@@ -1,0 +1,3 @@
+logging.level:
+    com.elchworks: DEBUG
+    com.elchworks.tastyworkstaxcalculator.ExchangeRate: INFO
