@@ -24,7 +24,7 @@ class TaxProfitAndLoss (
         val sellValueEur = eurValue(event.position)
         val buyValueUsd = event.transaction.value
         val buyDate = event.transaction.date
-        val buyValueEur = exchangeRate.usdToEur(buyValueUsd, buyDate)
+        val buyValueEur = exchangeRate.usdToEur(Profit(buyValueUsd, buyDate))
         val netProfit = netProfit(sellValueEur, buyValueEur)
         subtractProfit(buyValueEur)
         if(isLoss(netProfit)) {
@@ -34,9 +34,7 @@ class TaxProfitAndLoss (
     }
 
     private fun eurValue(position: OptionPosition): Float {
-        val sellValueUsd = position.value
-        val sellDate = position.openDate
-        return exchangeRate.usdToEur(sellValueUsd, sellDate)
+        return exchangeRate.usdToEur(position.netPremium())
     }
 
     private fun subtractProfit(buyValue: Float) {

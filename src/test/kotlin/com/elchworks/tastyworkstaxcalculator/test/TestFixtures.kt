@@ -4,10 +4,12 @@ import com.elchworks.tastyworkstaxcalculator.Transaction
 import org.apache.commons.lang3.RandomUtils
 import java.time.Instant
 import java.time.LocalDate
+import java.time.ZoneId
+import java.time.ZonedDateTime
 
 fun randomTransaction() =
     Transaction(
-        date = Instant.now(),
+        date = randomDateIn2021(),
         type = "",
         action = "SELL_TO_OPEN",
         symbol = "",
@@ -26,3 +28,8 @@ fun randomTransaction() =
         callOrPut = "PUT",
         orderNr = 0
     )
+
+private fun randomDateIn2021(): Instant =
+    ZonedDateTime.of(2021, 11, 1, 1, 1, 1, 0, ZoneId.of("CET"))
+        .plusMinutes(RandomUtils.nextLong(1,  86400))
+        .toInstant()
