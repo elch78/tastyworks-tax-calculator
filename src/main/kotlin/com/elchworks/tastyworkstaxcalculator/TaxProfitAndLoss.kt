@@ -26,9 +26,14 @@ class TaxProfitAndLoss (
         val buyDate = event.transaction.date
         val buyValueEur = exchangeRate.usdToEur(Profit(buyValueUsd, buyDate))
         val netProfit = netProfit(sellValueEur, buyValueEur)
-        subtractProfit(buyValueEur)
         if(isLoss(netProfit)) {
+            // Loss. Reduce the profit by the sell value (i.e. profit is 0)
+            // add the negative profit to the losses
             addLoss(netProfit)
+            subtractProfit(-sellValueEur)
+        } else {
+            // No loss. Just reduce the profit by the buyValue
+            subtractProfit(buyValueEur)
         }
         log.debug("option BTC netProfit='{}'", netProfit)
     }
@@ -45,12 +50,12 @@ class TaxProfitAndLoss (
 
     private fun addLoss(netProfit: Float) {
         loss -= netProfit
-        log.debug("netProfit='{}', loss='{}'", netProfit, loss)
+        log.debug("addLoss netProfit='{}', loss='{}'", netProfit, loss)
     }
 
     private fun isLoss(netProfit: Float): Boolean {
         val isLoss = netProfit < 0.0F
-        log.debug("netProfit='{}', isLoss='{}'", netProfit, isLoss)
+        log.debug("isLoss netProfit='{}', isLoss='{}'", netProfit, isLoss)
         return isLoss
     }
 
