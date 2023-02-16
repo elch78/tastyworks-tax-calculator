@@ -53,9 +53,9 @@ class TaxProfitAndLossTest @Autowired constructor(
         sut.onOptionBuyToClose(btcEvent(txSTO1, txBTC))
 
         // Then
-        val expectedProfit = if(netProfit >= 0) netProfit * USD_EUR_EXCHANGE_RATE else 0.0F
+        val expectedProfit = if(isloss(netProfit)) eurValue(netProfit) else 0.0F
         assertThat(sut.profit).isEqualTo(expectedProfit)
-        val expectedLoss = if (netProfit >= 0) 0.0F else -netProfit * USD_EUR_EXCHANGE_RATE
+        val expectedLoss = if (isloss(netProfit)) 0.0F else eurValue(-netProfit)
         assertThat(sut.loss).isEqualTo(expectedLoss)
     }
 
@@ -87,7 +87,9 @@ class TaxProfitAndLossTest @Autowired constructor(
         // For test use exchange rate USD to EUR of 2
         whenever(exchangeRate.usdToEur(any())).thenAnswer {
             val profit: Profit = it.getArgument<Any>(0) as Profit
-            profit.value * USD_EUR_EXCHANGE_RATE
+            eurValue(profit.value)
         }
     }
+    private fun isloss(netProfit: Float) = netProfit >= 0
+    private fun eurValue(netProfit: Float) = netProfit * USD_EUR_EXCHANGE_RATE
 }
