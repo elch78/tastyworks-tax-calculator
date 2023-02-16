@@ -25,7 +25,7 @@ class ExchangeRate {
         val year = dateTime.get(YEAR)
         val key = "$year-$month"
         log.debug("usdToEur year='{}', month='{}', key='{}'", year, month, key)
-        val rate = 1 / rates[key]!!
+        val rate = 1 / (rates[key] ?: error("No rate for $key"))
         log.debug("usdToEur rate='{}'", rate)
         val eurValue = value * rate
         log.debug("usdToEur eurValue='{}'", eurValue)
