@@ -6,10 +6,12 @@ import org.springframework.stereotype.Component
 
 @Component
 class PositionsManager(
-    private val eventPublisher: ApplicationEventPublisher
+    private val eventPublisher: ApplicationEventPublisher,
+    private val exchangeRate: ExchangeRate,
 ) {
     private val log = LoggerFactory.getLogger(PositionsManager::class.java)
     private val positions = mutableMapOf<String, OptionPosition>()
+    private val closedPositions = mutableListOf<OptionPosition>()
 
     fun process(transactions: List<Transaction>) {
         transactions
@@ -20,22 +22,38 @@ class PositionsManager(
                 "BUY_TO_CLOSE" -> closePosition(it)
             }
         }
-        positions.values.forEach{
-            log.info("expired or still open {}", it)
-        }
+        calculateProfitAndLoss()
     }
 
-    private fun closePosition(tx: Transaction) {
-        val position = positions[tx.key()]!!
-        positions.remove(tx.key())
+    private fun calculateProfitAndLoss() {
+        var profit: Float = 0.0F
+        var loss: Float = 0.0F
+        positions.values.forEach {
+            var profitAndLoss = it.profitAndLoss()
+            profit += profitAndLoss.profit
+            loss += profitAndLoss.loss
+        }
+        closedPositions.forEach{
+            var profitAndLoss = it.profitAndLoss()
+            profit += profitAndLoss.profit
+            loss += profitAndLoss.loss
+        }
+        log.info("profit='{}', loss='{}'", profit, loss)
+    }
+
+    private fun closePosition(btcTx: Transaction) {
+        val position = positions[btcTx.key()]!!
+        positions.remove(btcTx.key())
+        position.buyToClose(btcTx)
+        closedPositions.add(position)
         log.debug("closed position='{}'", position)
-        eventPublisher.publishEvent(OptionBuyToCloseEvent(position, tx))
+        eventPublisher.publishEvent(OptionBuyToCloseEvent(position, btcTx))
     }
 
     private fun openPosition(
         tx: Transaction
     ) {
-        val position = OptionPosition.fromTransction(tx)
+        val position = OptionPosition.fromTransction(tx, exchangeRate)
         positions[tx.key()] = position
         log.debug("opened position='{}'", position)
         eventPublisher.publishEvent(OptionSellToOpenEvent(position, tx))
