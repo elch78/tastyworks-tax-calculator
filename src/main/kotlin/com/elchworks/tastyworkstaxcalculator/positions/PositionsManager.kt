@@ -1,9 +1,11 @@
 package com.elchworks.tastyworkstaxcalculator.positions
 
 import com.elchworks.tastyworkstaxcalculator.ExchangeRate
+import com.elchworks.tastyworkstaxcalculator.transactions.NewTransactionEvent
 import com.elchworks.tastyworkstaxcalculator.transactions.Transaction
 import org.slf4j.LoggerFactory
 import org.springframework.context.ApplicationEventPublisher
+import org.springframework.context.event.EventListener
 import org.springframework.stereotype.Component
 
 @Component
@@ -15,16 +17,13 @@ class PositionsManager(
     private val positions = mutableMapOf<String, OptionPosition>()
     private val closedPositions = mutableListOf<OptionPosition>()
 
-    fun process(transactions: List<Transaction>) {
-        transactions
-            .sortedBy { it.date }
-            .forEach {
-            when (it.action) {
-                "SELL_TO_OPEN" -> openPosition(it)
-                "BUY_TO_CLOSE" -> closePosition(it)
-            }
+    @EventListener(NewTransactionEvent::class)
+    fun onNewTransaction(event: NewTransactionEvent) {
+        val tx = event.tx
+        when (tx.action) {
+            "SELL_TO_OPEN" -> openPosition(tx)
+            "BUY_TO_CLOSE" -> closePosition(tx)
         }
-        eventPublisher.publishEvent(TransactionsProcessedEvent())
     }
 
     private fun closePosition(btcTx: Transaction) {
