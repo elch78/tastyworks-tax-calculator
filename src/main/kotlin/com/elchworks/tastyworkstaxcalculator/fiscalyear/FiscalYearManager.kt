@@ -17,7 +17,7 @@ class FiscalYearManager(
     }
 
     @EventListener(TransactionsProcessedEvent::class)
-    fun onTransactionsProccessed(event: TransactionsProcessedEvent) {
+    fun onTransactionsProcessed(event: TransactionsProcessedEvent) {
         fiscalYearRepository.getFiscalYear(2021).calculateProfitAndLoss()
     }
 }
