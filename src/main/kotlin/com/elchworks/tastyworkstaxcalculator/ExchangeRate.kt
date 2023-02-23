@@ -1,5 +1,6 @@
 package com.elchworks.tastyworkstaxcalculator
 
+import com.elchworks.tastyworkstaxcalculator.positions.Profit
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import java.time.ZoneId

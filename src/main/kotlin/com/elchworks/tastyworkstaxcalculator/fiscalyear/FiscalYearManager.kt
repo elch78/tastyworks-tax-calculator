@@ -1,7 +1,7 @@
 package com.elchworks.tastyworkstaxcalculator.fiscalyear
 
-import com.elchworks.tastyworkstaxcalculator.OptionSellToOpenEvent
-import com.elchworks.tastyworkstaxcalculator.TransactionsProcessedEvent
+import com.elchworks.tastyworkstaxcalculator.positions.OptionSellToOpenEvent
+import com.elchworks.tastyworkstaxcalculator.positions.TransactionsProcessedEvent
 import org.springframework.context.event.EventListener
 import org.springframework.stereotype.Component
 

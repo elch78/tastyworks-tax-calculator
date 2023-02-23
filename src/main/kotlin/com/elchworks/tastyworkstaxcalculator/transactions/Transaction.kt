@@ -1,4 +1,4 @@
-package com.elchworks.tastyworkstaxcalculator
+package com.elchworks.tastyworkstaxcalculator.transactions
 
 import java.time.Instant
 import java.time.LocalDate

@@ -1,6 +1,6 @@
 package com.elchworks.tastyworkstaxcalculator.test
 
-import com.elchworks.tastyworkstaxcalculator.Transaction
+import com.elchworks.tastyworkstaxcalculator.transactions.Transaction
 import org.apache.commons.lang3.RandomUtils
 import java.time.Instant
 import java.time.LocalDate

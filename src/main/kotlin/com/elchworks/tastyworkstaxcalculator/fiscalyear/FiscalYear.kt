@@ -1,6 +1,6 @@
 package com.elchworks.tastyworkstaxcalculator.fiscalyear
 
-import com.elchworks.tastyworkstaxcalculator.OptionPosition
+import com.elchworks.tastyworkstaxcalculator.positions.OptionPosition
 import org.slf4j.LoggerFactory
 
 class FiscalYear {

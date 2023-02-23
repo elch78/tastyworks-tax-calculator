@@ -1,5 +1,9 @@
-package com.elchworks.tastyworkstaxcalculator
+package com.elchworks.tastyworkstaxcalculator.test.positions
 
+import com.elchworks.tastyworkstaxcalculator.ExchangeRate
+import com.elchworks.tastyworkstaxcalculator.positions.OptionPosition
+import com.elchworks.tastyworkstaxcalculator.positions.Profit
+import com.elchworks.tastyworkstaxcalculator.positions.ProfitAndLoss
 import com.elchworks.tastyworkstaxcalculator.test.randomTransaction
 import org.apache.commons.lang3.RandomUtils
 import org.assertj.core.api.Assertions.assertThat
@@ -31,10 +35,12 @@ class OptionPositionTest @Autowired constructor(
         val sut = OptionPosition(stoTx, exchangeRate)
 
         // Then
-        assertThat(sut.profitAndLoss()).isEqualTo(ProfitAndLoss(
+        assertThat(sut.profitAndLoss()).isEqualTo(
+            ProfitAndLoss(
             profit = premium * 2,
             loss = 0.0F
-        ))
+        )
+        )
     }
 
     @ParameterizedTest
@@ -54,10 +60,12 @@ class OptionPositionTest @Autowired constructor(
         val expectedNetProfitEur = netProfit * 2
         val expecteProfit = if(netProfit >= 0) expectedNetProfitEur else 0.0F
         val expecteLoss = if(netProfit >= 0) 0.0F else -expectedNetProfitEur
-        assertThat(sut.profitAndLoss()).isEqualTo(ProfitAndLoss(
+        assertThat(sut.profitAndLoss()).isEqualTo(
+            ProfitAndLoss(
             profit = expecteProfit,
             loss = expecteLoss
-        ))
+        )
+        )
     }
 
     @Test

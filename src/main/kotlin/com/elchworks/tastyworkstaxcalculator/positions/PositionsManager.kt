@@ -1,5 +1,7 @@
-package com.elchworks.tastyworkstaxcalculator
+package com.elchworks.tastyworkstaxcalculator.positions
 
+import com.elchworks.tastyworkstaxcalculator.ExchangeRate
+import com.elchworks.tastyworkstaxcalculator.transactions.Transaction
 import org.slf4j.LoggerFactory
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Component

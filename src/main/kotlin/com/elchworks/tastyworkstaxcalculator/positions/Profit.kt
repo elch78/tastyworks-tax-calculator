@@ -1,4 +1,4 @@
-package com.elchworks.tastyworkstaxcalculator
+package com.elchworks.tastyworkstaxcalculator.positions
 
 import java.time.Instant
 
