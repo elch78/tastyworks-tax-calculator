@@ -73,17 +73,17 @@ class OptionPositionTest @Autowired constructor(
         val sut = OptionPosition(stoTx, exchangeRate)
 
         // Then
-        assertThat(sut.closedInYear(closedInYear)).isFalse
-        assertThat(sut.closedInYear(closedInYear + 1)).isFalse
-        assertThat(sut.closedInYear(closedInYear - 1)).isFalse
+        assertThat(sut.isClosedInYear(closedInYear)).isFalse
+        assertThat(sut.isClosedInYear(closedInYear + 1)).isFalse
+        assertThat(sut.isClosedInYear(closedInYear - 1)).isFalse
 
         // When
         sut.buyToClose(btcTx)
 
         // Then
-        assertThat(sut.closedInYear(closedInYear)).isTrue
-        assertThat(sut.closedInYear(closedInYear + 1)).isFalse
-        assertThat(sut.closedInYear(closedInYear - 1)).isFalse
+        assertThat(sut.isClosedInYear(closedInYear)).isTrue
+        assertThat(sut.isClosedInYear(closedInYear + 1)).isFalse
+        assertThat(sut.isClosedInYear(closedInYear - 1)).isFalse
     }
 
     companion object {

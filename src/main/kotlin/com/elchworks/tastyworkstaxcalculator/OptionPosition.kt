@@ -17,15 +17,19 @@ class OptionPosition (
      * Status for fiscal year.
      */
     fun status(year: Int): String =
-        if(closedInYear(year)) "Closed" else "Open"
+        if(isClosedInYear(year)) "Closed" else "Open"
 
-    fun closedInYear(year: Int): Boolean {
-        val btcTxIsNull = btcTx == null
-        val btcTxYear = btcTx?.date?.atZone(ZoneId.of("CET"))?.get(YEAR)
-        val closedInYear = !btcTxIsNull && btcTxYear == year
-        log.debug("closedInYear btxTxIsNull='{}', btcTxYear='{}', closedInYear='{}'", btcTxIsNull, btcTxYear, closedInYear)
+    fun isClosedInYear(year: Int): Boolean {
+        val closedYear = yearClosed()
+        val closedInYear = closedYear == year
+        log.debug("isClosedInYear closedYear='{}', closedInYear='{}'", closedYear, closedInYear)
         return closedInYear
     }
+
+    fun yearOpened(): Int = stoTx.date.atZone(ZoneId.of("CET")).get(YEAR)
+    fun yearClosed(): Int? = btcTx?.date?.atZone(ZoneId.of("CET"))?.get(YEAR)
+
+
 
     fun profitAndLoss(): ProfitAndLoss {
         val netProfit = netProfit()

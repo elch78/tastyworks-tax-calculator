@@ -1,0 +1,3 @@
+package com.elchworks.tastyworkstaxcalculator
+
+class TransactionsProcessedEvent
