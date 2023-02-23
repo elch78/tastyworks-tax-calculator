@@ -12,6 +12,8 @@ import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.mock.mockito.MockBean
+import java.time.ZonedDateTime
+import java.time.temporal.ChronoField.YEAR
 import java.util.stream.Stream
 
 @SpringBootTest(classes = [])
@@ -19,7 +21,7 @@ class OptionPositionTest @Autowired constructor(
     @MockBean private val exchangeRate: ExchangeRate
 ) {
     @Test
-    fun expired() {
+    fun profitAndLossExpiredPosition() {
         // Given
         val premium = RandomUtils.nextFloat(1.0F, 100.0F)
         val stoTx = randomTransaction().copy(value = premium)
@@ -37,7 +39,7 @@ class OptionPositionTest @Autowired constructor(
 
     @ParameterizedTest
     @MethodSource
-    fun closed(netProfit: Float) {
+    fun profitAndLossClosedPosition(netProfit: Float) {
         // Given
         val premium = RandomUtils.nextFloat(1.0F, 100.0F)
         val stoTx = randomTransaction().copy(value = premium, quantity = 1)
@@ -56,6 +58,32 @@ class OptionPositionTest @Autowired constructor(
             profit = expecteProfit,
             loss = expecteLoss
         ))
+    }
+
+    @Test
+    fun closedInYear()
+    {
+        // Given
+        val stoTx = randomTransaction()
+        val closedInYear = 2021
+        val btcTxClosed = ZonedDateTime.now().with(YEAR, closedInYear.toLong()).toInstant()
+        val btcTx = randomTransaction().copy(date = btcTxClosed)
+
+        // When
+        val sut = OptionPosition(stoTx, exchangeRate)
+
+        // Then
+        assertThat(sut.closedInYear(closedInYear)).isFalse
+        assertThat(sut.closedInYear(closedInYear + 1)).isFalse
+        assertThat(sut.closedInYear(closedInYear - 1)).isFalse
+
+        // When
+        sut.buyToClose(btcTx)
+
+        // Then
+        assertThat(sut.closedInYear(closedInYear)).isTrue
+        assertThat(sut.closedInYear(closedInYear + 1)).isFalse
+        assertThat(sut.closedInYear(closedInYear - 1)).isFalse
     }
 
     companion object {

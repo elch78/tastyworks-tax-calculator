@@ -38,7 +38,21 @@ class PositionsManager(
             profit += profitAndLoss.profit
             loss += profitAndLoss.loss
         }
+        printReport(profit, loss)
         log.info("profit='{}', loss='{}'", profit, loss)
+    }
+
+    private fun printReport(profit: Float, loss: Float) {
+
+        val report = positions.values.plus(closedPositions)
+            .sortedBy { it.stoTx.date }
+            .map {
+                val stoTx = it.stoTx
+                val profitAndLoss = it.profitAndLoss()
+                "${stoTx.rootSymbol}\t\t${stoTx.date}\t${stoTx.value}\t${it.status(2021)}\t${profitAndLoss.profit}\t${profitAndLoss.loss}"
+            }
+            .joinToString ( "\n", prefix = "\nSymbol\tDate\tPremium\tStatus\tProfit\tLoss\n", postfix = "\ntotal\tprofit\t$profit\tloss\t$loss" )
+        log.info("{}", report)
     }
 
     private fun closePosition(btcTx: Transaction) {

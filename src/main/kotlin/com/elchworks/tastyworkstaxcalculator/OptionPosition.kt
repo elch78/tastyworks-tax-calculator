@@ -1,6 +1,8 @@
 package com.elchworks.tastyworkstaxcalculator
 
 import org.slf4j.LoggerFactory
+import java.time.ZoneId
+import java.time.temporal.ChronoField.YEAR
 
 class OptionPosition (
     val stoTx: Transaction,
@@ -10,6 +12,20 @@ class OptionPosition (
     private val log = LoggerFactory.getLogger(OptionPosition::class.java)
 
     fun netPremium() = Profit(value = stoTx.value, date = stoTx.date)
+
+    /**
+     * Status for fiscal year.
+     */
+    fun status(year: Int): String =
+        if(closedInYear(year)) "Closed" else "Open"
+
+    fun closedInYear(year: Int): Boolean {
+        val btcTxIsNull = btcTx == null
+        val btcTxYear = btcTx?.date?.atZone(ZoneId.of("CET"))?.get(YEAR)
+        val closedInYear = !btcTxIsNull && btcTxYear == year
+        log.debug("closedInYear btxTxIsNull='{}', btcTxYear='{}', closedInYear='{}'", btcTxIsNull, btcTxYear, closedInYear)
+        return closedInYear
+    }
 
     fun profitAndLoss(): ProfitAndLoss {
         val netProfit = netProfit()
