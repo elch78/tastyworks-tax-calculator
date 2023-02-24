@@ -1,3 +1,3 @@
 package com.elchworks.tastyworkstaxcalculator.transactions
 
-class TransactionsProcessedEvent
+class AllTransactionsProcessedEvent

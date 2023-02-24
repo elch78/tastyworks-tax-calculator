@@ -1,8 +1,8 @@
 package com.elchworks.tastyworkstaxcalculator
 
+import com.elchworks.tastyworkstaxcalculator.transactions.AllTransactionsProcessedEvent
 import com.elchworks.tastyworkstaxcalculator.transactions.NewTransactionEvent
 import com.elchworks.tastyworkstaxcalculator.transactions.Transaction
-import com.elchworks.tastyworkstaxcalculator.transactions.TransactionsProcessedEvent
 import com.opencsv.CSVReaderBuilder
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Component
@@ -59,7 +59,7 @@ class CsvReader(
             .forEach {
                 eventPublisher.publishEvent(NewTransactionEvent(it))
             }
-            eventPublisher.publishEvent(TransactionsProcessedEvent())
+            eventPublisher.publishEvent(AllTransactionsProcessedEvent())
     }
 
     private fun parsLocalDate(expirationDate: String): LocalDate =
