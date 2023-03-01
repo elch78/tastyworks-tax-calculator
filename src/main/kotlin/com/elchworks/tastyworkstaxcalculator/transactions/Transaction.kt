@@ -22,6 +22,4 @@ data class Transaction(
     val strikePrice: Number,
     val callOrPut: String,
     val orderNr: Int
-) {
-    fun key() = "$callOrPut-$rootSymbol-$expirationDate-$strikePrice"
-}
+)

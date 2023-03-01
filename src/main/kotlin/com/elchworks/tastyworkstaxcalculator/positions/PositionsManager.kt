@@ -40,4 +40,6 @@ class PositionsManager(
         log.debug("opened position='{}'", position)
         eventPublisher.publishEvent(OptionSellToOpenEvent(position, tx))
     }
+
+    private fun Transaction.key() = "${this.callOrPut}-${this.rootSymbol}-${this.expirationDate}-${this.strikePrice}"
 }
