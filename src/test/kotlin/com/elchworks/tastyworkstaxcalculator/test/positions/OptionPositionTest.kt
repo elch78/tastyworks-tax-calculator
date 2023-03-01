@@ -25,7 +25,7 @@ class OptionPositionTest @Autowired constructor(
     @MockBean private val exchangeRate: ExchangeRate
 ) {
     @Test
-    fun profitAndLossExpiredPosition() {
+    fun expired() {
         // Given
         val premium = RandomUtils.nextFloat(1.0F, 100.0F)
         val stoTx = randomTransaction().copy(value = premium)
