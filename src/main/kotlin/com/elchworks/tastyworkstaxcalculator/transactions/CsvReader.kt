@@ -2,7 +2,7 @@ package com.elchworks.tastyworkstaxcalculator
 
 import com.elchworks.tastyworkstaxcalculator.transactions.AllTransactionsProcessedEvent
 import com.elchworks.tastyworkstaxcalculator.transactions.NewTransactionEvent
-import com.elchworks.tastyworkstaxcalculator.transactions.Transaction
+import com.elchworks.tastyworkstaxcalculator.transactions.Trade
 import com.opencsv.CSVReaderBuilder
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Component
@@ -34,7 +34,7 @@ class CsvReader(
             .filter { !it[0].contains("Date") }
             .map {
                 val iterator = it.iterator()
-                Transaction(
+                Trade(
                     date = parseDate(iterator.next()),
                     type = iterator.next(),
                     action = iterator.next(),

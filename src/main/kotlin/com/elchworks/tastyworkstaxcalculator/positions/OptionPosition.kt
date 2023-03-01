@@ -1,15 +1,15 @@
 package com.elchworks.tastyworkstaxcalculator.positions
 
 import com.elchworks.tastyworkstaxcalculator.ExchangeRate
-import com.elchworks.tastyworkstaxcalculator.transactions.Transaction
+import com.elchworks.tastyworkstaxcalculator.transactions.Trade
 import org.slf4j.LoggerFactory
 import java.time.ZoneId
 import java.time.temporal.ChronoField.YEAR
 
 class OptionPosition (
-    val stoTx: Transaction,
+    val stoTx: Trade,
     private val exchangeRate: ExchangeRate,
-    private var btcTx: Transaction? = null,
+    private var btcTx: Trade? = null,
 ) {
     private val log = LoggerFactory.getLogger(OptionPosition::class.java)
 
@@ -44,7 +44,7 @@ class OptionPosition (
         return result
     }
 
-    fun buyToClose(btcTx: Transaction) {
+    fun buyToClose(btcTx: Trade) {
         if(btcTx.quantity != stoTx.quantity) {
             error("Currently only complete closing of positions is supported.")
         }
@@ -69,8 +69,8 @@ class OptionPosition (
     }
 
     companion object {
-        fun fromTransction(transaction: Transaction, exchangeRate: ExchangeRate) = OptionPosition(
-            stoTx = transaction,
+        fun fromTransction(trade: Trade, exchangeRate: ExchangeRate) = OptionPosition(
+            stoTx = trade,
             exchangeRate = exchangeRate,
         )
     }

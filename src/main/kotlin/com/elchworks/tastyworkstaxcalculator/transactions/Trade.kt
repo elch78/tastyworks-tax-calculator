@@ -3,8 +3,8 @@ package com.elchworks.tastyworkstaxcalculator.transactions
 import java.time.Instant
 import java.time.LocalDate
 
-data class Transaction(
-    val date: Instant,
+data class Trade(
+    override val date: Instant,
     val type: String,
     val action: String,
     val symbol: String,
@@ -22,4 +22,13 @@ data class Transaction(
     val strikePrice: Number,
     val callOrPut: String,
     val orderNr: Int
-)
+): Transaction
+
+data class OptionRemoval(
+    override val date: Instant,
+    val status: String,
+): Transaction
+
+interface Transaction {
+    val date: Instant
+}

@@ -2,7 +2,7 @@ package com.elchworks.tastyworkstaxcalculator.positions
 
 import com.elchworks.tastyworkstaxcalculator.ExchangeRate
 import com.elchworks.tastyworkstaxcalculator.transactions.NewTransactionEvent
-import com.elchworks.tastyworkstaxcalculator.transactions.Transaction
+import com.elchworks.tastyworkstaxcalculator.transactions.Trade
 import org.slf4j.LoggerFactory
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.context.event.EventListener
@@ -26,7 +26,7 @@ class PositionsManager(
         }
     }
 
-    private fun closePosition(btcTx: Transaction) {
+    private fun closePosition(btcTx: Trade) {
         val position = positions.remove(btcTx.key())!!
         position.buyToClose(btcTx)
         closedPositions.add(position)
@@ -34,12 +34,12 @@ class PositionsManager(
         eventPublisher.publishEvent(OptionBuyToCloseEvent(position, btcTx))
     }
 
-    private fun openPosition(tx: Transaction) {
+    private fun openPosition(tx: Trade) {
         val position = OptionPosition.fromTransction(tx, exchangeRate)
         positions[tx.key()] = position
         log.debug("opened position='{}'", position)
         eventPublisher.publishEvent(OptionSellToOpenEvent(position, tx))
     }
 
-    private fun Transaction.key() = "${this.callOrPut}-${this.rootSymbol}-${this.expirationDate}-${this.strikePrice}"
+    private fun Trade.key() = "${this.callOrPut}-${this.rootSymbol}-${this.expirationDate}-${this.strikePrice}"
 }

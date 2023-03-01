@@ -1,6 +1,6 @@
 package com.elchworks.tastyworkstaxcalculator.test
 
-import com.elchworks.tastyworkstaxcalculator.transactions.Transaction
+import com.elchworks.tastyworkstaxcalculator.transactions.Trade
 import org.apache.commons.lang3.RandomUtils
 import java.time.Instant
 import java.time.LocalDate
@@ -8,7 +8,7 @@ import java.time.ZoneId
 import java.time.ZonedDateTime
 
 fun randomTransaction() =
-    Transaction(
+    Trade(
         date = randomDateIn2021(),
         type = "",
         action = "SELL_TO_OPEN",
