@@ -45,7 +45,7 @@ class OptionPositionTest @Autowired constructor(
 
     @ParameterizedTest
     @MethodSource
-    fun profitAndLossClosedPosition(netProfit: Float) {
+    fun closed(netProfit: Float) {
         // Given
         val premium = RandomUtils.nextFloat(1.0F, 100.0F)
         val stoTx = randomTransaction().copy(value = premium, quantity = 1)
