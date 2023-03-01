@@ -9,8 +9,7 @@ import org.apache.commons.lang3.RandomUtils
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
-import org.junit.jupiter.params.provider.Arguments
-import org.junit.jupiter.params.provider.MethodSource
+import org.junit.jupiter.params.provider.ValueSource
 import org.mockito.kotlin.any
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
@@ -18,7 +17,6 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.mock.mockito.MockBean
 import java.time.ZonedDateTime
 import java.time.temporal.ChronoField.YEAR
-import java.util.stream.Stream
 
 @SpringBootTest(classes = [])
 class OptionPositionTest @Autowired constructor(
@@ -44,7 +42,7 @@ class OptionPositionTest @Autowired constructor(
     }
 
     @ParameterizedTest
-    @MethodSource
+    @ValueSource(floats = [1.0f, -1.0f])
     fun closed(netProfit: Float) {
         // Given
         val premium = RandomUtils.nextFloat(1.0F, 100.0F)
@@ -96,13 +94,6 @@ class OptionPositionTest @Autowired constructor(
 
     companion object {
         private const val USD_EUR_EXCHANGE_RATE = 2.0F
-        @JvmStatic
-        fun closed(): Stream<Arguments> = Stream.of(
-            // positive netProfit
-            Arguments.of(1.0F),
-            // negative netProfit
-            Arguments.of(-1.0F)
-        )
     }
 
     private fun withRateUsdToEur() {
