@@ -27,8 +27,7 @@ class PositionsManager(
     }
 
     private fun closePosition(btcTx: Transaction) {
-        val position = positions[btcTx.key()]!!
-        positions.remove(btcTx.key())
+        val position = positions.remove(btcTx.key())!!
         position.buyToClose(btcTx)
         closedPositions.add(position)
         log.debug("closed position='{}'", position)
