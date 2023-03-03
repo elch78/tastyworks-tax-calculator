@@ -1,7 +1,6 @@
 package com.elchworks.tastyworkstaxcalculator.fiscalyear
 
 import com.elchworks.tastyworkstaxcalculator.positions.OptionSellToOpenEvent
-import com.elchworks.tastyworkstaxcalculator.transactions.AllTransactionsProcessedEvent
 import org.springframework.context.event.EventListener
 import org.springframework.stereotype.Component
 
@@ -16,8 +15,8 @@ class FiscalYearManager(
         fiscalYear.addOptionPosition(event.position)
     }
 
-    @EventListener(AllTransactionsProcessedEvent::class)
-    fun onTransactionsProcessed(event: AllTransactionsProcessedEvent) {
-        fiscalYearRepository.getFiscalYear(2021).calculateProfitAndLoss()
+    @EventListener(EndOfYearEvent::class)
+    fun onEndOfYear(event: EndOfYearEvent) {
+        fiscalYearRepository.getFiscalYear(event.year).calculateProfitAndLoss()
     }
 }
