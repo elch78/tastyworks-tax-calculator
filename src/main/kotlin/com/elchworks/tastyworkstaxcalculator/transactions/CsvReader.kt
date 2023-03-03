@@ -3,7 +3,6 @@ package com.elchworks.tastyworkstaxcalculator
 import com.elchworks.tastyworkstaxcalculator.positions.OptionPositionStatus.ASSIGNED
 import com.elchworks.tastyworkstaxcalculator.positions.OptionPositionStatus.EXPIRED
 import com.elchworks.tastyworkstaxcalculator.transactions.Action
-import com.elchworks.tastyworkstaxcalculator.transactions.AllTransactionsProcessedEvent
 import com.elchworks.tastyworkstaxcalculator.transactions.NewTransactionEvent
 import com.elchworks.tastyworkstaxcalculator.transactions.OptionRemoval
 import com.elchworks.tastyworkstaxcalculator.transactions.Trade
@@ -49,7 +48,6 @@ class CsvReader(
             .forEach {
                 eventPublisher.publishEvent(NewTransactionEvent(it))
             }
-            eventPublisher.publishEvent(AllTransactionsProcessedEvent())
     }
 
     private fun parseTransaction(it: Array<String>): Transaction {
