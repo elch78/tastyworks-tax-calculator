@@ -1,8 +1,13 @@
 package com.elchworks.tastyworkstaxcalculator
 
+import com.elchworks.tastyworkstaxcalculator.positions.OptionPositionStatus.ASSIGNED
+import com.elchworks.tastyworkstaxcalculator.positions.OptionPositionStatus.EXPIRED
+import com.elchworks.tastyworkstaxcalculator.transactions.Action
 import com.elchworks.tastyworkstaxcalculator.transactions.AllTransactionsProcessedEvent
 import com.elchworks.tastyworkstaxcalculator.transactions.NewTransactionEvent
+import com.elchworks.tastyworkstaxcalculator.transactions.OptionRemoval
 import com.elchworks.tastyworkstaxcalculator.transactions.Trade
+import com.elchworks.tastyworkstaxcalculator.transactions.Transaction
 import com.opencsv.CSVReaderBuilder
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Component
@@ -29,31 +34,16 @@ class CsvReader(
             .readAll()
             .filter {
                 val type = it[1]
-                !type.contains("Money Movement")
-                        &&!type.contains("Receive Deliver")}
+                val action = it[2]
+                type == "Trade" ||
+                (
+                    type.contains("Receive Deliver") &&
+                    action.isBlank()
+                )
+            }
             .filter { !it[0].contains("Date") }
             .map {
-                val iterator = it.iterator()
-                Trade(
-                    date = parseDate(iterator.next()),
-                    type = iterator.next(),
-                    action = iterator.next(),
-                    symbol = iterator.next(),
-                    instrumentType = iterator.next(),
-                    description = iterator.next(),
-                    value = iterator.next().toFloat(),
-                    quantity = iterator.next().toInt(),
-                    averagePrice = iterator.next().toFloat(),
-                    commissions = iterator.next().toFloat(),
-                    fees = iterator.next().toFloat(),
-                    multiplier = iterator.next().toInt(),
-                    rootSymbol = iterator.next(),
-                    underlyingSymbol = iterator.next(),
-                    expirationDate = parsLocalDate(iterator.next()),// Not needed yet
-                    strikePrice = iterator.next().toFloat(),
-                    callOrPut = iterator.next(),
-                    orderNr = iterator.next().toInt()
-                )
+                parseTransaction(it)
             }
             .sortedBy { it.date }
             .forEach {
@@ -61,6 +51,69 @@ class CsvReader(
             }
             eventPublisher.publishEvent(AllTransactionsProcessedEvent())
     }
+
+    private fun parseTransaction(it: Array<String>): Transaction {
+        val iterator = it.iterator()
+        val date = parseDate(iterator.next())
+        val type = iterator.next()
+        val action = iterator.next()
+        return when {
+            type == "Trade" -> trade(date, action, iterator)
+            type == "Receive Deliver" && action.isBlank() -> optionRemoval(date, iterator)
+            // TODO assignment of stock
+//            type == "Receive Deliver" && !action.isBlank() -> optionRemoval(date, action)
+            else -> error("TODO")
+        }
+    }
+
+    private fun optionRemoval(date: Instant, iterator: Iterator<String>): OptionRemoval {
+        // skip Symbol, Instrument Type
+        iterator.next()
+        iterator.next()
+        val description = iterator.next()
+        val status = if (description.contains("assignment")) ASSIGNED else EXPIRED
+        // skip Value, Quantity, averagePrice, commissions, fees, multiplier
+        iterator.next()
+        iterator.next()
+        iterator.next()
+        iterator.next()
+        iterator.next()
+        iterator.next()
+        val rootSymbol = iterator.next()
+        // skip underlying symbol
+        iterator.next()
+        val expirationDate = parsLocalDate(iterator.next())
+        val strikePrice = iterator.next().toFloat()
+        val callOrPut = iterator.next()
+        return OptionRemoval(
+            date = date,
+            status = status,
+            rootSymbol = rootSymbol,
+            expirationDate = expirationDate,
+            strikePrice = strikePrice,
+            callOrPut = callOrPut
+        )
+    }
+
+    private fun trade(date: Instant, action: String, iterator: Iterator<String>) = Trade(
+        date = date,
+        action = Action.valueOf(action),
+        symbol = iterator.next(),
+        instrumentType = iterator.next(),
+        description = iterator.next(),
+        value = iterator.next().toFloat(),
+        quantity = iterator.next().toInt(),
+        averagePrice = iterator.next().toFloat(),
+        commissions = iterator.next().toFloat(),
+        fees = iterator.next().toFloat(),
+        multiplier = iterator.next().toInt(),
+        rootSymbol = iterator.next(),
+        underlyingSymbol = iterator.next(),
+        expirationDate = parsLocalDate(iterator.next()),
+        strikePrice = iterator.next().toFloat(),
+        callOrPut = iterator.next(),
+        orderNr = iterator.next().toInt()
+    )
 
     private fun parsLocalDate(expirationDate: String): LocalDate =
         LocalDate.from(LOCAL_DATE_FORMATTER.parse(expirationDate))

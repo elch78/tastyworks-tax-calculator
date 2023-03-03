@@ -1,12 +1,16 @@
 package com.elchworks.tastyworkstaxcalculator.transactions
 
+import com.elchworks.tastyworkstaxcalculator.positions.OptionPositionStatus
 import java.time.Instant
 import java.time.LocalDate
 
 data class Trade(
     override val date: Instant,
-    val type: String,
-    val action: String,
+    override val rootSymbol: String,
+    override val expirationDate: LocalDate,
+    override val strikePrice: Number,
+    override val callOrPut: String,
+    val action: Action,
     val symbol: String,
     val instrumentType: String,
     val description: String,
@@ -16,19 +20,26 @@ data class Trade(
     val commissions: Number,
     val fees: Number,
     val multiplier: Number,
-    val rootSymbol: String,
     val underlyingSymbol: String,
-    val expirationDate: LocalDate,
-    val strikePrice: Number,
-    val callOrPut: String,
     val orderNr: Int
-): Transaction
+): Transaction, OptionTransaction
 
 data class OptionRemoval(
     override val date: Instant,
-    val status: String,
-): Transaction
+    override val rootSymbol: String,
+    override val expirationDate: LocalDate,
+    override val strikePrice: Number,
+    override val callOrPut: String,
+    val status: OptionPositionStatus,
+): Transaction, OptionTransaction
 
 interface Transaction {
     val date: Instant
+}
+
+interface OptionTransaction {
+    val callOrPut: String
+    val rootSymbol: String
+    val expirationDate: LocalDate
+    val strikePrice: Number
 }

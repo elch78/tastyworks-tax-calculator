@@ -1,3 +1,6 @@
 package com.elchworks.tastyworkstaxcalculator.transactions
 
-data class NewTransactionEvent(val tx: Transaction)
+enum class Action {
+    SELL_TO_OPEN,
+    BUY_TO_CLOSE
+}

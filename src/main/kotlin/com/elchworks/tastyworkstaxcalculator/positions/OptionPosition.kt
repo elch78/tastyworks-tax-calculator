@@ -1,6 +1,9 @@
 package com.elchworks.tastyworkstaxcalculator.positions
 
 import com.elchworks.tastyworkstaxcalculator.ExchangeRate
+import com.elchworks.tastyworkstaxcalculator.positions.OptionPositionStatus.ASSIGNED
+import com.elchworks.tastyworkstaxcalculator.positions.OptionPositionStatus.CLOSED
+import com.elchworks.tastyworkstaxcalculator.positions.OptionPositionStatus.EXPIRED
 import com.elchworks.tastyworkstaxcalculator.transactions.Trade
 import org.slf4j.LoggerFactory
 import java.time.ZoneId
@@ -10,8 +13,11 @@ class OptionPosition (
     val stoTx: Trade,
     private val exchangeRate: ExchangeRate,
     private var btcTx: Trade? = null,
+
 ) {
     private val log = LoggerFactory.getLogger(OptionPosition::class.java)
+    var status = OptionPositionStatus.OPEN
+        get
 
     fun netPremium() = Profit(value = stoTx.value, date = stoTx.date)
 
@@ -49,6 +55,15 @@ class OptionPosition (
             error("Currently only complete closing of positions is supported.")
         }
         this.btcTx = btcTx
+        status = CLOSED
+    }
+
+    fun expired() {
+        status = EXPIRED
+    }
+
+    fun assigned() {
+        status = ASSIGNED
     }
 
     private fun netProfit(): Float {
