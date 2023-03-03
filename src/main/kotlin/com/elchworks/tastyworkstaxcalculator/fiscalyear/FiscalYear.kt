@@ -30,9 +30,9 @@ class FiscalYear {
                 val stoTx = it.stoTx
                 val profitAndLoss = it.profitAndLoss()
                 val description = "${stoTx.rootSymbol.padEnd(4)} ${stoTx.expirationDate} ${stoTx.callOrPut}@${stoTx.strikePrice}".padEnd(25)
-                "$description\t\t${stoTx.date}\t${it.status(2021).padEnd(6)}\t${profitAndLoss.profit.toString().padEnd(12)}\t${profitAndLoss.loss}"
+                "$description ${it.status.name.padEnd(8)} ${profitAndLoss.profit.toString().padEnd(12)} ${profitAndLoss.loss}"
             }
-            .joinToString ( "\n", prefix = "\nPosition\tStatus\tProfit\tLoss\n", postfix = "\ntotal\tprofit\t${profit.profit}\tloss\t${profit.loss}" )
+            .joinToString ( "\n", prefix = "\nPosition Status Profit Loss\n", postfix = "\ntotal profit: ${profit.profit} loss: ${profit.loss}" )
         log.info("{}", report)
     }
 }
