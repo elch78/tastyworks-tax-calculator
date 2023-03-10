@@ -26,7 +26,7 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
 //    implementation("javax.money:money-api:1.1")
-    // https://mvnrepository.com/artifact/com.opencsv/opencsv
+//    implementation("org.javamoney:moneta:1.2.1")
     implementation("com.opencsv:opencsv:5.7.1")
     developmentOnly("org.springframework.boot:spring-boot-devtools")
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
