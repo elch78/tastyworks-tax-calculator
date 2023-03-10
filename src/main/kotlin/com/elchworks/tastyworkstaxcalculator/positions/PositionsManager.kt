@@ -6,8 +6,9 @@ import com.elchworks.tastyworkstaxcalculator.transactions.Action.BUY_TO_CLOSE
 import com.elchworks.tastyworkstaxcalculator.transactions.Action.SELL_TO_OPEN
 import com.elchworks.tastyworkstaxcalculator.transactions.NewTransactionEvent
 import com.elchworks.tastyworkstaxcalculator.transactions.OptionRemoval
+import com.elchworks.tastyworkstaxcalculator.transactions.OptionTrade
 import com.elchworks.tastyworkstaxcalculator.transactions.OptionTransaction
-import com.elchworks.tastyworkstaxcalculator.transactions.Trade
+import com.elchworks.tastyworkstaxcalculator.transactions.optionDescription
 import org.slf4j.LoggerFactory
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.context.event.EventListener
@@ -19,34 +20,34 @@ class PositionsManager(
     private val eventPublisher: ApplicationEventPublisher,
 ) {
     private val log = LoggerFactory.getLogger(PositionsManager::class.java)
-    private val positions = mutableMapOf<String, Queue<Trade>>()
+    private val positions = mutableMapOf<String, Queue<OptionTrade>>()
 
     @EventListener(NewTransactionEvent::class)
     fun onNewTransaction(event: NewTransactionEvent) {
         val tx = event.tx
         when {
-            tx is Trade && tx.action == SELL_TO_OPEN -> openPosition(tx)
-            tx is Trade && tx.action == BUY_TO_CLOSE -> closePosition(tx)
+            tx is OptionTrade && tx.action == SELL_TO_OPEN -> openPosition(tx)
+            tx is OptionTrade && tx.action == BUY_TO_CLOSE -> closePosition(tx)
             tx is OptionRemoval -> optionRemoval(tx)
         }
     }
 
     private fun optionRemoval(tx: OptionRemoval) {
-        val position = removePositionFifo(tx)
+        val stoTx = removePositionFifo(tx)
         when(tx.status) {
-            ASSIGNED -> log.info("position assigned. position='{}'", position)
-            EXPIRED -> log.info("position expired. position='{}'", position)
+            ASSIGNED -> log.info("position assigned. position='{}'", stoTx.optionDescription())
+            EXPIRED -> log.info("position expired. position='{}'", stoTx.optionDescription())
             else -> error("unexpected status ${tx.status}")
         }
     }
 
-    private fun closePosition(btcTx: Trade) {
+    private fun closePosition(btcTx: OptionTrade) {
         val stoTx = removePositionFifo(btcTx)
         log.debug("closed stoTx='{}'", stoTx)
         eventPublisher.publishEvent(OptionBuyToCloseEvent(stoTx, btcTx))
     }
 
-    private fun openPosition(tx: Trade) {
+    private fun openPosition(tx: OptionTrade) {
         positions.computeIfAbsent(tx.key()) { LinkedList() }
             .offer(tx)
         log.debug("opened stoTx='{}'", tx)

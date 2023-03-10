@@ -6,11 +6,10 @@ import com.elchworks.tastyworkstaxcalculator.positions.OptionSellToOpenEvent
 import com.elchworks.tastyworkstaxcalculator.positions.Profit
 import com.elchworks.tastyworkstaxcalculator.positions.ProfitAndLoss
 import com.elchworks.tastyworkstaxcalculator.positions.plus
-import com.elchworks.tastyworkstaxcalculator.transactions.Trade
-import com.elchworks.tastyworkstaxcalculator.transactions.Transaction
+import com.elchworks.tastyworkstaxcalculator.transactions.OptionTrade
+import com.elchworks.tastyworkstaxcalculator.transactions.optionDescription
+import com.elchworks.tastyworkstaxcalculator.transactions.year
 import org.slf4j.LoggerFactory
-import java.time.ZoneId
-import java.time.temporal.ChronoField
 
 class FiscalYear(
     private val exchangeRate: ExchangeRate,
@@ -28,7 +27,8 @@ class FiscalYear(
         val stoTx = stoEvent.stoTx
         val premium = txValueInEur(stoTx)
         profitAndLoss += ProfitAndLoss(premium, 0.0f)
-        log.info("position opened. position='{}', premium='{}', profitAndLoss='{}'", positionDescription(stoTx), premium, profitAndLoss)
+        log.info("position opened. position='{}', premium='{}', profit='{}'€, loss='{}'€",
+            stoTx.optionDescription(), premium, profitAndLoss.profit, profitAndLoss.loss)
     }
 
     fun onPositionClosed(btcEvent: OptionBuyToCloseEvent) {
@@ -41,11 +41,13 @@ class FiscalYear(
             if(isLoss(netProfit)) {
                 // is loss. Reduce profit by the whole premium, increase loss by netProfit
                 profitAndLoss += ProfitAndLoss(-premium, -netProfit)
-                log.info("Close with net loss. position='{}', netProfit='{}', profitAndLoss='{}'", positionDescription(stoTx), netProfit, profitAndLoss)
+                log.info("Close with net loss. position='{}', netProfit='{}', profit='{}'€, loss='{}'€",
+                    stoTx.optionDescription(), netProfit, profitAndLoss.profit, profitAndLoss.loss)
             } else {
                 // no loss. Only reduce profit by buyValue.
                 profitAndLoss += ProfitAndLoss(buyValue, 0.0f)
-                log.info("Close with net profit. position='{}', netProfit='{}', profitAndLoss='{}'", positionDescription(stoTx), netProfit, profitAndLoss)
+                log.info("Close with net profit. position='{}', netProfit='{}', profit='{}'€, loss='{}'€",
+                    stoTx.optionDescription(), netProfit, profitAndLoss.profit, profitAndLoss.loss)
             }
         } else {
             // the position was not opened in the same year. The whole value of the transaction is a loss for the current year
@@ -56,16 +58,13 @@ class FiscalYear(
 
     }
 
-    private fun positionDescription(stoTx: Trade) =
-        "${stoTx.callOrPut} ${stoTx.rootSymbol} ${stoTx.expirationDate}"
-
     private fun isLoss(netProfit: Float): Boolean {
         val isLoss = netProfit < 0.0F
         log.debug("isLoss netProfit='{}', isLoss='{}'", netProfit, isLoss)
         return isLoss
     }
 
-    private fun positionWasOpenedInThisFiscalYear(stoTx: Trade) = stoTx.year() == fiscalYear
+    private fun positionWasOpenedInThisFiscalYear(stoTx: OptionTrade) = stoTx.year() == fiscalYear
 
     private fun netProfit(premium: Float, buyValue: Float): Float {
         // buyValue is negative
@@ -74,7 +73,5 @@ class FiscalYear(
         return netProfit
     }
 
-    private fun txValueInEur(btcTx: Trade) = exchangeRate.usdToEur(Profit(btcTx.value, btcTx.date))
+    private fun txValueInEur(btcTx: OptionTrade) = exchangeRate.usdToEur(Profit(btcTx.value, btcTx.date))
 }
-
-fun Transaction.year(): Int = this.date.atZone(ZoneId.of("CET")).get(ChronoField.YEAR)

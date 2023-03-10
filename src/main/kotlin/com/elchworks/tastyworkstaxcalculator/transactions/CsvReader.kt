@@ -5,7 +5,7 @@ import com.elchworks.tastyworkstaxcalculator.positions.OptionPositionStatus.EXPI
 import com.elchworks.tastyworkstaxcalculator.transactions.Action
 import com.elchworks.tastyworkstaxcalculator.transactions.NewTransactionEvent
 import com.elchworks.tastyworkstaxcalculator.transactions.OptionRemoval
-import com.elchworks.tastyworkstaxcalculator.transactions.Trade
+import com.elchworks.tastyworkstaxcalculator.transactions.OptionTrade
 import com.elchworks.tastyworkstaxcalculator.transactions.Transaction
 import com.opencsv.CSVReaderBuilder
 import org.springframework.context.ApplicationEventPublisher
@@ -93,7 +93,7 @@ class CsvReader(
         )
     }
 
-    private fun trade(date: Instant, action: String, iterator: Iterator<String>) = Trade(
+    private fun trade(date: Instant, action: String, iterator: Iterator<String>) = OptionTrade(
         date = date,
         action = Action.valueOf(action),
         symbol = iterator.next(),

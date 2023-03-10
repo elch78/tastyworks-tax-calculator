@@ -1,8 +1,8 @@
 package com.elchworks.tastyworkstaxcalculator.positions
 
-import com.elchworks.tastyworkstaxcalculator.transactions.Trade
+import com.elchworks.tastyworkstaxcalculator.transactions.OptionTrade
 
 data class OptionBuyToCloseEvent(
-    val stoTx: Trade,
-    val btcTx: Trade,
+    val stoTx: OptionTrade,
+    val btcTx: OptionTrade,
 )

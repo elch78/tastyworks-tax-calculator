@@ -1,7 +1,7 @@
 package com.elchworks.tastyworkstaxcalculator.positions
 
-import com.elchworks.tastyworkstaxcalculator.transactions.Trade
+import com.elchworks.tastyworkstaxcalculator.transactions.OptionTrade
 
 data class OptionSellToOpenEvent(
-    val stoTx: Trade
+    val stoTx: OptionTrade
 )

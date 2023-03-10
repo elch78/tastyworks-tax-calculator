@@ -2,6 +2,7 @@ package com.elchworks.tastyworkstaxcalculator.fiscalyear
 
 import com.elchworks.tastyworkstaxcalculator.positions.OptionBuyToCloseEvent
 import com.elchworks.tastyworkstaxcalculator.positions.OptionSellToOpenEvent
+import com.elchworks.tastyworkstaxcalculator.transactions.year
 import org.springframework.context.event.EventListener
 import org.springframework.stereotype.Component
 

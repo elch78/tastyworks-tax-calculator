@@ -3,8 +3,10 @@ package com.elchworks.tastyworkstaxcalculator.transactions
 import com.elchworks.tastyworkstaxcalculator.positions.OptionPositionStatus
 import java.time.Instant
 import java.time.LocalDate
+import java.time.ZoneId
+import java.time.temporal.ChronoField
 
-data class Trade(
+data class OptionTrade(
     override val date: Instant,
     override val rootSymbol: String,
     override val expirationDate: LocalDate,
@@ -43,3 +45,6 @@ interface OptionTransaction {
     val expirationDate: LocalDate
     val strikePrice: Number
 }
+
+fun Transaction.year(): Int = this.date.atZone(ZoneId.of("CET")).get(ChronoField.YEAR)
+fun OptionTrade.optionDescription() = "${this.rootSymbol} ${this.callOrPut} ${this.expirationDate}@${this.strikePrice}"
