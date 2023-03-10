@@ -3,7 +3,6 @@ package com.elchworks.tastyworkstaxcalculator.positions
 import com.elchworks.tastyworkstaxcalculator.test.randomTrade
 import com.elchworks.tastyworkstaxcalculator.transactions.Action.BUY_TO_CLOSE
 import com.elchworks.tastyworkstaxcalculator.transactions.Action.SELL_TO_OPEN
-import com.elchworks.tastyworkstaxcalculator.transactions.NewTransactionEvent
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired

@@ -4,7 +4,6 @@ import com.elchworks.tastyworkstaxcalculator.positions.OptionPositionStatus.ASSI
 import com.elchworks.tastyworkstaxcalculator.positions.OptionPositionStatus.EXPIRED
 import com.elchworks.tastyworkstaxcalculator.transactions.Action.BUY_TO_CLOSE
 import com.elchworks.tastyworkstaxcalculator.transactions.Action.SELL_TO_OPEN
-import com.elchworks.tastyworkstaxcalculator.transactions.NewTransactionEvent
 import com.elchworks.tastyworkstaxcalculator.transactions.OptionRemoval
 import com.elchworks.tastyworkstaxcalculator.transactions.OptionTrade
 import com.elchworks.tastyworkstaxcalculator.transactions.OptionTransaction

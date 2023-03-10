@@ -1,9 +1,9 @@
 package com.elchworks.tastyworkstaxcalculator
 
+import com.elchworks.tastyworkstaxcalculator.positions.NewTransactionEvent
 import com.elchworks.tastyworkstaxcalculator.positions.OptionPositionStatus.ASSIGNED
 import com.elchworks.tastyworkstaxcalculator.positions.OptionPositionStatus.EXPIRED
 import com.elchworks.tastyworkstaxcalculator.transactions.Action
-import com.elchworks.tastyworkstaxcalculator.transactions.NewTransactionEvent
 import com.elchworks.tastyworkstaxcalculator.transactions.OptionRemoval
 import com.elchworks.tastyworkstaxcalculator.transactions.OptionTrade
 import com.elchworks.tastyworkstaxcalculator.transactions.Transaction
