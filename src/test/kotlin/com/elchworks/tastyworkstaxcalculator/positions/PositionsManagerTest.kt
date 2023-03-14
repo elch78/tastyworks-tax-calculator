@@ -1,6 +1,6 @@
 package com.elchworks.tastyworkstaxcalculator.positions
 
-import com.elchworks.tastyworkstaxcalculator.test.randomTrade
+import com.elchworks.tastyworkstaxcalculator.test.randomOptionTrade
 import com.elchworks.tastyworkstaxcalculator.transactions.Action.BUY_TO_CLOSE
 import com.elchworks.tastyworkstaxcalculator.transactions.Action.SELL_TO_OPEN
 import org.assertj.core.api.Assertions.assertThat
@@ -25,22 +25,22 @@ class PositionsManagerTest @Autowired constructor(
         val symbol1 = "ABC"
         val expirationDate1 = LocalDate.now()
         // Given
-        val stoTx1 = randomTrade().copy(
+        val stoTx1 = randomOptionTrade().copy(
             rootSymbol = symbol1,
             action = SELL_TO_OPEN,
             expirationDate = expirationDate1,
         )
-        val stoTx2 = randomTrade().copy(
+        val stoTx2 = randomOptionTrade().copy(
             rootSymbol = symbol1,
             action = SELL_TO_OPEN,
             expirationDate = expirationDate1,
         )
-        val btcTx1 = randomTrade().copy(
+        val btcTx1 = randomOptionTrade().copy(
             rootSymbol = symbol1,
             action = BUY_TO_CLOSE,
             expirationDate = expirationDate1,
         )
-        val btcTx2 = randomTrade().copy(
+        val btcTx2 = randomOptionTrade().copy(
             rootSymbol = symbol1,
             action = BUY_TO_CLOSE,
             expirationDate = expirationDate1,

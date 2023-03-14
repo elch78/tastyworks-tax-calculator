@@ -29,6 +29,7 @@ data class OptionTrade(
 data class StockTrade(
     override val date: Instant,
     val symbol: String,
+    val action: Action,
     val value: Float,
     val description: String,
     val quantity: Int,

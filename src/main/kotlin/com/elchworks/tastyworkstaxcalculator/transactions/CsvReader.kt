@@ -92,6 +92,7 @@ class CsvReader {
         StockTrade(
             date = parseDate(columns.date()),
             symbol = columns.symbol(),
+            action = Action.valueOf(columns.action()),
             value = columns.value(),
             description = columns.description(),
             quantity = columns.quantity(),

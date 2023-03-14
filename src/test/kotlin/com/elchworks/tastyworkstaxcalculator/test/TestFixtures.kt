@@ -1,14 +1,16 @@
 package com.elchworks.tastyworkstaxcalculator.test
 
+import com.elchworks.tastyworkstaxcalculator.transactions.Action.SELL_TO_CLOSE
 import com.elchworks.tastyworkstaxcalculator.transactions.Action.SELL_TO_OPEN
 import com.elchworks.tastyworkstaxcalculator.transactions.OptionTrade
+import com.elchworks.tastyworkstaxcalculator.transactions.StockTrade
 import org.apache.commons.lang3.RandomUtils
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
 import java.time.ZonedDateTime
 
-fun randomTrade() =
+fun randomOptionTrade() =
     OptionTrade(
         date = randomDateIn2021(),
         action = SELL_TO_OPEN,
@@ -21,12 +23,25 @@ fun randomTrade() =
         commissions = 0f,
         fees = 0f,
         multiplier = 100,
-        rootSymbol = "rootSymbom",
+        rootSymbol = "rootSymbol",
         underlyingSymbol = "",
         expirationDate = LocalDate.now(),
         strikePrice = 5.0f,
         callOrPut = "PUT",
         orderNr = 0
+    )
+
+fun randomStockTrade() =
+    StockTrade(
+        symbol = "symbol",
+        action = SELL_TO_CLOSE,
+        quantity = RandomUtils.nextInt(),
+        value = RandomUtils.nextFloat(),
+        date = randomDateIn2021(),
+        fees = RandomUtils.nextFloat(),
+        commissions = RandomUtils.nextFloat(),
+        averagePrice = RandomUtils.nextFloat(),
+        description = "randomDescription"
     )
 
 private fun randomDateIn2021(): Instant =

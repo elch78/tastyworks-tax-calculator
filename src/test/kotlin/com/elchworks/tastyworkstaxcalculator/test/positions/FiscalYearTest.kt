@@ -6,7 +6,7 @@ import com.elchworks.tastyworkstaxcalculator.positions.OptionBuyToCloseEvent
 import com.elchworks.tastyworkstaxcalculator.positions.OptionSellToOpenEvent
 import com.elchworks.tastyworkstaxcalculator.positions.Profit
 import com.elchworks.tastyworkstaxcalculator.positions.ProfitAndLoss
-import com.elchworks.tastyworkstaxcalculator.test.randomTrade
+import com.elchworks.tastyworkstaxcalculator.test.randomOptionTrade
 import org.apache.commons.lang3.RandomUtils
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -26,7 +26,7 @@ class FiscalYearTest @Autowired constructor(
     fun expired() {
         // Given
         val premium = RandomUtils.nextFloat(1.0F, 100.0F)
-        val stoTx = randomTrade().copy(value = premium)
+        val stoTx = randomOptionTrade().copy(value = premium)
         withRateUsdToEur()
         val sut = FiscalYear(exchangeRate, 2021)
 
@@ -47,8 +47,8 @@ class FiscalYearTest @Autowired constructor(
     fun closed(netProfit: Float) {
         // Given
         val premium = RandomUtils.nextFloat(1.0F, 100.0F)
-        val stoTx = randomTrade().copy(value = premium, quantity = 1)
-        val btcTx = randomTrade().copy(value = -premium + netProfit, quantity = 1)
+        val stoTx = randomOptionTrade().copy(value = premium, quantity = 1)
+        val btcTx = randomOptionTrade().copy(value = -premium + netProfit, quantity = 1)
         withRateUsdToEur()
         val sut = FiscalYear(exchangeRate, 2021)
 

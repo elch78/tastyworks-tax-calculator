@@ -3,10 +3,12 @@ package com.elchworks.tastyworkstaxcalculator.positions
 import com.elchworks.tastyworkstaxcalculator.positions.OptionPositionStatus.ASSIGNED
 import com.elchworks.tastyworkstaxcalculator.positions.OptionPositionStatus.EXPIRED
 import com.elchworks.tastyworkstaxcalculator.transactions.Action.BUY_TO_CLOSE
+import com.elchworks.tastyworkstaxcalculator.transactions.Action.SELL_TO_CLOSE
 import com.elchworks.tastyworkstaxcalculator.transactions.Action.SELL_TO_OPEN
 import com.elchworks.tastyworkstaxcalculator.transactions.OptionRemoval
 import com.elchworks.tastyworkstaxcalculator.transactions.OptionTrade
 import com.elchworks.tastyworkstaxcalculator.transactions.OptionTransaction
+import com.elchworks.tastyworkstaxcalculator.transactions.StockTrade
 import com.elchworks.tastyworkstaxcalculator.transactions.Transaction
 import com.elchworks.tastyworkstaxcalculator.transactions.optionDescription
 import org.slf4j.LoggerFactory
@@ -20,7 +22,8 @@ class PositionsManager(
     private val eventPublisher: ApplicationEventPublisher,
 ) {
     private val log = LoggerFactory.getLogger(PositionsManager::class.java)
-    private val positions = mutableMapOf<String, Queue<OptionTrade>>()
+    private val optionPositions = mutableMapOf<String, Queue<OptionTrade>>()
+    private val stockPositions = mutableMapOf<String, Queue<StockPosition>>()
 
     @EventListener(NewTransactionEvent::class)
     fun onNewTransaction(event: NewTransactionEvent) {
@@ -30,8 +33,20 @@ class PositionsManager(
             isOpenOptionPosition(tx) -> openPosition(tx as OptionTrade)
             isCloseOptionPosition(tx) -> closePosition(tx as OptionTrade)
             isOptionRemoval(tx) -> optionRemoval(tx as OptionRemoval)
+            isSellStockTrade(tx) -> handleStockTrade(tx as StockTrade)
             else -> error("Unhandled Transaction: $tx")
         }
+    }
+
+    private fun isSellStockTrade(tx: Transaction): Boolean {
+        val isSellStockTrade = tx is StockTrade && tx.action == SELL_TO_CLOSE
+        log.debug("isSellStockTrade='{}'", isSellStockTrade)
+        return isSellStockTrade
+    }
+
+    private fun handleStockTrade(stockTrade: StockTrade) {
+        stockPositions[stockTrade.symbol]
+
     }
 
     private fun isOptionRemoval(tx: Transaction): Boolean {
@@ -68,14 +83,14 @@ class PositionsManager(
     }
 
     private fun openPosition(tx: OptionTrade) {
-        positions.computeIfAbsent(tx.key()) { LinkedList() }
+        optionPositions.computeIfAbsent(tx.key()) { LinkedList() }
             .offer(tx)
         log.debug("opened stoTx='{}'", tx)
         eventPublisher.publishEvent(OptionSellToOpenEvent(tx))
     }
 
     private fun removePositionFifo(tx: OptionTransaction) =
-        positions[tx.key()]!!.remove()
+        optionPositions[tx.key()]!!.remove()
 
     private fun OptionTransaction.key() = "${this.callOrPut}-${this.rootSymbol}-${this.expirationDate}-${this.strikePrice}"
 }

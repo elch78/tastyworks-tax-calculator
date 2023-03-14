@@ -4,6 +4,7 @@ import com.elchworks.tastyworkstaxcalculator.CsvReader
 import com.elchworks.tastyworkstaxcalculator.positions.OptionPositionStatus.ASSIGNED
 import com.elchworks.tastyworkstaxcalculator.positions.OptionPositionStatus.EXPIRED
 import com.elchworks.tastyworkstaxcalculator.transactions.Action.BUY_TO_CLOSE
+import com.elchworks.tastyworkstaxcalculator.transactions.Action.SELL_TO_CLOSE
 import com.elchworks.tastyworkstaxcalculator.transactions.Action.SELL_TO_OPEN
 import org.assertj.core.api.Assertions.assertThatList
 import org.junit.jupiter.api.Disabled
@@ -140,17 +141,7 @@ class CsvReaderTest {
     @Test
     fun optionAssignment() {
         assertThatList(readFile("optionAssignment.csv"))
-            .isEqualTo(listOf(
-                StockTrade(
-                    date = Instant.parse("2022-03-28T13:30:27Z"),
-                    symbol = "APPH",
-                    value = 601.71f,
-                    description = "Sold 100 APPH @ 6.02",
-                    quantity = 100,
-                    averagePrice = 6.02f,
-                    commissions = 0.0f,
-                    fees = -0.102f
-                )
+            .isEqualTo(listOf<Transaction>(
             ))
     }
     @Test
@@ -160,6 +151,7 @@ class CsvReaderTest {
                 StockTrade(
                     date = Instant.parse("2022-03-28T13:30:27Z"),
                     symbol = "APPH",
+                    action = SELL_TO_CLOSE,
                     value = 601.71f,
                     description = "Sold 100 APPH @ 6.02",
                     quantity = 100,
