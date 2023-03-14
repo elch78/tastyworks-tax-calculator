@@ -7,6 +7,7 @@ import com.elchworks.tastyworkstaxcalculator.transactions.Action.SELL_TO_OPEN
 import com.elchworks.tastyworkstaxcalculator.transactions.OptionRemoval
 import com.elchworks.tastyworkstaxcalculator.transactions.OptionTrade
 import com.elchworks.tastyworkstaxcalculator.transactions.OptionTransaction
+import com.elchworks.tastyworkstaxcalculator.transactions.Transaction
 import com.elchworks.tastyworkstaxcalculator.transactions.optionDescription
 import org.slf4j.LoggerFactory
 import org.springframework.context.ApplicationEventPublisher
@@ -23,12 +24,31 @@ class PositionsManager(
 
     @EventListener(NewTransactionEvent::class)
     fun onNewTransaction(event: NewTransactionEvent) {
+        log.debug("onNewTransaction event='{}'", event)
         val tx = event.tx
         when {
-            tx is OptionTrade && tx.action == SELL_TO_OPEN -> openPosition(tx)
-            tx is OptionTrade && tx.action == BUY_TO_CLOSE -> closePosition(tx)
-            tx is OptionRemoval -> optionRemoval(tx)
+            isOpenOptionPosition(tx) -> openPosition(tx as OptionTrade)
+            isCloseOptionPosition(tx) -> closePosition(tx as OptionTrade)
+            isOptionRemoval(tx) -> optionRemoval(tx as OptionRemoval)
         }
+    }
+
+    private fun isOptionRemoval(tx: Transaction): Boolean {
+        val isOptionRemoval = tx is OptionRemoval
+        log.debug("isOptionRemoval='{}'", isOptionRemoval)
+        return isOptionRemoval
+    }
+
+    private fun isCloseOptionPosition(tx: Transaction): Boolean {
+        val isCloseOptionPosition = tx is OptionTrade && tx.action == BUY_TO_CLOSE
+        log.debug("isCloseOptionPosition='{}'", isCloseOptionPosition)
+        return isCloseOptionPosition
+    }
+
+    private fun isOpenOptionPosition(tx: Transaction): Boolean {
+        val isOpenOptionPosition = tx is OptionTrade && tx.action == SELL_TO_OPEN
+        log.debug("isOpenOptionPosition='{}'", isOpenOptionPosition)
+        return isOpenOptionPosition
     }
 
     private fun optionRemoval(tx: OptionRemoval) {
