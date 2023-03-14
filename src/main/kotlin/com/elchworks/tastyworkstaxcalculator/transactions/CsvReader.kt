@@ -43,6 +43,7 @@ class CsvReader {
                 try {
                     parseTransaction(it)
                 } catch (e: Exception) {
+                    // FIXME: This is not producing the expected outcome. I.e. printing all the values of the line
                     throw RuntimeException("Failed to parse ${it.joinToString { " " }}", e)
                 }
             }
