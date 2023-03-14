@@ -38,7 +38,7 @@ class CsvReader {
                     action.isBlank()
                 )
             }
-            .filter { !it[0].contains("Date") }
+            .filter { !isHeaderLine(it) }
             .map {
                 try {
                     parseTransaction(it)
@@ -48,6 +48,8 @@ class CsvReader {
                 }
             }
     }
+
+    private fun isHeaderLine(it: Array<String>) = it.date().contains("Date")
 
     private fun parseTransaction(columns: Array<String>): Transaction {
         return when {
