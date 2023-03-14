@@ -27,8 +27,8 @@ class FiscalYear(
         val stoTx = stoEvent.stoTx
         val premium = txValueInEur(stoTx)
         profitAndLoss += ProfitAndLoss(premium, 0.0f)
-        log.info("position opened. position='{}', premium='{}', profit='{}'€, loss='{}'€",
-            stoTx.optionDescription(), premium, profitAndLoss.profit, profitAndLoss.loss)
+        log.info("position opened. position='{}', premium='{}', profit='{}'€, loss='{}'€, fiscalYear='{}'",
+            stoTx.optionDescription(), premium, profitAndLoss.profit, profitAndLoss.loss, fiscalYear)
     }
 
     fun onPositionClosed(btcEvent: OptionBuyToCloseEvent) {

@@ -1,6 +1,7 @@
 package com.elchworks.tastyworkstaxcalculator
 
 import com.elchworks.tastyworkstaxcalculator.fiscalyear.EndOfYearEvent
+import com.elchworks.tastyworkstaxcalculator.positions.NewTransactionEvent
 import org.slf4j.LoggerFactory
 import org.springframework.boot.CommandLineRunner
 import org.springframework.boot.autoconfigure.SpringBootApplication
@@ -16,9 +17,18 @@ class TastyworksTaxCalculatorApplication(
 ): CommandLineRunner {
     private val log = LoggerFactory.getLogger(TastyworksTaxCalculatorApplication::class.java)
     override fun run(vararg args: String?) {
-        val file =
-            File("/home/elch/ws/tastyworks-tax-calculator/src/main/resources/tastyworks_transactions_x3569_2021-11-01_2021-12-31.csv")
-        csvReader.readCsv(file.inputStream())
+        File("/home/elch/tmp/tastyworks/")
+            .walk()
+            .filter { it.isFile }
+            .map {
+                log.info("reading $it")
+                csvReader.readCsv(it)
+            }
+            .flatten()
+            .sortedBy { it.date }
+            .forEach {
+                eventPublisher.publishEvent(NewTransactionEvent(it))
+            }
         eventPublisher.publishEvent(EndOfYearEvent(2021))
     }
 }
