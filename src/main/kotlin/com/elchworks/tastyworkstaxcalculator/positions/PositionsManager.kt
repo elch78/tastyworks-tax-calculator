@@ -30,6 +30,7 @@ class PositionsManager(
             isOpenOptionPosition(tx) -> openPosition(tx as OptionTrade)
             isCloseOptionPosition(tx) -> closePosition(tx as OptionTrade)
             isOptionRemoval(tx) -> optionRemoval(tx as OptionRemoval)
+            else -> error("Unhandled Transaction: $tx")
         }
     }
 
