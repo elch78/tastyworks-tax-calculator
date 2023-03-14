@@ -52,6 +52,7 @@ class CsvReader {
     private fun isHeaderLine(it: Array<String>) = it.date().contains("Date")
 
     private fun parseTransaction(columns: Array<String>): Transaction {
+        log.debug("parseTransaction columns='{}'", columns)
         return when {
             isOptionTrade(columns) -> optionTrade(columns)
             isOptionRemoval(columns) -> optionRemoval(columns)
