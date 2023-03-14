@@ -1,7 +1,11 @@
 package com.elchworks.tastyworkstaxcalculator.test
 
+import com.elchworks.tastyworkstaxcalculator.positions.OptionPositionStatus
+import com.elchworks.tastyworkstaxcalculator.transactions.Action.BUY_TO_OPEN
 import com.elchworks.tastyworkstaxcalculator.transactions.Action.SELL_TO_CLOSE
 import com.elchworks.tastyworkstaxcalculator.transactions.Action.SELL_TO_OPEN
+import com.elchworks.tastyworkstaxcalculator.transactions.OptionAssignment
+import com.elchworks.tastyworkstaxcalculator.transactions.OptionRemoval
 import com.elchworks.tastyworkstaxcalculator.transactions.OptionTrade
 import com.elchworks.tastyworkstaxcalculator.transactions.StockTrade
 import org.apache.commons.lang3.RandomUtils
@@ -25,11 +29,34 @@ fun randomOptionTrade() =
         multiplier = 100,
         rootSymbol = "rootSymbol",
         underlyingSymbol = "",
-        expirationDate = LocalDate.now(),
+        expirationDate = randomLocalDate(),
         strikePrice = 5.0f,
         callOrPut = "PUT",
         orderNr = 0
     )
+
+fun randomOptionRemoval() =
+    OptionRemoval(
+        date = randomDateIn2021(),
+        rootSymbol = "rootSymbol",
+        expirationDate = randomLocalDate(),
+        strikePrice = RandomUtils.nextFloat(),
+        callOrPut = "PUT",
+        status = OptionPositionStatus.EXPIRED
+    )
+
+fun randomAssignment() =
+    OptionAssignment(
+        date = randomDateIn2021(),
+        action = BUY_TO_OPEN,
+        symbol = "rootSymbol",
+        value = RandomUtils.nextFloat(),
+        quantity = RandomUtils.nextInt(),
+        averagePrice = RandomUtils.nextFloat(),
+        fees = RandomUtils.nextFloat(),
+    )
+
+private fun randomLocalDate(): LocalDate = LocalDate.now()
 
 fun randomStockTrade() =
     StockTrade(

@@ -3,6 +3,7 @@ package com.elchworks.tastyworkstaxcalculator
 import com.elchworks.tastyworkstaxcalculator.positions.OptionPositionStatus.ASSIGNED
 import com.elchworks.tastyworkstaxcalculator.positions.OptionPositionStatus.EXPIRED
 import com.elchworks.tastyworkstaxcalculator.transactions.Action
+import com.elchworks.tastyworkstaxcalculator.transactions.OptionAssignment
 import com.elchworks.tastyworkstaxcalculator.transactions.OptionRemoval
 import com.elchworks.tastyworkstaxcalculator.transactions.OptionTrade
 import com.elchworks.tastyworkstaxcalculator.transactions.StockTrade
@@ -34,8 +35,7 @@ class CsvReader {
                 val action = it[2]
                 type == "Trade" ||
                 (
-                    type.contains("Receive Deliver") &&
-                    action.isBlank()
+                    type.contains("Receive Deliver")
                 )
             }
             .filter { !isHeaderLine(it) }
@@ -57,10 +57,28 @@ class CsvReader {
             isOptionTrade(columns) -> optionTrade(columns)
             isOptionRemoval(columns) -> optionRemoval(columns)
             isStockTrade(columns) -> stockTrade(columns)
-            // TODO assignment of stock
-//            type == "Receive Deliver" && !action.isBlank() -> optionRemoval(date, action)
+            isAssignment(columns) -> optionAssignment(columns)
             else -> error("TODO")
         }
+    }
+
+    private fun optionAssignment(columns: Array<String>) =
+        OptionAssignment(
+            date = parseDate(columns.date()),
+            action = Action.valueOf(columns.action()),
+            symbol = columns.symbol(),
+            value = columns.value(),
+            quantity = columns.quantity(),
+            averagePrice = columns.averagePrice(),
+            fees = columns.fees()
+        )
+
+    private fun isAssignment(columns: Array<String>): Boolean {
+        val type = columns.type()
+        val instrumentType = columns.instrumentType()
+        val isAssignment = type == "Receive Deliver" && instrumentType == "Equity"
+        log.debug("isAssignment type='{}', instrumentType='{}', isAssignment='{}'", type, instrumentType, isAssignment)
+        return isAssignment
     }
 
     private fun isOptionTrade(columns: Array<String>): Boolean {
@@ -165,7 +183,7 @@ fun Array<String>.action() = this[2]
 fun Array<String>.symbol() = this[3]
 fun Array<String>.instrumentType() = this[4]
 fun Array<String>.description() = this[5]
-fun Array<String>.value() = this[6].toFloat()
+fun Array<String>.value() = this[6].replace(",", "").toFloat()
 fun Array<String>.quantity() = this[7].toInt()
 fun Array<String>.averagePrice() = this[8].toFloat()
 fun Array<String>.commissions() = this[9].toFloat()

@@ -4,10 +4,10 @@ import com.elchworks.tastyworkstaxcalculator.CsvReader
 import com.elchworks.tastyworkstaxcalculator.positions.OptionPositionStatus.ASSIGNED
 import com.elchworks.tastyworkstaxcalculator.positions.OptionPositionStatus.EXPIRED
 import com.elchworks.tastyworkstaxcalculator.transactions.Action.BUY_TO_CLOSE
+import com.elchworks.tastyworkstaxcalculator.transactions.Action.BUY_TO_OPEN
 import com.elchworks.tastyworkstaxcalculator.transactions.Action.SELL_TO_CLOSE
 import com.elchworks.tastyworkstaxcalculator.transactions.Action.SELL_TO_OPEN
 import org.assertj.core.api.Assertions.assertThatList
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.springframework.core.io.ClassPathResource
 import java.time.Instant
@@ -137,11 +137,28 @@ class CsvReaderTest {
             ))
     }
 
-    @Disabled("TODO parse assignments")
     @Test
     fun optionAssignment() {
         assertThatList(readFile("optionAssignment.csv"))
             .isEqualTo(listOf<Transaction>(
+                OptionAssignment(
+                    date = Instant.parse("2022-11-18T22:00:00Z"),
+                    action = SELL_TO_CLOSE,
+                    symbol = "MMAT",
+                    value = 100.0f,
+                    quantity = 100,
+                    averagePrice = 1.0f,
+                    fees = -5.023f
+                ),
+                OptionAssignment(
+                    date = Instant.parse("2022-12-16T22:00:00Z"),
+                    action = BUY_TO_OPEN,
+                    symbol = "TLRY",
+                    value = -700.0f,
+                    quantity = 200,
+                    averagePrice = -3.5f,
+                    fees = -5.0f
+                ),
             ))
     }
     @Test

@@ -1,3 +1,6 @@
 logging.level:
     com.elchworks: INFO
     com.elchworks.tastyworkstaxcalculator.ExchangeRate: INFO
+    com.elchworks.tastyworkstaxcalculator.CsvReader: INFO
+    com.elchworks.tastyworkstaxcalculator.positions.PositionsManager: INFO
+    com.elchworks.tastyworkstaxcalculator.positions.StockPosition: INFO

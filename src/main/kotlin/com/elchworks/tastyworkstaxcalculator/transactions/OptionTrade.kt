@@ -28,15 +28,15 @@ data class OptionTrade(
 
 data class StockTrade(
     override val date: Instant,
-    val symbol: String,
-    val action: Action,
-    val value: Float,
+    override val symbol: String,
+    override val action: Action,
+    override val value: Float,
+    override val quantity: Int,
+    override val averagePrice: Float,
     val description: String,
-    val quantity: Int,
-    val averagePrice: Float,
     val commissions: Float,
     val fees: Float
-): Transaction
+): Transaction, StockTransaction
 
 data class OptionRemoval(
     override val date: Instant,
@@ -47,6 +47,16 @@ data class OptionRemoval(
     val status: OptionPositionStatus,
 ): Transaction, OptionTransaction
 
+data class OptionAssignment(
+    override val date: Instant,
+    override val action: Action,
+    override val symbol: String,
+    override val value: Float,
+    override val quantity: Int,
+    override val averagePrice: Float,
+    val fees: Float
+): Transaction, StockTransaction
+
 interface Transaction {
     val date: Instant
 }
@@ -56,6 +66,14 @@ interface OptionTransaction {
     val rootSymbol: String
     val expirationDate: LocalDate
     val strikePrice: Number
+}
+
+interface StockTransaction {
+    val action: Action
+    val symbol: String
+    val quantity: Int
+    val value: Float
+    val averagePrice: Float
 }
 fun Transaction.year(): Int = this.date.atZone(ZoneId.of("CET")).get(ChronoField.YEAR)
 fun OptionTrade.optionDescription() = "${this.rootSymbol} ${this.callOrPut} ${this.expirationDate}@${this.strikePrice}"
