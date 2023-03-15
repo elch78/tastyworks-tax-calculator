@@ -11,6 +11,7 @@ import com.elchworks.tastyworkstaxcalculator.transactions.OptionRemoval
 import com.elchworks.tastyworkstaxcalculator.transactions.OptionTrade
 import com.elchworks.tastyworkstaxcalculator.transactions.OptionTransaction
 import com.elchworks.tastyworkstaxcalculator.transactions.StockTrade
+import com.elchworks.tastyworkstaxcalculator.transactions.StockTransaction
 import com.elchworks.tastyworkstaxcalculator.transactions.optionDescription
 import org.slf4j.LoggerFactory
 import org.springframework.context.ApplicationEventPublisher
@@ -32,8 +33,8 @@ class PositionsManager(
         when(val tx = event.tx) {
             is OptionTrade -> optionTrade(tx)
             is OptionRemoval -> optionRemoval(tx)
-            is StockTrade -> closeStockPosition(tx)
-            is OptionAssignment -> assignment(tx)
+            is StockTrade -> stockTrade(tx)
+            is OptionAssignment -> stockTrade(tx)
             else -> error("Unhandled Transaction: $tx")
         }
     }
@@ -46,15 +47,7 @@ class PositionsManager(
         }
     }
 
-    private fun assignment(tx: OptionAssignment) {
-        when(tx.action) {
-            BUY_TO_OPEN -> optionAssignmentBuyToOpen(tx)
-            SELL_TO_CLOSE -> optionAssignmentSellToClose(tx)
-            else -> error("unexpected action for assignment: ${tx.action}")
-        }
-    }
-
-    private fun optionAssignmentSellToClose(stcTx: OptionAssignment) {
+    private fun closeStockPosition(stcTx: StockTransaction) {
         var quantityToClose = stcTx.quantity
         do {
             val position = stockPositions[stcTx.symbol]!!.peek()
@@ -67,18 +60,20 @@ class PositionsManager(
             log.debug("optionAssignmentSellToClose quantityToClose='{}'", quantityToClose)
             eventPublisher.publishEvent(StockSellToCloseEvent(position.btoTx, stcTx, positionCloseResult.quantityClosed))
         } while (quantityToClose != 0)
-
     }
 
-    private fun optionAssignmentBuyToOpen(btoTx: OptionAssignment) {
+    private fun openStockPosition(btoTx: StockTransaction) {
         stockPositions.computeIfAbsent(btoTx.symbol) {LinkedList()}
             .offer(StockPosition(btoTx))
         log.info("Assignment tx='{}'", btoTx)
     }
 
-    private fun closeStockPosition(stockTrade: StockTrade) {
-        stockPositions[stockTrade.symbol]
-
+    private fun stockTrade(stockTrade: StockTransaction) {
+        when(stockTrade.action) {
+            BUY_TO_OPEN -> openStockPosition(stockTrade)
+            SELL_TO_CLOSE -> closeStockPosition(stockTrade)
+            else -> error("Unexpected action for StockTrade: ${stockTrade.action}")
+        }
     }
 
     private fun optionRemoval(tx: OptionRemoval) {
