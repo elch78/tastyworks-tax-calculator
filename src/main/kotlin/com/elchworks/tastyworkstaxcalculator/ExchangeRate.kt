@@ -1,12 +1,14 @@
 package com.elchworks.tastyworkstaxcalculator
 
 import com.elchworks.tastyworkstaxcalculator.positions.Profit
+import org.javamoney.moneta.Money
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import java.time.ZoneId
 import java.time.ZonedDateTime
 import java.time.temporal.ChronoField.MONTH_OF_YEAR
 import java.time.temporal.ChronoField.YEAR
+import javax.money.MonetaryAmount
 
 @Component
 class ExchangeRate {
@@ -32,7 +34,7 @@ class ExchangeRate {
         "2021-11" to 1.14F,
     )
 
-    fun usdToEur(profit: Profit): Float {
+    fun usdToEur(profit: Profit): MonetaryAmount {
         log.debug("usdToEur profit='{}'", profit)
         val dateTime = ZonedDateTime.ofInstant(profit.date, ZoneId.of("CET"))
         val month = dateTime.get(MONTH_OF_YEAR)
@@ -41,7 +43,7 @@ class ExchangeRate {
         log.debug("usdToEur year='{}', month='{}', key='{}'", year, month, key)
         val rate = 1 / (rates[key] ?: error("No rate for $key"))
         log.debug("usdToEur rate='{}'", rate)
-        val eurValue = profit.value * rate
+        val eurValue = Money.of((profit.value * rate).number, "EUR")
         log.debug("usdToEur eurValue='{}'", eurValue)
         return eurValue
     }

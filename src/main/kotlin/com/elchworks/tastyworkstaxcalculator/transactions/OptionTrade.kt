@@ -5,6 +5,7 @@ import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
 import java.time.temporal.ChronoField
+import javax.money.MonetaryAmount
 
 data class OptionTrade(
     override val date: Instant,
@@ -16,9 +17,9 @@ data class OptionTrade(
     val symbol: String,
     val instrumentType: String,
     val description: String,
-    val value: Float,
+    val value: MonetaryAmount,
     val quantity: Int,
-    val averagePrice: Float,
+    val averagePrice: MonetaryAmount,
     val commissions: Float,
     val fees: Float,
     val multiplier: Int,
@@ -30,9 +31,9 @@ data class StockTrade(
     override val date: Instant,
     override val symbol: String,
     override val action: Action,
-    override val value: Float,
+    override val value: MonetaryAmount,
     override val quantity: Int,
-    override val averagePrice: Float,
+    override val averagePrice: MonetaryAmount,
     val description: String,
     val commissions: Float,
     val fees: Float
@@ -51,9 +52,9 @@ data class OptionAssignment(
     override val date: Instant,
     override val action: Action,
     override val symbol: String,
-    override val value: Float,
+    override val value: MonetaryAmount,
     override val quantity: Int,
-    override val averagePrice: Float,
+    override val averagePrice: MonetaryAmount,
     val fees: Float
 ): StockTransaction
 
@@ -72,8 +73,8 @@ interface StockTransaction : Transaction{
     val action: Action
     val symbol: String
     val quantity: Int
-    val value: Float
-    val averagePrice: Float
+    val value: MonetaryAmount
+    val averagePrice: MonetaryAmount
 }
 
 fun Transaction.year(): Int = this.date.atZone(ZoneId.of("CET")).get(ChronoField.YEAR)

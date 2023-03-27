@@ -1,35 +1,41 @@
 package com.elchworks.tastyworkstaxcalculator.fiscalyear
 
 import com.elchworks.tastyworkstaxcalculator.ExchangeRate
+import com.elchworks.tastyworkstaxcalculator.eur
+import com.elchworks.tastyworkstaxcalculator.minus
+import com.elchworks.tastyworkstaxcalculator.plus
 import com.elchworks.tastyworkstaxcalculator.positions.OptionBuyToCloseEvent
 import com.elchworks.tastyworkstaxcalculator.positions.OptionSellToOpenEvent
 import com.elchworks.tastyworkstaxcalculator.positions.Profit
 import com.elchworks.tastyworkstaxcalculator.positions.ProfitAndLoss
 import com.elchworks.tastyworkstaxcalculator.positions.StockSellToCloseEvent
 import com.elchworks.tastyworkstaxcalculator.positions.plus
+import com.elchworks.tastyworkstaxcalculator.times
 import com.elchworks.tastyworkstaxcalculator.transactions.OptionTrade
 import com.elchworks.tastyworkstaxcalculator.transactions.optionDescription
 import com.elchworks.tastyworkstaxcalculator.transactions.year
+import org.javamoney.moneta.Money
 import org.slf4j.LoggerFactory
+import javax.money.MonetaryAmount
 
 class FiscalYear(
     private val exchangeRate: ExchangeRate,
     private val fiscalYear: Int,
 ) {
     var profitAndLossFromOptions = ProfitAndLoss()
-    var profitAndLossFromStocks = 0.0f
+    var profitAndLossFromStocks = eur(0)
     private val log = LoggerFactory.getLogger(FiscalYear::class.java)
 
 
     fun printReport() {
-        log.info("Profit and loss for fiscal year $fiscalYear: profit = ${profitAndLossFromOptions.profit}€ loss = ${profitAndLossFromOptions.loss}€")
+        log.info("Profit and loss for fiscal year $fiscalYear: profit = ${profitAndLossFromOptions.profit} loss = ${profitAndLossFromOptions.loss}")
     }
 
     fun onOptionPositionOpened(stoEvent: OptionSellToOpenEvent) {
         val stoTx = stoEvent.stoTx
         val premium = txValueInEur(stoTx)
-        profitAndLossFromOptions += ProfitAndLoss(premium, 0.0f)
-        log.info("position opened. position='{}', premium='{}', profit='{}'€, loss='{}'€, fiscalYear='{}'",
+        profitAndLossFromOptions += ProfitAndLoss(premium, Money.of(0, "EUR"))
+        log.info("position opened. position='{}', premium='{}', profit='{}', loss='{}', fiscalYear='{}'",
             stoTx.optionDescription(), premium, profitAndLossFromOptions.profit, profitAndLossFromOptions.loss, fiscalYear)
     }
 
@@ -42,19 +48,19 @@ class FiscalYear(
             val netProfit = netProfit(premium, buyValue)
             if(isLoss(netProfit)) {
                 // is loss. Reduce profit by the whole premium, increase loss by netProfit
-                profitAndLossFromOptions += ProfitAndLoss(-premium, -netProfit)
-                log.info("Close with net loss. position='{}', netProfit='{}', profit='{}'€, loss='{}'€",
+                profitAndLossFromOptions += ProfitAndLoss(premium.negate(), netProfit.negate())
+                log.info("Close with net loss. position='{}', netProfit='{}', profit='{}', loss='{}'",
                     stoTx.optionDescription(), netProfit, profitAndLossFromOptions.profit, profitAndLossFromOptions.loss)
             } else {
                 // no loss. Only reduce profit by buyValue.
-                profitAndLossFromOptions += ProfitAndLoss(buyValue, 0.0f)
-                log.info("Close with net profit. position='{}', netProfit='{}', profit='{}'€, loss='{}'€",
+                profitAndLossFromOptions += ProfitAndLoss(buyValue, eur(0))
+                log.info("Close with net profit. position='{}', netProfit='{}', profit='{}', loss='{}'",
                     stoTx.optionDescription(), netProfit, profitAndLossFromOptions.profit, profitAndLossFromOptions.loss)
             }
         } else {
             // the position was not opened in the same year. The whole value of the transaction is a loss for the current year
             val netProfit = txValueInEur(stoTx)
-            profitAndLossFromOptions += ProfitAndLoss(0.0f, -netProfit)
+            profitAndLossFromOptions += ProfitAndLoss(eur(0), netProfit.negate())
             log.info("Option position closed that was opened in a different fiscal year. netProfit='{}', profitAndLoss='{}'", netProfit, profitAndLossFromOptions)
         }
     }
@@ -77,15 +83,15 @@ class FiscalYear(
             symbol, quantitySold, netProfit, profitAndLossFromStocks)
     }
 
-    private fun isLoss(netProfit: Float): Boolean {
-        val isLoss = netProfit < 0.0F
+    private fun isLoss(netProfit: MonetaryAmount): Boolean {
+        val isLoss = netProfit.isNegative
         log.debug("isLoss netProfit='{}', isLoss='{}'", netProfit, isLoss)
         return isLoss
     }
 
     private fun positionWasOpenedInThisFiscalYear(stoTx: OptionTrade) = stoTx.year() == fiscalYear
 
-    private fun netProfit(premium: Float, buyValue: Float): Float {
+    private fun netProfit(premium: MonetaryAmount, buyValue: MonetaryAmount): MonetaryAmount {
         // buyValue is negative
         val netProfit = premium + buyValue
         log.debug("netProfit premium='{}', buyValue='{}', netProfit='{}'", premium, buyValue, netProfit)

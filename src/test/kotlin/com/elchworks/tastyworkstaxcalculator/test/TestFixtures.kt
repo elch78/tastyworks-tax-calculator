@@ -1,6 +1,7 @@
 package com.elchworks.tastyworkstaxcalculator.test
 
 import com.elchworks.tastyworkstaxcalculator.positions.OptionPositionStatus
+import com.elchworks.tastyworkstaxcalculator.toMonetaryAmountUsd
 import com.elchworks.tastyworkstaxcalculator.transactions.Action.BUY_TO_OPEN
 import com.elchworks.tastyworkstaxcalculator.transactions.Action.SELL_TO_CLOSE
 import com.elchworks.tastyworkstaxcalculator.transactions.Action.SELL_TO_OPEN
@@ -9,6 +10,7 @@ import com.elchworks.tastyworkstaxcalculator.transactions.OptionRemoval
 import com.elchworks.tastyworkstaxcalculator.transactions.OptionTrade
 import com.elchworks.tastyworkstaxcalculator.transactions.StockTrade
 import org.apache.commons.lang3.RandomUtils
+import org.javamoney.moneta.Money
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
@@ -21,9 +23,9 @@ fun randomOptionTrade() =
         symbol = "",
         instrumentType = "",
         description = "",
-        value = RandomUtils.nextFloat(),
+        value = randomUsdAmount(),
         quantity = 1, // not random for now. In order to prevent error message "Currently only complete closing of positions is supported."
-        averagePrice = 0f,
+        averagePrice = Money.of(0, "USD"),
         commissions = 0f,
         fees = 0f,
         multiplier = 100,
@@ -34,6 +36,9 @@ fun randomOptionTrade() =
         callOrPut = "PUT",
         orderNr = 0
     )
+
+fun randomUsdAmount() = RandomUtils.nextFloat().toMonetaryAmountUsd()
+fun randomUsdAmount(startInclusive: Float, endExclusive: Float) = RandomUtils.nextFloat(startInclusive, endExclusive).toMonetaryAmountUsd()
 
 fun randomOptionRemoval() =
     OptionRemoval(
@@ -50,9 +55,9 @@ fun randomAssignment() =
         date = randomDateIn2021(),
         action = BUY_TO_OPEN,
         symbol = "rootSymbol",
-        value = RandomUtils.nextFloat(),
+        value = randomUsdAmount(),
         quantity = RandomUtils.nextInt(),
-        averagePrice = RandomUtils.nextFloat(),
+        averagePrice = randomUsdAmount(),
         fees = RandomUtils.nextFloat(),
     )
 
@@ -63,11 +68,11 @@ fun randomStockTrade() =
         symbol = "symbol",
         action = SELL_TO_CLOSE,
         quantity = RandomUtils.nextInt(),
-        value = RandomUtils.nextFloat(),
+        value = randomUsdAmount(),
         date = randomDateIn2021(),
         fees = RandomUtils.nextFloat(),
         commissions = RandomUtils.nextFloat(),
-        averagePrice = RandomUtils.nextFloat(),
+        averagePrice = randomUsdAmount(),
         description = "randomDescription"
     )
 

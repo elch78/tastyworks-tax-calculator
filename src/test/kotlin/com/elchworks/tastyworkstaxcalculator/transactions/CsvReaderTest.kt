@@ -7,6 +7,7 @@ import com.elchworks.tastyworkstaxcalculator.transactions.Action.BUY_TO_CLOSE
 import com.elchworks.tastyworkstaxcalculator.transactions.Action.BUY_TO_OPEN
 import com.elchworks.tastyworkstaxcalculator.transactions.Action.SELL_TO_CLOSE
 import com.elchworks.tastyworkstaxcalculator.transactions.Action.SELL_TO_OPEN
+import com.elchworks.tastyworkstaxcalculator.usd
 import org.assertj.core.api.Assertions.assertThatList
 import org.junit.jupiter.api.Test
 import org.springframework.core.io.ClassPathResource
@@ -68,9 +69,9 @@ class CsvReaderTest {
                     symbol = "PACB  221230C00010500",
                     instrumentType = "Equity Option",
                     description = "Sold 2 PACB 12/30/22 Call 10.50 @ 0.10",
-                    value = 20.0f,
+                    value = usd(20.0f),
                     quantity = 2,
-                    averagePrice = 10.0f,
+                    averagePrice = usd(10.0f),
                     commissions = -2.0f,
                     fees = -0.254f,
                     multiplier = 100,
@@ -87,9 +88,9 @@ class CsvReaderTest {
                     symbol = "TLRY  221209C00005000",
                     instrumentType = "Equity Option",
                     description = "Bought 1 TLRY 12/09/22 Call 5.00 @ 0.09",
-                    value = -9.0f,
+                    value = usd(-9.0f),
                     quantity = 1,
-                    averagePrice = -9.0f,
+                    averagePrice = usd(-9.0f),
                     commissions = 0.0f,
                     fees = -0.12f,
                     multiplier = 100,
@@ -106,9 +107,9 @@ class CsvReaderTest {
                     symbol = "PACB  221028P00007000",
                     instrumentType = "Equity Option",
                     description = "Sold 1 PACB 10/28/22 Put 7.00 @ 0.20",
-                    value = 20.0f,
+                    value = usd(20.0f),
                     quantity = 1,
-                    averagePrice = 20.0f,
+                    averagePrice = usd(20.0f),
                     commissions = -1.0f,
                     fees = -0.142f,
                     multiplier = 100,
@@ -125,9 +126,9 @@ class CsvReaderTest {
                     symbol = "MNMD  221021P00002500",
                     instrumentType = "Equity Option",
                     description = "Bought 1 MNMD 10/21/22 Put 2.50 @ 0.20",
-                    value = -20.0f,
+                    value = usd(-20.0f),
                     quantity = 1,
-                    averagePrice = -20.0f,
+                    averagePrice = usd(-20.0f),
                     commissions = 0.0f,
                     fees = -0.12f,
                     multiplier = 100,
@@ -145,18 +146,18 @@ class CsvReaderTest {
                     date = Instant.parse("2022-11-18T22:00:00Z"),
                     action = SELL_TO_CLOSE,
                     symbol = "MMAT",
-                    value = 100.0f,
+                    value = usd(100.0f),
                     quantity = 100,
-                    averagePrice = 1.0f,
+                    averagePrice = usd(1.0f),
                     fees = -5.023f
                 ),
                 OptionAssignment(
                     date = Instant.parse("2022-12-16T22:00:00Z"),
                     action = BUY_TO_OPEN,
                     symbol = "TLRY",
-                    value = -700.0f,
+                    value = usd(-700.0f),
                     quantity = 200,
-                    averagePrice = -3.5f,
+                    averagePrice = usd(-3.5f),
                     fees = -5.0f
                 ),
             ))
@@ -169,10 +170,10 @@ class CsvReaderTest {
                     date = Instant.parse("2022-03-28T13:30:27Z"),
                     symbol = "APPH",
                     action = SELL_TO_CLOSE,
-                    value = 601.71f,
+                    value = usd(601.71f),
                     description = "Sold 100 APPH @ 6.02",
                     quantity = 100,
-                    averagePrice = 6.02f,
+                    averagePrice = usd(6.02f),
                     commissions = 0.0f,
                     fees = -0.102f
                 )
