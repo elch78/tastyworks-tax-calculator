@@ -5,6 +5,7 @@ import com.elchworks.tastyworkstaxcalculator.positions.OptionBuyToCloseEvent
 import com.elchworks.tastyworkstaxcalculator.positions.OptionSellToOpenEvent
 import com.elchworks.tastyworkstaxcalculator.positions.Profit
 import com.elchworks.tastyworkstaxcalculator.positions.ProfitAndLoss
+import com.elchworks.tastyworkstaxcalculator.positions.StockSellToCloseEvent
 import com.elchworks.tastyworkstaxcalculator.positions.plus
 import com.elchworks.tastyworkstaxcalculator.transactions.OptionTrade
 import com.elchworks.tastyworkstaxcalculator.transactions.optionDescription
@@ -15,23 +16,24 @@ class FiscalYear(
     private val exchangeRate: ExchangeRate,
     private val fiscalYear: Int,
 ) {
-    var profitAndLoss = ProfitAndLoss()
+    var profitAndLossFromOptions = ProfitAndLoss()
+    var profitAndLossFromStocks = 0.0f
     private val log = LoggerFactory.getLogger(FiscalYear::class.java)
 
 
     fun printReport() {
-        log.info("Profit and loss for fiscal year $fiscalYear: profit = ${profitAndLoss.profit}€ loss = ${profitAndLoss.loss}€")
+        log.info("Profit and loss for fiscal year $fiscalYear: profit = ${profitAndLossFromOptions.profit}€ loss = ${profitAndLossFromOptions.loss}€")
     }
 
-    fun onPositionOpened(stoEvent: OptionSellToOpenEvent) {
+    fun onOptionPositionOpened(stoEvent: OptionSellToOpenEvent) {
         val stoTx = stoEvent.stoTx
         val premium = txValueInEur(stoTx)
-        profitAndLoss += ProfitAndLoss(premium, 0.0f)
+        profitAndLossFromOptions += ProfitAndLoss(premium, 0.0f)
         log.info("position opened. position='{}', premium='{}', profit='{}'€, loss='{}'€, fiscalYear='{}'",
-            stoTx.optionDescription(), premium, profitAndLoss.profit, profitAndLoss.loss, fiscalYear)
+            stoTx.optionDescription(), premium, profitAndLossFromOptions.profit, profitAndLossFromOptions.loss, fiscalYear)
     }
 
-    fun onPositionClosed(btcEvent: OptionBuyToCloseEvent) {
+    fun onOptionPositionClosed(btcEvent: OptionBuyToCloseEvent) {
         val btcTx = btcEvent.btcTx
         val stoTx = btcEvent.stoTx
         if(positionWasOpenedInThisFiscalYear(stoTx)) {
@@ -40,22 +42,39 @@ class FiscalYear(
             val netProfit = netProfit(premium, buyValue)
             if(isLoss(netProfit)) {
                 // is loss. Reduce profit by the whole premium, increase loss by netProfit
-                profitAndLoss += ProfitAndLoss(-premium, -netProfit)
+                profitAndLossFromOptions += ProfitAndLoss(-premium, -netProfit)
                 log.info("Close with net loss. position='{}', netProfit='{}', profit='{}'€, loss='{}'€",
-                    stoTx.optionDescription(), netProfit, profitAndLoss.profit, profitAndLoss.loss)
+                    stoTx.optionDescription(), netProfit, profitAndLossFromOptions.profit, profitAndLossFromOptions.loss)
             } else {
                 // no loss. Only reduce profit by buyValue.
-                profitAndLoss += ProfitAndLoss(buyValue, 0.0f)
+                profitAndLossFromOptions += ProfitAndLoss(buyValue, 0.0f)
                 log.info("Close with net profit. position='{}', netProfit='{}', profit='{}'€, loss='{}'€",
-                    stoTx.optionDescription(), netProfit, profitAndLoss.profit, profitAndLoss.loss)
+                    stoTx.optionDescription(), netProfit, profitAndLossFromOptions.profit, profitAndLossFromOptions.loss)
             }
         } else {
             // the position was not opened in the same year. The whole value of the transaction is a loss for the current year
             val netProfit = txValueInEur(stoTx)
-            profitAndLoss += ProfitAndLoss(0.0f, -netProfit)
-            log.info("Option position closed that was opened in a different fiscal year. netProfit='{}', profitAndLoss='{}'", netProfit, profitAndLoss)
+            profitAndLossFromOptions += ProfitAndLoss(0.0f, -netProfit)
+            log.info("Option position closed that was opened in a different fiscal year. netProfit='{}', profitAndLoss='{}'", netProfit, profitAndLossFromOptions)
         }
+    }
 
+    fun onStockPositionClosed(event: StockSellToCloseEvent) {
+        val symbol = event.btoTx.symbol
+        val quantitySold = event.quantitySold
+        val sellPrice = event.stcTx.averagePrice
+        val buyPrice = event.btoTx.averagePrice
+        log.debug("onStockPositionClosed symbol='{}', quantitySold='{}', buyPrice='{}', sellPrice='{}'", symbol, quantitySold, buyPrice, sellPrice)
+        val buyValue = buyPrice * quantitySold
+        val buyValueEur = exchangeRate.usdToEur(Profit(buyValue, event.btoTx.date))
+        log.debug("onStockPositionClosed buyValue='{}', buyValueEur='{}'", buyValue, buyValueEur)
+        val sellValue = sellPrice * quantitySold
+        val sellValueEur = exchangeRate.usdToEur(Profit(sellValue, event.stcTx.date))
+        log.debug("onStockPositionClosed sellValue='{}', sellValueEur='{}'", sellValue, sellValueEur)
+        val netProfit = sellValueEur - buyValueEur
+        profitAndLossFromStocks += netProfit
+        log.info("Stock sold. symbol='{}', quantity='{}', netProfit='{}', profitFromStocks='{}'",
+            symbol, quantitySold, netProfit, profitAndLossFromStocks)
     }
 
     private fun isLoss(netProfit: Float): Boolean {
@@ -74,4 +93,5 @@ class FiscalYear(
     }
 
     private fun txValueInEur(btcTx: OptionTrade) = exchangeRate.usdToEur(Profit(btcTx.value, btcTx.date))
+
 }

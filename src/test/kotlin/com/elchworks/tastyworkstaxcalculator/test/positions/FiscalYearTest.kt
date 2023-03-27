@@ -6,7 +6,9 @@ import com.elchworks.tastyworkstaxcalculator.positions.OptionBuyToCloseEvent
 import com.elchworks.tastyworkstaxcalculator.positions.OptionSellToOpenEvent
 import com.elchworks.tastyworkstaxcalculator.positions.Profit
 import com.elchworks.tastyworkstaxcalculator.positions.ProfitAndLoss
+import com.elchworks.tastyworkstaxcalculator.positions.StockSellToCloseEvent
 import com.elchworks.tastyworkstaxcalculator.test.randomOptionTrade
+import com.elchworks.tastyworkstaxcalculator.test.randomStockTrade
 import org.apache.commons.lang3.RandomUtils
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -22,19 +24,20 @@ import org.springframework.boot.test.mock.mockito.MockBean
 class FiscalYearTest @Autowired constructor(
     @MockBean private val exchangeRate: ExchangeRate
 ) {
+    private val sut = FiscalYear(exchangeRate, 2021)
+
     @Test
-    fun expired() {
+    fun optionExpired() {
         // Given
         val premium = RandomUtils.nextFloat(1.0F, 100.0F)
         val stoTx = randomOptionTrade().copy(value = premium)
         withRateUsdToEur()
-        val sut = FiscalYear(exchangeRate, 2021)
 
         // When
-        sut.onPositionOpened(OptionSellToOpenEvent(stoTx))
+        sut.onOptionPositionOpened(OptionSellToOpenEvent(stoTx))
 
         // Then
-        assertThat(sut.profitAndLoss).isEqualTo(
+        assertThat(sut.profitAndLossFromOptions).isEqualTo(
             ProfitAndLoss(
             profit = premium * 2,
             loss = 0.0F
@@ -44,28 +47,50 @@ class FiscalYearTest @Autowired constructor(
 
     @ParameterizedTest
     @ValueSource(floats = [1.0f, -1.0f])
-    fun closed(netProfit: Float) {
+    fun optionClosed(netProfit: Float) {
         // Given
         val premium = RandomUtils.nextFloat(1.0F, 100.0F)
         val stoTx = randomOptionTrade().copy(value = premium, quantity = 1)
         val btcTx = randomOptionTrade().copy(value = -premium + netProfit, quantity = 1)
         withRateUsdToEur()
-        val sut = FiscalYear(exchangeRate, 2021)
 
         // When
-        sut.onPositionOpened(OptionSellToOpenEvent(stoTx))
-        sut.onPositionClosed(OptionBuyToCloseEvent(stoTx, btcTx))
+        sut.onOptionPositionOpened(OptionSellToOpenEvent(stoTx))
+        sut.onOptionPositionClosed(OptionBuyToCloseEvent(stoTx, btcTx))
 
         // Then
         val expectedNetProfitEur = netProfit * 2
         val expecteProfit = if(netProfit >= 0) expectedNetProfitEur else 0.0F
         val expecteLoss = if(netProfit >= 0) 0.0F else -expectedNetProfitEur
-        assertThat(sut.profitAndLoss).isEqualTo(
+        assertThat(sut.profitAndLossFromOptions).isEqualTo(
             ProfitAndLoss(
             profit = expecteProfit,
             loss = expecteLoss
         )
         )
+    }
+
+    @Test
+    fun test() {
+        // Given
+        val profit = RandomUtils.nextFloat(1.0f, 10.0f)
+        val buyPrice = RandomUtils.nextFloat(1.0f, 100.0f)
+        val sellPrice = buyPrice + profit
+        val btoTx = randomStockTrade().copy(
+            averagePrice = buyPrice
+        )
+        val stcTx = randomStockTrade().copy(
+            averagePrice = sellPrice
+        )
+        val quantitySold = RandomUtils.nextInt(1, 10)
+        val event = StockSellToCloseEvent(btoTx, stcTx, quantitySold)
+        withRateUsdToEur()
+
+        // When
+        sut.onStockPositionClosed(event)
+
+        // Then
+        assertThat(sut.profitAndLossFromStocks).isEqualTo(profit * quantitySold * USD_EUR_EXCHANGE_RATE)
     }
 
     companion object {
