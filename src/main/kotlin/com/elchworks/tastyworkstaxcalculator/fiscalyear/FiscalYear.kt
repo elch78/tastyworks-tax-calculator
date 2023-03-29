@@ -28,7 +28,13 @@ class FiscalYear(
 
 
     fun printReport() {
-        log.info("Profit and loss for fiscal year $fiscalYear: profit = ${profitAndLossFromOptions.profit} loss = ${profitAndLossFromOptions.loss}")
+        log.info("""
+            
+            Profit and loss for fiscal year $fiscalYear: 
+            profit from options = ${profitAndLossFromOptions.profit} 
+            loss from options = ${profitAndLossFromOptions.loss}
+            profit from stocks = $profitAndLossFromStocks
+            """.trimIndent())
     }
 
     fun onOptionPositionOpened(stoEvent: OptionSellToOpenEvent) {
