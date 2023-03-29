@@ -154,7 +154,7 @@ class CsvReader {
 
     private fun parseDate(date: String): Instant {
         val parsed = Instant.from(FORMATTER.parse(date))
-        log.info("parsed date='{}', parsed='{}'", date, parsed)
+        log.debug("parsed date='{}', parsed='{}'", date, parsed)
         return parsed
     }
 
