@@ -79,8 +79,8 @@ class FiscalYearTest {
     fun stockPositionClosed() {
         // Given
         val profit = randomUsdAmount(1.0f, 10.0f)
-        val buyPrice = randomUsdAmount(1.0f, 100.0f)
-        val sellPrice = buyPrice + profit
+        val buyPrice = randomUsdAmount(1.0f, 100.0f).negate()
+        val sellPrice = buyPrice.negate() + profit
         val btoTx = randomStockTrade().copy(
             averagePrice = buyPrice
         )
