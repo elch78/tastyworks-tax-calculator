@@ -2,7 +2,6 @@ package com.elchworks.tastyworkstaxcalculator.fiscalyear
 
 import com.elchworks.tastyworkstaxcalculator.ExchangeRate
 import com.elchworks.tastyworkstaxcalculator.eur
-import com.elchworks.tastyworkstaxcalculator.minus
 import com.elchworks.tastyworkstaxcalculator.plus
 import com.elchworks.tastyworkstaxcalculator.positions.OptionBuyToCloseEvent
 import com.elchworks.tastyworkstaxcalculator.positions.OptionSellToOpenEvent
@@ -82,7 +81,8 @@ class FiscalYear(
         val sellValue = sellPrice * quantitySold
         val sellValueEur = exchangeRate.usdToEur(Profit(sellValue, event.stcTx.date))
         log.debug("onStockPositionClosed sellValue='{}', sellValueEur='{}'", sellValue, sellValueEur)
-        val netProfit = sellValueEur - buyValueEur
+        // buy value is negative. Thus we have to add the values
+        val netProfit = sellValueEur + buyValueEur
         profitAndLossFromStocks += netProfit
         log.info("Stock sold. symbol='{}', quantity='{}', netProfit='{}', profitFromStocks='{}'",
             symbol, quantitySold, netProfit, profitAndLossFromStocks)

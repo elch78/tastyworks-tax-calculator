@@ -4,3 +4,4 @@ logging.level:
     com.elchworks.tastyworkstaxcalculator.CsvReader: INFO
     com.elchworks.tastyworkstaxcalculator.positions.PositionsManager: INFO
     com.elchworks.tastyworkstaxcalculator.positions.StockPosition: INFO
+    com.elchworks.tastyworkstaxcalculator.fiscalyear.FiscalYear: INFO
