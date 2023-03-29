@@ -102,7 +102,7 @@ class CsvReader {
         val instrumentType = columns.instrumentType()
         val action = columns.action()
         val isStockTrade = type == "Trade" && instrumentType == "Equity" && action == "SELL_TO_CLOSE"
-        log.debug("isStockTrade type='{}', instrumentType='{}', action='{}', isStockTrade='{}'", type, action, instrumentType, isStockTrade)
+        log.debug("isStockTrade type='{}', instrumentType='{}', action='{}', isStockTrade='{}'", type, instrumentType, action, isStockTrade)
         return isStockTrade
     }
 
