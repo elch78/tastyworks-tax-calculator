@@ -22,6 +22,7 @@ class FiscalYearManager(
         getFiscalYear(event.btcTx).onOptionPositionClosed(event)
     }
 
+    @EventListener(StockSellToCloseEvent::class)
     fun onStockPositionClosed(event: StockSellToCloseEvent) {
        getFiscalYear(event.stcTx).onStockPositionClosed(event)
     }
