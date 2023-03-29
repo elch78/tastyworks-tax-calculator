@@ -18,14 +18,12 @@ class FiscalYearManager(
         getFiscalYear(event.stoTx).onOptionPositionOpened(event)
 
     @EventListener(OptionBuyToCloseEvent::class)
-    fun onPositionClosed(event: OptionBuyToCloseEvent) {
+    fun onPositionClosed(event: OptionBuyToCloseEvent) =
         getFiscalYear(event.btcTx).onOptionPositionClosed(event)
-    }
 
     @EventListener(StockSellToCloseEvent::class)
-    fun onStockPositionClosed(event: StockSellToCloseEvent) {
+    fun onStockPositionClosed(event: StockSellToCloseEvent) =
        getFiscalYear(event.stcTx).onStockPositionClosed(event)
-    }
 
     fun printReports() {
         fiscalYearRepository.getAllSortedByYear().forEach{it.printReport()}
