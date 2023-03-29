@@ -1,4 +1,4 @@
-package com.elchworks.tastyworkstaxcalculator.positions
+package com.elchworks.tastyworkstaxcalculator.positions.stock
 
 import com.elchworks.tastyworkstaxcalculator.transactions.StockTransaction
 

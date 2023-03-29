@@ -1,6 +1,6 @@
 package com.elchworks.tastyworkstaxcalculator.test
 
-import com.elchworks.tastyworkstaxcalculator.positions.OptionPositionStatus
+import com.elchworks.tastyworkstaxcalculator.positions.option.OptionPositionStatus
 import com.elchworks.tastyworkstaxcalculator.toMonetaryAmountUsd
 import com.elchworks.tastyworkstaxcalculator.transactions.Action.BUY_TO_OPEN
 import com.elchworks.tastyworkstaxcalculator.transactions.Action.SELL_TO_CLOSE

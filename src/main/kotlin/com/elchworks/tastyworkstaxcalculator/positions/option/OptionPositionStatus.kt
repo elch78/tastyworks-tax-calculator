@@ -1,4 +1,4 @@
-package com.elchworks.tastyworkstaxcalculator.positions
+package com.elchworks.tastyworkstaxcalculator.positions.option
 
 enum class OptionPositionStatus {
     OPEN,

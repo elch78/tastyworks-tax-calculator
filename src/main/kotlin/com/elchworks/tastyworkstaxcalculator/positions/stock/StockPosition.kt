@@ -1,5 +1,6 @@
-package com.elchworks.tastyworkstaxcalculator.positions
+package com.elchworks.tastyworkstaxcalculator.positions.stock
 
+import com.elchworks.tastyworkstaxcalculator.positions.PositionCloseResult
 import com.elchworks.tastyworkstaxcalculator.transactions.StockTransaction
 import org.slf4j.LoggerFactory
 import kotlin.math.min
