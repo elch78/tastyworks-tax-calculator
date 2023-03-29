@@ -76,7 +76,7 @@ class FiscalYearTest {
     }
 
     @Test
-    fun test() {
+    fun stockPositionClosed() {
         // Given
         val profit = randomUsdAmount(1.0f, 10.0f)
         val buyPrice = randomUsdAmount(1.0f, 100.0f)
