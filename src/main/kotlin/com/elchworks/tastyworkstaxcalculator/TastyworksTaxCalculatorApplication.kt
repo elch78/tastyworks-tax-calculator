@@ -3,7 +3,8 @@ package com.elchworks.tastyworkstaxcalculator
 import com.elchworks.tastyworkstaxcalculator.fiscalyear.FiscalYearManager
 import com.elchworks.tastyworkstaxcalculator.positions.NewTransactionEvent
 import org.slf4j.LoggerFactory
-import org.springframework.boot.CommandLineRunner
+import org.springframework.boot.ApplicationArguments
+import org.springframework.boot.ApplicationRunner
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
 import org.springframework.context.ApplicationEventPublisher
@@ -15,10 +16,11 @@ class TastyworksTaxCalculatorApplication(
     private val csvReader: CsvReader,
     private val eventPublisher: ApplicationEventPublisher,
     private val fiscalYearManager: FiscalYearManager,
-): CommandLineRunner {
+): ApplicationRunner {
     private val log = LoggerFactory.getLogger(TastyworksTaxCalculatorApplication::class.java)
-    override fun run(vararg args: String?) {
-        File("/home/elch/tmp/tastyworks/")
+    override fun run(args: ApplicationArguments) {
+        val transactionsDir = args.getOptionValues("transactionsDir")[0]
+        File(transactionsDir)
             .walk()
             .filter { it.isFile }
             .map {
