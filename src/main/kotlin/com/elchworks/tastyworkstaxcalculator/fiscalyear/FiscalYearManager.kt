@@ -25,9 +25,8 @@ class FiscalYearManager(
     fun onStockPositionClosed(event: StockSellToCloseEvent) =
        getFiscalYear(event.stcTx).onStockPositionClosed(event)
 
-    fun printReports() {
+    fun printReports() =
         fiscalYearRepository.getAllSortedByYear().forEach{it.printReport()}
-    }
 
     private fun getFiscalYear(tx: Transaction) =
         fiscalYearRepository.getFiscalYear(tx.year())
