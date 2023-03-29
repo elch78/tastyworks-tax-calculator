@@ -20,12 +20,11 @@ import javax.money.MonetaryAmount
 
 class FiscalYear(
     private val exchangeRate: ExchangeRate,
-    private val fiscalYear: Int,
+    val fiscalYear: Int,
 ) {
     var profitAndLossFromOptions = ProfitAndLoss()
     var profitAndLossFromStocks = eur(0)
     private val log = LoggerFactory.getLogger(FiscalYear::class.java)
-
 
     fun printReport() {
         log.info("""

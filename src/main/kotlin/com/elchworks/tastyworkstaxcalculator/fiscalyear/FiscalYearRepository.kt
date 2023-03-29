@@ -10,4 +10,5 @@ class FiscalYearRepository(
     private val fiscalYears = mutableMapOf<Int, FiscalYear>()
 
     fun getFiscalYear(year: Int) = fiscalYears.computeIfAbsent(year) { FiscalYear(exchangeRate, year) }
+    fun getAllSortedByYear() = fiscalYears.values.sortedBy { it.fiscalYear }
 }

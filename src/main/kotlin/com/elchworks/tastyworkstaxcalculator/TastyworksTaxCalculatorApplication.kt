@@ -1,6 +1,6 @@
 package com.elchworks.tastyworkstaxcalculator
 
-import com.elchworks.tastyworkstaxcalculator.fiscalyear.EndOfYearEvent
+import com.elchworks.tastyworkstaxcalculator.fiscalyear.FiscalYearManager
 import com.elchworks.tastyworkstaxcalculator.positions.NewTransactionEvent
 import org.slf4j.LoggerFactory
 import org.springframework.boot.CommandLineRunner
@@ -13,7 +13,8 @@ import java.io.File
 @SpringBootApplication
 class TastyworksTaxCalculatorApplication(
     private val csvReader: CsvReader,
-    private val eventPublisher: ApplicationEventPublisher
+    private val eventPublisher: ApplicationEventPublisher,
+    private val fiscalYearManager: FiscalYearManager,
 ): CommandLineRunner {
     private val log = LoggerFactory.getLogger(TastyworksTaxCalculatorApplication::class.java)
     override fun run(vararg args: String?) {
@@ -29,7 +30,7 @@ class TastyworksTaxCalculatorApplication(
             .forEach {
                 eventPublisher.publishEvent(NewTransactionEvent(it))
             }
-        eventPublisher.publishEvent(EndOfYearEvent(2021))
+        fiscalYearManager.printReports()
     }
 }
 
