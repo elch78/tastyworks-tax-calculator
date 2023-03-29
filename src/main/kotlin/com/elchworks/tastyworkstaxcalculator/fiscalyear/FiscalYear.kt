@@ -40,7 +40,7 @@ class FiscalYear(
         val stoTx = stoEvent.stoTx
         val premium = txValueInEur(stoTx)
         profitAndLossFromOptions += ProfitAndLoss(premium, Money.of(0, "EUR"))
-        log.info("position opened. position='{}', premium='{}', profit='{}', loss='{}', fiscalYear='{}'",
+        log.info("Option position opened. position='{}', premium='{}', profit='{}', loss='{}', fiscalYear='{}'",
             stoTx.optionDescription(), premium, profitAndLossFromOptions.profit, profitAndLossFromOptions.loss, fiscalYear)
     }
 
