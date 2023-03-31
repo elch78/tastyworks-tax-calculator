@@ -4,8 +4,8 @@ import com.elchworks.tastyworkstaxcalculator.convert.ExchangeRateRepository
 import com.elchworks.tastyworkstaxcalculator.convert.currencyExchange
 import com.elchworks.tastyworkstaxcalculator.eur
 import com.elchworks.tastyworkstaxcalculator.fiscalyear.FiscalYear
+import com.elchworks.tastyworkstaxcalculator.fiscalyear.ProfitsSummary
 import com.elchworks.tastyworkstaxcalculator.plus
-import com.elchworks.tastyworkstaxcalculator.positions.ProfitAndLoss
 import com.elchworks.tastyworkstaxcalculator.positions.option.OptionBuyToCloseEvent
 import com.elchworks.tastyworkstaxcalculator.positions.option.OptionSellToOpenEvent
 import com.elchworks.tastyworkstaxcalculator.positions.stock.StockSellToCloseEvent
@@ -44,10 +44,11 @@ class FiscalYearTest {
         sut.onOptionPositionOpened(OptionSellToOpenEvent(stoTx))
 
         // Then
-        assertThat(sut.profitAndLossFromOptions).isEqualTo(
-            ProfitAndLoss(
-            profit = (premium * 2).toEur(),
-            loss = eur(0)
+        assertThat(sut.profits()).isEqualTo(
+            ProfitsSummary(
+                profitsFromOptions = (premium * 2).toEur(),
+                lossesFromOptions = eur(0),
+                eur(0)
         )
         )
     }
@@ -69,10 +70,11 @@ class FiscalYearTest {
         val expectedNetProfitEur = (netProfit * 2).toEur()
         val expecteProfit = if(netProfit.isPositive) expectedNetProfitEur else eur(0)
         val expecteLoss = if(netProfit.isPositive) eur(0) else expectedNetProfitEur.negate()
-        assertThat(sut.profitAndLossFromOptions).isEqualTo(
-            ProfitAndLoss(
-            profit = expecteProfit,
-            loss = expecteLoss
+        assertThat(sut.profits()).isEqualTo(
+            ProfitsSummary(
+                profitsFromOptions = expecteProfit,
+                lossesFromOptions = expecteLoss,
+                profitsFromStocks = eur(0)
         )
         )
     }
@@ -97,7 +99,13 @@ class FiscalYearTest {
         sut.onStockPositionClosed(event)
 
         // Then
-        assertThat(sut.profitAndLossFromStocks).isEqualTo((profit * quantitySold * USD_EUR_EXCHANGE_RATE).toEur())
+        assertThat(sut.profits()).isEqualTo(
+            ProfitsSummary(
+                profitsFromOptions = eur(0),
+                lossesFromOptions = eur(0),
+                profitsFromStocks = (profit * quantitySold * USD_EUR_EXCHANGE_RATE).toEur()
+            )
+        )
     }
 
     companion object {

@@ -22,8 +22,8 @@ class FiscalYear(
     private val currencyExchange: currencyExchange,
     val fiscalYear: Year,
 ) {
-    var profitAndLossFromOptions = ProfitAndLoss()
-    var profitAndLossFromStocks = eur(0)
+    private var profitAndLossFromOptions = ProfitAndLoss()
+    private var profitAndLossFromStocks = eur(0)
     private val log = LoggerFactory.getLogger(FiscalYear::class.java)
 
     fun profits(): ProfitsSummary = ProfitsSummary(
