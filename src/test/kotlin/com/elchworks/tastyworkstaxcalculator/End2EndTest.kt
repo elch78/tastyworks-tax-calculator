@@ -112,7 +112,7 @@ class End2EndTest @Autowired constructor(
         eventPublisher.publishEvent(NewTransactionEvent(stoTx))
         eventPublisher.publishEvent(NewTransactionEvent(btcTx))
 
-        // Then
+        // Then sell value is profit for 2021 and buy value is a loss for 2022
         assertThat(fiscalYearRepository.getFiscalYear(YEAR_2021).profits())
             .isEqualTo(ProfitsSummary(eur(SELL_VALUE), eur(0), eur(0)))
         assertThat(fiscalYearRepository.getFiscalYear(YEAR_2022).profits())
