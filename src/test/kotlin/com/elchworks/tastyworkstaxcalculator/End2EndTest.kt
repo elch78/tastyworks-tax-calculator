@@ -19,6 +19,9 @@ import com.elchworks.tastyworkstaxcalculator.transactions.Action.SELL_TO_CLOSE
 import com.elchworks.tastyworkstaxcalculator.transactions.Action.SELL_TO_OPEN
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.Arguments
+import org.junit.jupiter.params.provider.MethodSource
 import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.whenever
@@ -36,6 +39,7 @@ import java.time.Month.FEBRUARY
 import java.time.Month.JANUARY
 import java.time.Year
 import java.time.ZoneId
+import java.util.stream.Stream
 
 @SpringBootTest
 // Beans are stateful
@@ -176,28 +180,36 @@ class End2EndTest @Autowired constructor(
             .isEqualTo(ProfitsSummary(eur(SELL_VALUE_EUR), eur(0), eur(0)))
     }
 
-    @Test
-    fun simpleAssignmentPutAndCallNoProfit() {
+    @ParameterizedTest
+    @MethodSource
+    fun simpleAssignmentPutAndCall(profitPerStock: BigDecimal) {
         // Given
+        val premiumPut = randomBigDecimal()
+        val premiumCall = randomBigDecimal()
+        val stockBuyPrice = randomBigDecimal()
+        val stockSellPrice = stockBuyPrice + profitPerStock
+
         val stoTxPut = defaultOptionStoTx().copy(
-            callOrPut = "PUT"
+            callOrPut = "PUT",
+            value = usd(premiumPut),
         )
         val assignmentPut = defaultAssignment().copy(
-            callOrPut = "PUT"
+            callOrPut = "PUT",
         )
         val stockBtoTx = defaultStockTrade().copy(
             action = BUY_TO_OPEN,
-            averagePrice = usd(STRIKE_PRICE),
+            averagePrice = usd(-stockBuyPrice),
         )
         val stoTxCall = defaultOptionStoTx().copy(
-            callOrPut = "CALL"
+            callOrPut = "CALL",
+            value = usd(premiumCall)
         )
         val assignmentCall = defaultAssignment().copy(
-            callOrPut = "CALL"
+            callOrPut = "CALL",
         )
         val stockStcTx = defaultStockTrade().copy(
             action = SELL_TO_CLOSE,
-            averagePrice = usd(-STRIKE_PRICE)
+            averagePrice = usd(stockSellPrice)
         )
         withFixedExchangeRate()
 
@@ -209,9 +221,11 @@ class End2EndTest @Autowired constructor(
         eventPublisher.publishEvent(NewTransactionEvent(assignmentCall))
         eventPublisher.publishEvent(NewTransactionEvent(stockStcTx))
 
-        // Then two times premium and no profit from stocks
+        // Then
+        val expectedStockProfit = profitPerStock * BigDecimal("100") * EXCHANGE_RATE
+        val expectedProfitFromOptions = (premiumPut + premiumCall) * EXCHANGE_RATE
         assertThat(fiscalYearRepository.getFiscalYear(YEAR_2021).profits())
-            .isEqualTo(ProfitsSummary(eur(SELL_VALUE_EUR + SELL_VALUE_EUR), eur(0), eur(0)))
+            .isEqualTo(ProfitsSummary(eur(expectedProfitFromOptions), eur(0), eur(expectedStockProfit)))
     }
 
     private fun defaultStockTrade() = randomStockTrade().copy(
@@ -261,5 +275,11 @@ class End2EndTest @Autowired constructor(
         private val BUY_VALUE_EUR = BUY_VALUE_USD * EXCHANGE_RATE
         private val STRIKE_PRICE = randomBigDecimal()
         private val EXPIRATION_DATE = LocalDate.now()
+
+        @JvmStatic
+        fun simpleAssignmentPutAndCall() = Stream.of(
+            Arguments.of(BigDecimal("10.0")),
+            Arguments.of(BigDecimal("-10.0"))
+        )
     }
 }
