@@ -9,10 +9,13 @@ import com.elchworks.tastyworkstaxcalculator.transactions.OptionAssignment
 import com.elchworks.tastyworkstaxcalculator.transactions.OptionRemoval
 import com.elchworks.tastyworkstaxcalculator.transactions.OptionTrade
 import com.elchworks.tastyworkstaxcalculator.transactions.StockTrade
+import org.apache.commons.lang3.RandomStringUtils
 import org.apache.commons.lang3.RandomUtils
 import org.javamoney.moneta.Money
 import java.time.Instant
 import java.time.LocalDate
+import java.time.Month
+import java.time.Year
 import java.time.ZoneId
 import java.time.ZonedDateTime
 
@@ -80,3 +83,9 @@ private fun randomDateIn2021(): Instant =
     ZonedDateTime.of(2021, 11, 1, 1, 1, 1, 0, ZoneId.of("CET"))
         .plusMinutes(RandomUtils.nextLong(1,  86400))
         .toInstant()
+fun randomDate(year: Year, month: Month): Instant =
+    ZonedDateTime.of(year.value, month.value, 1, 1, 1, 1, 0, ZoneId.of("CET"))
+        .plusMinutes(RandomUtils.nextLong(1,  86400))
+        .toInstant()
+
+fun randomString(id: String) = "$id-${RandomStringUtils.random(5)}"
