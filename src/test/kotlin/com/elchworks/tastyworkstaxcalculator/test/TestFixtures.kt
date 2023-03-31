@@ -81,11 +81,11 @@ fun randomStockTrade() =
 
 private fun randomDateIn2021(): Instant =
     ZonedDateTime.of(2021, 11, 1, 1, 1, 1, 0, ZoneId.of("CET"))
-        .plusMinutes(RandomUtils.nextLong(1,  86400))
+        .plusMinutes(RandomUtils.nextLong(1,  1000))
         .toInstant()
 fun randomDate(year: Year, month: Month): Instant =
     ZonedDateTime.of(year.value, month.value, 1, 1, 1, 1, 0, ZoneId.of("CET"))
-        .plusMinutes(RandomUtils.nextLong(1,  86400))
+        .plusMinutes(RandomUtils.nextLong(1,  1000))
         .toInstant()
 
 fun randomString(id: String) = "$id-${RandomStringUtils.random(5)}"
