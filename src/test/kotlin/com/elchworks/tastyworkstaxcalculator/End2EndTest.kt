@@ -70,12 +70,12 @@ class End2EndTest @Autowired constructor(
             date = sellDate,
             action = SELL_TO_OPEN,
             rootSymbol = SYMBOL,
-            value = usd(VALUE)
+            value = usd(SELL_VALUE)
         )
         val btcTx = stoTx.copy(
             date = buyDate,
             action = BUY_TO_CLOSE,
-            value = usd(-VALUE)
+            value = usd(-SELL_VALUE)
         )
         withExchangeRate(sellDate, 1.0f)
         withExchangeRate(buyDate, 2.0f)
@@ -86,7 +86,7 @@ class End2EndTest @Autowired constructor(
 
         // Then loss due to different exchange rate
         assertThat(fiscalYearRepository.getFiscalYear(YEAR_2021).profits())
-            .isEqualTo(ProfitsSummary(eur(0), eur(VALUE), eur(0)))
+            .isEqualTo(ProfitsSummary(eur(0), eur(SELL_VALUE), eur(0)))
     }
 
 
@@ -97,12 +97,12 @@ class End2EndTest @Autowired constructor(
             date = randomDate(YEAR_2021, DECEMBER),
             action = SELL_TO_OPEN,
             rootSymbol = SYMBOL,
-            value = usd(VALUE)
+            value = usd(SELL_VALUE)
         )
         val btcTx = stoTx.copy(
             date = randomDate(YEAR_2022, JANUARY),
             action = BUY_TO_CLOSE,
-            value = usd(-VALUE)
+            value = usd(-BUY_VALUE)
         )
         withFixedExchangeRate()
 
@@ -112,9 +112,9 @@ class End2EndTest @Autowired constructor(
 
         // Then
         assertThat(fiscalYearRepository.getFiscalYear(YEAR_2021).profits())
-            .isEqualTo(ProfitsSummary(eur(VALUE), eur(0), eur(0)))
+            .isEqualTo(ProfitsSummary(eur(SELL_VALUE), eur(0), eur(0)))
         assertThat(fiscalYearRepository.getFiscalYear(YEAR_2022).profits())
-            .isEqualTo(ProfitsSummary(eur(0), eur(-VALUE), eur(0)))
+            .isEqualTo(ProfitsSummary(eur(0), eur(BUY_VALUE), eur(0)))
     }
 
     private fun withFixedExchangeRate() {
@@ -132,6 +132,7 @@ class End2EndTest @Autowired constructor(
         private val YEAR_2021 = Year.of(2021)
         private val YEAR_2022 = Year.of(2022)
         private val SYMBOL = randomString("symbol")
-        private val VALUE = RandomUtils.nextFloat()
+        private val SELL_VALUE = RandomUtils.nextFloat()
+        private val BUY_VALUE = RandomUtils.nextFloat()
     }
 }
