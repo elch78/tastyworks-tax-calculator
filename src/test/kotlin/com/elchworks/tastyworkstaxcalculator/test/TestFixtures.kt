@@ -9,15 +9,19 @@ import com.elchworks.tastyworkstaxcalculator.transactions.OptionAssignment
 import com.elchworks.tastyworkstaxcalculator.transactions.OptionRemoval
 import com.elchworks.tastyworkstaxcalculator.transactions.OptionTrade
 import com.elchworks.tastyworkstaxcalculator.transactions.StockTrade
+import com.elchworks.tastyworkstaxcalculator.usd
 import org.apache.commons.lang3.RandomStringUtils
 import org.apache.commons.lang3.RandomUtils
 import org.javamoney.moneta.Money
+import java.math.BigDecimal
+import java.math.BigInteger
 import java.time.Instant
 import java.time.LocalDate
 import java.time.Month
 import java.time.Year
 import java.time.ZoneId
 import java.time.ZonedDateTime
+
 
 fun randomOptionTrade() =
     OptionTrade(
@@ -35,7 +39,7 @@ fun randomOptionTrade() =
         rootSymbol = "rootSymbol",
         underlyingSymbol = "",
         expirationDate = randomLocalDate(),
-        strikePrice = 5.0f,
+        strikePrice = usd(BigDecimal("5.0")),
         callOrPut = "PUT",
         orderNr = 0
     )
@@ -48,7 +52,7 @@ fun randomOptionRemoval() =
         date = randomDateIn2021(),
         rootSymbol = "rootSymbol",
         expirationDate = randomLocalDate(),
-        strikePrice = RandomUtils.nextFloat(),
+        strikePrice = usd(randomBigDecimal()),
         callOrPut = "PUT",
         status = OptionPositionStatus.EXPIRED
     )
@@ -88,4 +92,6 @@ fun randomDate(year: Year, month: Month): Instant =
         .plusMinutes(RandomUtils.nextLong(1,  1000))
         .toInstant()
 
-fun randomString(id: String) = "$id-${RandomStringUtils.random(5)}"
+fun randomString(id: String) = "$id-${RandomStringUtils.randomAlphabetic(3)}"
+
+fun randomBigDecimal() = BigDecimal(BigInteger.valueOf(RandomUtils.nextLong(1, 101)), 2)

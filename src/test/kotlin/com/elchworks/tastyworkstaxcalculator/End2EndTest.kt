@@ -6,12 +6,17 @@ import com.elchworks.tastyworkstaxcalculator.convert.ExchangeRateRepository
 import com.elchworks.tastyworkstaxcalculator.fiscalyear.FiscalYearRepository
 import com.elchworks.tastyworkstaxcalculator.fiscalyear.ProfitsSummary
 import com.elchworks.tastyworkstaxcalculator.positions.NewTransactionEvent
+import com.elchworks.tastyworkstaxcalculator.positions.option.OptionPositionStatus.ASSIGNED
+import com.elchworks.tastyworkstaxcalculator.test.randomBigDecimal
 import com.elchworks.tastyworkstaxcalculator.test.randomDate
+import com.elchworks.tastyworkstaxcalculator.test.randomOptionRemoval
 import com.elchworks.tastyworkstaxcalculator.test.randomOptionTrade
+import com.elchworks.tastyworkstaxcalculator.test.randomStockTrade
 import com.elchworks.tastyworkstaxcalculator.test.randomString
 import com.elchworks.tastyworkstaxcalculator.transactions.Action.BUY_TO_CLOSE
+import com.elchworks.tastyworkstaxcalculator.transactions.Action.BUY_TO_OPEN
+import com.elchworks.tastyworkstaxcalculator.transactions.Action.SELL_TO_CLOSE
 import com.elchworks.tastyworkstaxcalculator.transactions.Action.SELL_TO_OPEN
-import org.apache.commons.lang3.RandomUtils
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
@@ -22,7 +27,10 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.test.annotation.DirtiesContext
+import java.math.BigDecimal
+import java.math.BigDecimal.ONE
 import java.time.Instant
+import java.time.LocalDate
 import java.time.Month.DECEMBER
 import java.time.Month.FEBRUARY
 import java.time.Month.JANUARY
@@ -65,6 +73,34 @@ class End2EndTest @Autowired constructor(
     }
 
     @Test
+    fun optionPositionClosedSameYearWithLossDueToExchangeRate() {
+        // Given
+        val sellDate = randomDate(YEAR_2021, JANUARY)
+        val buyDate = randomDate(YEAR_2021, FEBRUARY)
+        val stoTx = randomOptionTrade().copy(
+            date = sellDate,
+            action = SELL_TO_OPEN,
+            rootSymbol = SYMBOL,
+            value = usd(SELL_VALUE_USD)
+        )
+        val btcTx = stoTx.copy(
+            date = buyDate,
+            action = BUY_TO_CLOSE,
+            value = usd(-SELL_VALUE_USD)
+        )
+        withExchangeRate(sellDate, ONE)
+        withExchangeRate(buyDate, BigDecimal("2.0"))
+
+        // When
+        eventPublisher.publishEvent(NewTransactionEvent(stoTx))
+        eventPublisher.publishEvent(NewTransactionEvent(btcTx))
+
+        // Then loss due to different exchange rate
+        assertThat(fiscalYearRepository.getFiscalYear(YEAR_2021).profits())
+            .isEqualTo(ProfitsSummary(eur(0), eur(SELL_VALUE_USD), eur(0)))
+    }
+
+    @Test
     fun optionPositionClosedSameYearWithProfitDueToExchangeRate() {
         // Given
         val sellDate = randomDate(YEAR_2021, JANUARY)
@@ -73,15 +109,15 @@ class End2EndTest @Autowired constructor(
             date = sellDate,
             action = SELL_TO_OPEN,
             rootSymbol = SYMBOL,
-            value = usd(SELL_VALUE)
+            value = usd(SELL_VALUE_USD)
         )
         val btcTx = stoTx.copy(
             date = buyDate,
             action = BUY_TO_CLOSE,
-            value = usd(-SELL_VALUE)
+            value = usd(-SELL_VALUE_USD)
         )
-        withExchangeRate(sellDate, 1.0f)
-        withExchangeRate(buyDate, 2.0f)
+        withExchangeRate(sellDate, BigDecimal("2.0"))
+        withExchangeRate(buyDate, BigDecimal.ONE)
 
         // When
         eventPublisher.publishEvent(NewTransactionEvent(stoTx))
@@ -89,7 +125,7 @@ class End2EndTest @Autowired constructor(
 
         // Then loss due to different exchange rate
         assertThat(fiscalYearRepository.getFiscalYear(YEAR_2021).profits())
-            .isEqualTo(ProfitsSummary(eur(0), eur(SELL_VALUE), eur(0)))
+            .isEqualTo(ProfitsSummary(eur(SELL_VALUE_USD), eur(0), eur(0)))
     }
 
     @Test
@@ -99,12 +135,12 @@ class End2EndTest @Autowired constructor(
             date = randomDate(YEAR_2021, DECEMBER),
             action = SELL_TO_OPEN,
             rootSymbol = SYMBOL,
-            value = usd(SELL_VALUE)
+            value = usd(SELL_VALUE_USD)
         )
         val btcTx = stoTx.copy(
             date = randomDate(YEAR_2022, JANUARY),
             action = BUY_TO_CLOSE,
-            value = usd(-BUY_VALUE)
+            value = usd(-BUY_VALUE_USD)
         )
         withFixedExchangeRate()
 
@@ -114,27 +150,116 @@ class End2EndTest @Autowired constructor(
 
         // Then sell value is profit for 2021 and buy value is a loss for 2022
         assertThat(fiscalYearRepository.getFiscalYear(YEAR_2021).profits())
-            .isEqualTo(ProfitsSummary(eur(SELL_VALUE), eur(0), eur(0)))
+            .isEqualTo(ProfitsSummary(eur(SELL_VALUE_EUR), eur(0), eur(0)))
         assertThat(fiscalYearRepository.getFiscalYear(YEAR_2022).profits())
-            .isEqualTo(ProfitsSummary(eur(0), eur(BUY_VALUE), eur(0)))
+            .isEqualTo(ProfitsSummary(eur(0), eur(BUY_VALUE_EUR), eur(0)))
     }
+
+    @Test
+    fun simpleAssigment() {
+        // Given
+        val callOrPut = "PUT"
+        val stoTx = defaultOptionStoTx().copy(
+            callOrPut = callOrPut
+        )
+        val assignmentTx = defaultAssignment().copy(
+            callOrPut = callOrPut
+        )
+        withFixedExchangeRate()
+
+        // When
+        eventPublisher.publishEvent(NewTransactionEvent(stoTx))
+        eventPublisher.publishEvent(NewTransactionEvent(assignmentTx))
+
+        // Then
+        assertThat(fiscalYearRepository.getFiscalYear(YEAR_2021).profits())
+            .isEqualTo(ProfitsSummary(eur(SELL_VALUE_EUR), eur(0), eur(0)))
+    }
+
+    @Test
+    fun simpleAssignmentPutAndCallNoProfit() {
+        // Given
+        val stoTxPut = defaultOptionStoTx().copy(
+            callOrPut = "PUT"
+        )
+        val assignmentPut = defaultAssignment().copy(
+            callOrPut = "PUT"
+        )
+        val stockBtoTx = defaultStockTrade().copy(
+            action = BUY_TO_OPEN,
+            averagePrice = usd(STRIKE_PRICE),
+        )
+        val stoTxCall = defaultOptionStoTx().copy(
+            callOrPut = "CALL"
+        )
+        val assignmentCall = defaultAssignment().copy(
+            callOrPut = "CALL"
+        )
+        val stockStcTx = defaultStockTrade().copy(
+            action = SELL_TO_CLOSE,
+            averagePrice = usd(-STRIKE_PRICE)
+        )
+        withFixedExchangeRate()
+
+        // When
+        eventPublisher.publishEvent(NewTransactionEvent(stoTxPut))
+        eventPublisher.publishEvent(NewTransactionEvent(assignmentPut))
+        eventPublisher.publishEvent(NewTransactionEvent(stockBtoTx))
+        eventPublisher.publishEvent(NewTransactionEvent(stoTxCall))
+        eventPublisher.publishEvent(NewTransactionEvent(assignmentCall))
+        eventPublisher.publishEvent(NewTransactionEvent(stockStcTx))
+
+        // Then two times premium and no profit from stocks
+        assertThat(fiscalYearRepository.getFiscalYear(YEAR_2021).profits())
+            .isEqualTo(ProfitsSummary(eur(SELL_VALUE_EUR + SELL_VALUE_EUR), eur(0), eur(0)))
+    }
+
+    private fun defaultStockTrade() = randomStockTrade().copy(
+        symbol = SYMBOL,
+        action = BUY_TO_OPEN,
+        quantity = 100,
+        averagePrice = usd(STRIKE_PRICE)
+    )
 
     private fun withFixedExchangeRate() {
-        whenever(exchangeRateRepository.monthlyRateUsdToEur(any())).thenReturn(1.0f)
+        whenever(exchangeRateRepository.monthlyRateUsdToEur(any())).thenReturn(EXCHANGE_RATE)
     }
 
-    private fun withExchangeRate(date: Instant, exchangeRate: Float) {
+    private fun withExchangeRate(date: Instant, exchangeRate: BigDecimal) {
         val localDate = date.atZone(ZoneId.of("CET")).toLocalDate()
         whenever(exchangeRateRepository.monthlyRateUsdToEur(eq(localDate)))
             .thenReturn(exchangeRate)
     }
 
+    private fun defaultAssignment() = randomOptionRemoval().copy(
+        date = randomDate(YEAR_2021, FEBRUARY),
+        rootSymbol = SYMBOL,
+        status = ASSIGNED,
+        callOrPut = "PUT",
+        strikePrice = usd(STRIKE_PRICE),
+        expirationDate = EXPIRATION_DATE
+    )
+
+    private fun defaultOptionStoTx() = randomOptionTrade().copy(
+        date = randomDate(YEAR_2021, JANUARY),
+        action = SELL_TO_OPEN,
+        rootSymbol = SYMBOL,
+        value = usd(SELL_VALUE_USD),
+        callOrPut = "PUT",
+        strikePrice = usd(STRIKE_PRICE),
+        expirationDate = EXPIRATION_DATE
+    )
 
     companion object {
         private val YEAR_2021 = Year.of(2021)
         private val YEAR_2022 = Year.of(2022)
         private val SYMBOL = randomString("symbol")
-        private val SELL_VALUE = RandomUtils.nextFloat()
-        private val BUY_VALUE = RandomUtils.nextFloat()
+        private val EXCHANGE_RATE = BigDecimal("2.0")
+        private val SELL_VALUE_USD = randomBigDecimal()
+        private val SELL_VALUE_EUR = SELL_VALUE_USD * EXCHANGE_RATE
+        private val BUY_VALUE_USD = randomBigDecimal()
+        private val BUY_VALUE_EUR = BUY_VALUE_USD * EXCHANGE_RATE
+        private val STRIKE_PRICE = randomBigDecimal()
+        private val EXPIRATION_DATE = LocalDate.now()
     }
 }

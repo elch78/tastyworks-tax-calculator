@@ -125,7 +125,7 @@ class CsvReader {
             status = if (colums.description().contains("assignment")) ASSIGNED else EXPIRED,
             rootSymbol = colums.rootSymbol(),
             expirationDate = parsLocalDate(colums.expirationDate()),
-            strikePrice = colums.strikePrice().toFloat(),
+            strikePrice = colums.strikePrice(),
             callOrPut = colums.callOrPut()
         )
 
@@ -144,7 +144,7 @@ class CsvReader {
         rootSymbol = columns.rootSymbol(),
         underlyingSymbol = columns.underlyingSymbol(),
         expirationDate = parsLocalDate(columns.expirationDate()),
-        strikePrice = columns.strikePrice().toFloat(),
+        strikePrice = columns.strikePrice(),
         callOrPut = columns.callOrPut(),
         orderNr = columns.orderNr().toInt()
     )
@@ -192,7 +192,7 @@ fun Array<String>.multiplier() = this[11]
 fun Array<String>.rootSymbol() = this[12]
 fun Array<String>.underlyingSymbol() = this[13]
 fun Array<String>.expirationDate() = this[14]
-fun Array<String>.strikePrice() = this[15]
+fun Array<String>.strikePrice() = this[15].toFloat().toMonetaryAmountUsd()
 fun Array<String>.callOrPut() = this[16]
 fun Array<String>.orderNr() = this[17]
 

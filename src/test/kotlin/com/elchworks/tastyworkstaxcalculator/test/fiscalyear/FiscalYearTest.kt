@@ -24,6 +24,7 @@ import org.junit.jupiter.params.provider.MethodSource
 import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
+import java.math.BigDecimal
 import java.time.Year
 import java.util.stream.Stream
 import javax.money.MonetaryAmount
@@ -109,7 +110,7 @@ class FiscalYearTest {
     }
 
     companion object {
-        private const val USD_EUR_EXCHANGE_RATE = 2.0F
+        private val USD_EUR_EXCHANGE_RATE = BigDecimal("2.0")
 
         @JvmStatic
         fun optionClosed() = Stream.of(
