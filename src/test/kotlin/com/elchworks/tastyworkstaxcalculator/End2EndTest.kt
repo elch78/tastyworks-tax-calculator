@@ -15,13 +15,16 @@ import org.apache.commons.lang3.RandomUtils
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
+import org.mockito.kotlin.eq
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.context.ApplicationEventPublisher
+import java.time.Month.FEBRUARY
 import java.time.Month.JANUARY
 import java.time.Year
+import java.time.ZoneId
 
 @SpringBootTest
 class End2EndTest @Autowired constructor(
@@ -59,18 +62,25 @@ class End2EndTest @Autowired constructor(
     @Test
     fun optionPositionClosedSameYearWithProfitDueToExchangeRate() {
         // Given
+        val date1 = randomDate(YEAR_2021, JANUARY)
+        val localDate1 = date1.atZone(ZoneId.of("CET")).toLocalDate()
+        val date2 = randomDate(YEAR_2021, FEBRUARY)
+        val localDate2 = date2.atZone(ZoneId.of("CET")).toLocalDate()
         val stoTx = randomOptionTrade().copy(
-            randomDate(YEAR_2021, JANUARY),
+            date = date1,
             action = SELL_TO_OPEN,
             rootSymbol = SYMBOL,
             value = usd(VALUE)
         )
         val btcTx = stoTx.copy(
+            date = date2,
             action = BUY_TO_CLOSE,
             value = usd(-VALUE)
         )
-        whenever(exchangeRateRepository.monthlyRateUsdToEur(any()))
-            .thenReturn(1.0f, 2.0f)
+        whenever(exchangeRateRepository.monthlyRateUsdToEur(eq(localDate1)))
+            .thenReturn(1.0f)
+        whenever(exchangeRateRepository.monthlyRateUsdToEur(eq(localDate2)))
+            .thenReturn(2.0f)
 
         // When
         eventPublisher.publishEvent(NewTransactionEvent(stoTx))
