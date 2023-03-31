@@ -100,7 +100,7 @@ class FiscalYear(
     private fun positionWasOpenedInThisFiscalYear(stoTx: OptionTrade): Boolean {
         val stoYear = stoTx.year()
         val positionWasOpenedInThisFiscalYear = stoYear == fiscalYear
-        log.debug("positionWasOpenedInThisFiscalYear param='{}', param='{}', param='{}'", stoYear, fiscalYear, positionWasOpenedInThisFiscalYear)
+        log.debug("positionWasOpenedInThisFiscalYear stoYear='{}', fiscalYear='{}', positionWasOpenedInThisFiscalYear='{}'", stoYear, fiscalYear, positionWasOpenedInThisFiscalYear)
         return positionWasOpenedInThisFiscalYear
     }
 
