@@ -24,13 +24,14 @@ import org.junit.jupiter.params.provider.MethodSource
 import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
+import java.time.Year
 import java.util.stream.Stream
 import javax.money.MonetaryAmount
 
 class FiscalYearTest {
     private val exchangeRateRepository: ExchangeRateRepository = mock()
     private val currencyExchange: currencyExchange = currencyExchange(exchangeRateRepository)
-    private val sut = FiscalYear(currencyExchange, 2021)
+    private val sut = FiscalYear(currencyExchange, Year.of(2021))
 
     @Test
     fun optionExpired() {

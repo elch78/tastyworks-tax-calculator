@@ -3,6 +3,7 @@ package com.elchworks.tastyworkstaxcalculator.transactions
 import com.elchworks.tastyworkstaxcalculator.positions.option.OptionPositionStatus
 import java.time.Instant
 import java.time.LocalDate
+import java.time.Year
 import java.time.ZoneId
 import java.time.temporal.ChronoField
 import javax.money.MonetaryAmount
@@ -77,5 +78,5 @@ interface StockTransaction : Transaction{
     val averagePrice: MonetaryAmount
 }
 
-fun Transaction.year(): Int = this.date.atZone(ZoneId.of("CET")).get(ChronoField.YEAR)
+fun Transaction.year(): Year = Year.of(this.date.atZone(ZoneId.of("CET")).get(ChronoField.YEAR))
 fun OptionTrade.optionDescription() = "${this.rootSymbol} ${this.callOrPut} ${this.expirationDate}@${this.strikePrice}"

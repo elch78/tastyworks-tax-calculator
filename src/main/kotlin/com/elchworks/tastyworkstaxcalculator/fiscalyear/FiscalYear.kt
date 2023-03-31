@@ -15,11 +15,12 @@ import com.elchworks.tastyworkstaxcalculator.transactions.optionDescription
 import com.elchworks.tastyworkstaxcalculator.transactions.year
 import org.javamoney.moneta.Money
 import org.slf4j.LoggerFactory
+import java.time.Year
 import javax.money.MonetaryAmount
 
 class FiscalYear(
     private val currencyExchange: currencyExchange,
-    val fiscalYear: Int,
+    val fiscalYear: Year,
 ) {
     var profitAndLossFromOptions = ProfitAndLoss()
     var profitAndLossFromStocks = eur(0)
