@@ -25,15 +25,11 @@ class FiscalYear(
     var profitAndLossFromStocks = eur(0)
     private val log = LoggerFactory.getLogger(FiscalYear::class.java)
 
-    fun printReport() {
-        log.info("""
-            
-            Profit and loss for fiscal year $fiscalYear: 
-            profit from options = ${profitAndLossFromOptions.profit} 
-            loss from options = ${profitAndLossFromOptions.loss}
-            profit from stocks = $profitAndLossFromStocks
-            """.trimIndent())
-    }
+    fun profits(): ProfitsSummary = ProfitsSummary(
+        profitsFromOptions = profitAndLossFromOptions.profit,
+        lossesFromOptions = profitAndLossFromOptions.loss,
+        profitsFromStocks = profitAndLossFromStocks
+    )
 
     fun onOptionPositionOpened(stoEvent: OptionSellToOpenEvent) {
         val stoTx = stoEvent.stoTx

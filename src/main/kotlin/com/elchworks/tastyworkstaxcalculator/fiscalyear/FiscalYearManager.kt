@@ -5,6 +5,7 @@ import com.elchworks.tastyworkstaxcalculator.positions.option.OptionSellToOpenEv
 import com.elchworks.tastyworkstaxcalculator.positions.stock.StockSellToCloseEvent
 import com.elchworks.tastyworkstaxcalculator.transactions.Transaction
 import com.elchworks.tastyworkstaxcalculator.transactions.year
+import org.slf4j.LoggerFactory
 import org.springframework.context.event.EventListener
 import org.springframework.stereotype.Component
 
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Component
 class FiscalYearManager(
     private val fiscalYearRepository: FiscalYearRepository
 ) {
+    private val log = LoggerFactory.getLogger(FiscalYearManager::class.java)
 
     @EventListener(OptionSellToOpenEvent::class)
     fun onPositionOpened(event: OptionSellToOpenEvent) =
@@ -25,8 +27,19 @@ class FiscalYearManager(
     fun onStockPositionClosed(event: StockSellToCloseEvent) =
        getFiscalYear(event.stcTx).onStockPositionClosed(event)
 
-    fun printReports() =
-        fiscalYearRepository.getAllSortedByYear().forEach{it.printReport()}
+    fun printReports() {
+        fiscalYearRepository.getAllSortedByYear().forEach{
+            val profits = it.profits()
+            log.info("""
+            
+            Profit and loss for fiscal year ${it.fiscalYear}: 
+            profit from options = ${profits.profitsFromOptions} 
+            loss from options = ${profits.lossesFromOptions}
+            profit from stocks = ${profits.profitsFromStocks}
+            """.trimIndent())
+        }
+    }
+
 
     private fun getFiscalYear(tx: Transaction) =
         fiscalYearRepository.getFiscalYear(tx.year())
