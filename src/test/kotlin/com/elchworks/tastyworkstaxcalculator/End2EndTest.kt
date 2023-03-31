@@ -21,6 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.context.ApplicationEventPublisher
+import java.time.Instant
 import java.time.Month.FEBRUARY
 import java.time.Month.JANUARY
 import java.time.Year
@@ -62,33 +63,35 @@ class End2EndTest @Autowired constructor(
     @Test
     fun optionPositionClosedSameYearWithProfitDueToExchangeRate() {
         // Given
-        val date1 = randomDate(YEAR_2021, JANUARY)
-        val localDate1 = date1.atZone(ZoneId.of("CET")).toLocalDate()
-        val date2 = randomDate(YEAR_2021, FEBRUARY)
-        val localDate2 = date2.atZone(ZoneId.of("CET")).toLocalDate()
+        val sellDate = randomDate(YEAR_2021, JANUARY)
+        val buyDate = randomDate(YEAR_2021, FEBRUARY)
         val stoTx = randomOptionTrade().copy(
-            date = date1,
+            date = sellDate,
             action = SELL_TO_OPEN,
             rootSymbol = SYMBOL,
             value = usd(VALUE)
         )
         val btcTx = stoTx.copy(
-            date = date2,
+            date = buyDate,
             action = BUY_TO_CLOSE,
             value = usd(-VALUE)
         )
-        whenever(exchangeRateRepository.monthlyRateUsdToEur(eq(localDate1)))
-            .thenReturn(1.0f)
-        whenever(exchangeRateRepository.monthlyRateUsdToEur(eq(localDate2)))
-            .thenReturn(2.0f)
+        withExchangeRate(sellDate, 1.0f)
+        withExchangeRate(buyDate, 2.0f)
 
         // When
         eventPublisher.publishEvent(NewTransactionEvent(stoTx))
         eventPublisher.publishEvent(NewTransactionEvent(btcTx))
 
-        // Then LOSS equal to value due to exchange rate
+        // Then loss due to different exchange rate
         assertThat(fiscalYearRepository.getFiscalYear(YEAR_2021).profits())
             .isEqualTo(ProfitsSummary(eur(0), eur(VALUE), eur(0)))
+    }
+
+    private fun withExchangeRate(date: Instant, exchangeRate: Float) {
+        val localDate = date.atZone(ZoneId.of("CET")).toLocalDate()
+        whenever(exchangeRateRepository.monthlyRateUsdToEur(eq(localDate)))
+            .thenReturn(exchangeRate)
     }
 
 
