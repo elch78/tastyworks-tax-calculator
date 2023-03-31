@@ -1,10 +1,10 @@
 package com.elchworks.tastyworkstaxcalculator.test.positions
 
-import com.elchworks.tastyworkstaxcalculator.ExchangeRate
+import com.elchworks.tastyworkstaxcalculator.convert.ExchangeRateRepository
+import com.elchworks.tastyworkstaxcalculator.convert.currencyExchange
 import com.elchworks.tastyworkstaxcalculator.eur
 import com.elchworks.tastyworkstaxcalculator.fiscalyear.FiscalYear
 import com.elchworks.tastyworkstaxcalculator.plus
-import com.elchworks.tastyworkstaxcalculator.positions.Profit
 import com.elchworks.tastyworkstaxcalculator.positions.ProfitAndLoss
 import com.elchworks.tastyworkstaxcalculator.positions.option.OptionBuyToCloseEvent
 import com.elchworks.tastyworkstaxcalculator.positions.option.OptionSellToOpenEvent
@@ -28,8 +28,9 @@ import java.util.stream.Stream
 import javax.money.MonetaryAmount
 
 class FiscalYearTest {
-    private val exchangeRate: ExchangeRate = mock()
-    private val sut = FiscalYear(exchangeRate, 2021)
+    private val exchangeRateRepository: ExchangeRateRepository = mock()
+    private val currencyExchange: currencyExchange = currencyExchange(exchangeRateRepository)
+    private val sut = FiscalYear(currencyExchange, 2021)
 
     @Test
     fun optionExpired() {
@@ -109,10 +110,7 @@ class FiscalYearTest {
     }
 
     private fun withRateUsdToEur() {
-        // For test use exchange rate USD to EUR of 2
-        whenever(exchangeRate.usdToEur(any())).thenAnswer {
-            val profit: Profit = it.getArgument<Any>(0) as Profit
-            eur((profit.value * USD_EUR_EXCHANGE_RATE).number)
-        }
+        whenever(exchangeRateRepository.monthlyRateUsdToEur(any()))
+            .thenReturn(USD_EUR_EXCHANGE_RATE)
     }
 }

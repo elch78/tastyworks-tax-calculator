@@ -1,6 +1,6 @@
 package com.elchworks.tastyworkstaxcalculator.fiscalyear
 
-import com.elchworks.tastyworkstaxcalculator.ExchangeRate
+import com.elchworks.tastyworkstaxcalculator.convert.currencyExchange
 import com.elchworks.tastyworkstaxcalculator.eur
 import com.elchworks.tastyworkstaxcalculator.plus
 import com.elchworks.tastyworkstaxcalculator.positions.Profit
@@ -18,7 +18,7 @@ import org.slf4j.LoggerFactory
 import javax.money.MonetaryAmount
 
 class FiscalYear(
-    private val exchangeRate: ExchangeRate,
+    private val currencyExchange: currencyExchange,
     val fiscalYear: Int,
 ) {
     var profitAndLossFromOptions = ProfitAndLoss()
@@ -76,10 +76,10 @@ class FiscalYear(
         val buyPrice = event.btoTx.averagePrice
         log.debug("onStockPositionClosed symbol='{}', quantitySold='{}', buyPrice='{}', sellPrice='{}'", symbol, quantitySold, buyPrice, sellPrice)
         val buyValue = buyPrice * quantitySold
-        val buyValueEur = exchangeRate.usdToEur(Profit(buyValue, event.btoTx.date))
+        val buyValueEur = currencyExchange.usdToEur(Profit(buyValue, event.btoTx.date))
         log.debug("onStockPositionClosed buyValue='{}', buyValueEur='{}'", buyValue, buyValueEur)
         val sellValue = sellPrice * quantitySold
-        val sellValueEur = exchangeRate.usdToEur(Profit(sellValue, event.stcTx.date))
+        val sellValueEur = currencyExchange.usdToEur(Profit(sellValue, event.stcTx.date))
         log.debug("onStockPositionClosed sellValue='{}', sellValueEur='{}'", sellValue, sellValueEur)
         // buy value is negative. Thus we have to add the values
         val netProfit = sellValueEur + buyValueEur
@@ -103,6 +103,6 @@ class FiscalYear(
         return netProfit
     }
 
-    private fun txValueInEur(btcTx: OptionTrade) = exchangeRate.usdToEur(Profit(btcTx.value, btcTx.date))
+    private fun txValueInEur(btcTx: OptionTrade) = currencyExchange.usdToEur(Profit(btcTx.value, btcTx.date))
 
 }

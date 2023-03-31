@@ -1,18 +1,13 @@
-package com.elchworks.tastyworkstaxcalculator
+package com.elchworks.tastyworkstaxcalculator.convert
 
-import com.elchworks.tastyworkstaxcalculator.positions.Profit
-import org.javamoney.moneta.Money
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
-import java.time.ZoneId
-import java.time.ZonedDateTime
-import java.time.temporal.ChronoField.MONTH_OF_YEAR
-import java.time.temporal.ChronoField.YEAR
-import javax.money.MonetaryAmount
+import java.time.LocalDate
+import java.time.temporal.ChronoField
 
 @Component
-class ExchangeRate {
-    private val log = LoggerFactory.getLogger(ExchangeRate::class.java)
+class ExchangeRateRepository {
+    private val log = LoggerFactory.getLogger(ExchangeRateRepository::class.java)
 
     // source: https://de.statista.com/statistik/daten/studie/214878/umfrage/wechselkurs-des-euro-gegenueber-dem-us-dollar-monatliche-entwicklung/
     private val rates = mapOf(
@@ -34,17 +29,13 @@ class ExchangeRate {
         "2021-11" to 1.14F,
     )
 
-    fun usdToEur(profit: Profit): MonetaryAmount {
-        log.debug("usdToEur profit='{}'", profit)
-        val dateTime = ZonedDateTime.ofInstant(profit.date, ZoneId.of("CET"))
-        val month = dateTime.get(MONTH_OF_YEAR)
-        val year = dateTime.get(YEAR)
+    fun monthlyRateUsdToEur(date: LocalDate): Float {
+        val month = date.get(ChronoField.MONTH_OF_YEAR)
+        val year = date.get(ChronoField.YEAR)
         val key = "$year-$month"
         log.debug("usdToEur year='{}', month='{}', key='{}'", year, month, key)
         val rate = 1 / (rates[key] ?: error("No rate for $key"))
         log.debug("usdToEur rate='{}'", rate)
-        val eurValue = Money.of((profit.value * rate).number, "EUR")
-        log.debug("usdToEur eurValue='{}'", eurValue)
-        return eurValue
+        return rate
     }
 }
