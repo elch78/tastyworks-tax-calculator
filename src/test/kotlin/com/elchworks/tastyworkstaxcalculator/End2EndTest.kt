@@ -21,6 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.context.ApplicationEventPublisher
+import org.springframework.test.annotation.DirtiesContext
 import java.time.Instant
 import java.time.Month.DECEMBER
 import java.time.Month.FEBRUARY
@@ -29,6 +30,8 @@ import java.time.Year
 import java.time.ZoneId
 
 @SpringBootTest
+// Beans are stateful
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 class End2EndTest @Autowired constructor(
     // mocked to prevent it from running
     @MockBean private val application: ApplicationRunner,
@@ -88,7 +91,6 @@ class End2EndTest @Autowired constructor(
         assertThat(fiscalYearRepository.getFiscalYear(YEAR_2021).profits())
             .isEqualTo(ProfitsSummary(eur(0), eur(SELL_VALUE), eur(0)))
     }
-
 
     @Test
     fun optionPositionClosedDifferentYearWithoutProfitSameExchangeRate() {
