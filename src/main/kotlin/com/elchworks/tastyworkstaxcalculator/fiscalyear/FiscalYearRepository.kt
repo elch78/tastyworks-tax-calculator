@@ -1,12 +1,12 @@
 package com.elchworks.tastyworkstaxcalculator.fiscalyear
 
-import com.elchworks.tastyworkstaxcalculator.convert.currencyExchange
+import com.elchworks.tastyworkstaxcalculator.convert.CurrencyExchange
 import org.springframework.stereotype.Component
 import java.time.Year
 
 @Component
 class FiscalYearRepository(
-    private val currencyExchange: currencyExchange
+    private val currencyExchange: CurrencyExchange
 ) {
     private val fiscalYears = mutableMapOf<Year, FiscalYear>()
 

@@ -1,7 +1,7 @@
 package com.elchworks.tastyworkstaxcalculator.test.fiscalyear
 
+import com.elchworks.tastyworkstaxcalculator.convert.CurrencyExchange
 import com.elchworks.tastyworkstaxcalculator.convert.ExchangeRateRepository
-import com.elchworks.tastyworkstaxcalculator.convert.currencyExchange
 import com.elchworks.tastyworkstaxcalculator.eur
 import com.elchworks.tastyworkstaxcalculator.fiscalyear.FiscalYear
 import com.elchworks.tastyworkstaxcalculator.fiscalyear.ProfitsSummary
@@ -30,7 +30,7 @@ import javax.money.MonetaryAmount
 
 class FiscalYearTest {
     private val exchangeRateRepository: ExchangeRateRepository = mock()
-    private val currencyExchange: currencyExchange = currencyExchange(exchangeRateRepository)
+    private val currencyExchange: CurrencyExchange = CurrencyExchange(exchangeRateRepository)
     private val sut = FiscalYear(currencyExchange, Year.of(2021))
 
     @Test

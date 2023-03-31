@@ -10,10 +10,10 @@ import java.time.ZonedDateTime
 import javax.money.MonetaryAmount
 
 @Component
-class currencyExchange(
+class CurrencyExchange(
     private val exchangeRateRepository: ExchangeRateRepository
 ) {
-    private val log = LoggerFactory.getLogger(currencyExchange::class.java)
+    private val log = LoggerFactory.getLogger(CurrencyExchange::class.java)
 
     fun usdToEur(profit: Profit): MonetaryAmount {
         log.debug("usdToEur profit='{}'", profit)

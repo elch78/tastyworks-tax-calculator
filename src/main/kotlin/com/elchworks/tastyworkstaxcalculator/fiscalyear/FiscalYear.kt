@@ -1,6 +1,6 @@
 package com.elchworks.tastyworkstaxcalculator.fiscalyear
 
-import com.elchworks.tastyworkstaxcalculator.convert.currencyExchange
+import com.elchworks.tastyworkstaxcalculator.convert.CurrencyExchange
 import com.elchworks.tastyworkstaxcalculator.eur
 import com.elchworks.tastyworkstaxcalculator.plus
 import com.elchworks.tastyworkstaxcalculator.positions.Profit
@@ -19,7 +19,7 @@ import java.time.Year
 import javax.money.MonetaryAmount
 
 class FiscalYear(
-    private val currencyExchange: currencyExchange,
+    private val currencyExchange: CurrencyExchange,
     val fiscalYear: Year,
 ) {
     private var profitAndLossFromOptions = ProfitAndLoss()
