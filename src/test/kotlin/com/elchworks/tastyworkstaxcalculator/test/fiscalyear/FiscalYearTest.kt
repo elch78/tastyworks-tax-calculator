@@ -1,4 +1,4 @@
-package com.elchworks.tastyworkstaxcalculator.test.positions
+package com.elchworks.tastyworkstaxcalculator.test.fiscalyear
 
 import com.elchworks.tastyworkstaxcalculator.convert.ExchangeRateRepository
 import com.elchworks.tastyworkstaxcalculator.convert.currencyExchange
