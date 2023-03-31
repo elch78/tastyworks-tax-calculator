@@ -59,8 +59,8 @@ class FiscalYear(
                     stoTx.optionDescription(), netProfit, profitAndLossFromOptions.profit, profitAndLossFromOptions.loss)
             }
         } else {
-            // the position was not opened in the same year. The whole value of the transaction is a loss for the current year
-            val netProfit = txValueInEur(stoTx)
+            // the position was not opened in the same year. The whole value of the buy transaction is a loss for the current year
+            val netProfit = txValueInEur(btcTx)
             profitAndLossFromOptions += ProfitAndLoss(eur(0), netProfit.negate())
             log.info("Option position closed that was opened in a different fiscal year. netProfit='{}', profitAndLoss='{}'", netProfit, profitAndLossFromOptions)
         }
