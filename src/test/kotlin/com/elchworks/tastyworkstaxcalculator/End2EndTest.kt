@@ -22,6 +22,7 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.context.ApplicationEventPublisher
 import java.time.Instant
+import java.time.Month.DECEMBER
 import java.time.Month.FEBRUARY
 import java.time.Month.JANUARY
 import java.time.Year
@@ -36,7 +37,7 @@ class End2EndTest @Autowired constructor(
     @MockBean private val exchangeRateRepository: ExchangeRateRepository
 ) {
     @Test
-    fun optionPositionClosedSameYearWithoutProfit() {
+    fun optionPositionClosedSameYearWithoutProfitSameExchangeRate() {
         // Given
         val value = usd(5)
         val stoTx = randomOptionTrade().copy(
@@ -49,7 +50,7 @@ class End2EndTest @Autowired constructor(
             action = BUY_TO_CLOSE,
             value = value.negate()
         )
-        whenever(exchangeRateRepository.monthlyRateUsdToEur(any())).thenReturn(1.0f)
+        withFixedExchangeRate()
 
         // When
         eventPublisher.publishEvent(NewTransactionEvent(stoTx))
@@ -88,6 +89,38 @@ class End2EndTest @Autowired constructor(
             .isEqualTo(ProfitsSummary(eur(0), eur(VALUE), eur(0)))
     }
 
+
+    @Test
+    fun optionPositionClosedDifferentYearWithoutProfitSameExchangeRate() {
+        // Given
+        val stoTx = randomOptionTrade().copy(
+            date = randomDate(YEAR_2021, DECEMBER),
+            action = SELL_TO_OPEN,
+            rootSymbol = SYMBOL,
+            value = usd(VALUE)
+        )
+        val btcTx = stoTx.copy(
+            date = randomDate(YEAR_2022, JANUARY),
+            action = BUY_TO_CLOSE,
+            value = usd(-VALUE)
+        )
+        withFixedExchangeRate()
+
+        // When
+        eventPublisher.publishEvent(NewTransactionEvent(stoTx))
+        eventPublisher.publishEvent(NewTransactionEvent(btcTx))
+
+        // Then
+        assertThat(fiscalYearRepository.getFiscalYear(YEAR_2021).profits())
+            .isEqualTo(ProfitsSummary(eur(VALUE), eur(0), eur(0)))
+        assertThat(fiscalYearRepository.getFiscalYear(YEAR_2022).profits())
+            .isEqualTo(ProfitsSummary(eur(0), eur(-VALUE), eur(0)))
+    }
+
+    private fun withFixedExchangeRate() {
+        whenever(exchangeRateRepository.monthlyRateUsdToEur(any())).thenReturn(1.0f)
+    }
+
     private fun withExchangeRate(date: Instant, exchangeRate: Float) {
         val localDate = date.atZone(ZoneId.of("CET")).toLocalDate()
         whenever(exchangeRateRepository.monthlyRateUsdToEur(eq(localDate)))
@@ -97,6 +130,7 @@ class End2EndTest @Autowired constructor(
 
     companion object {
         private val YEAR_2021 = Year.of(2021)
+        private val YEAR_2022 = Year.of(2022)
         private val SYMBOL = randomString("symbol")
         private val VALUE = RandomUtils.nextFloat()
     }
