@@ -11,6 +11,7 @@ import com.elchworks.tastyworkstaxcalculator.test.randomOptionTrade
 import com.elchworks.tastyworkstaxcalculator.test.randomString
 import com.elchworks.tastyworkstaxcalculator.transactions.Action.BUY_TO_CLOSE
 import com.elchworks.tastyworkstaxcalculator.transactions.Action.SELL_TO_OPEN
+import org.apache.commons.lang3.RandomUtils
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
@@ -55,10 +56,35 @@ class End2EndTest @Autowired constructor(
             .isEqualTo(ProfitsSummary(eur(0), eur(0), eur(0)))
     }
 
+    @Test
+    fun optionPositionClosedSameYearWithProfitDueToExchangeRate() {
+        // Given
+        val stoTx = randomOptionTrade().copy(
+            randomDate(YEAR_2021, JANUARY),
+            action = SELL_TO_OPEN,
+            rootSymbol = SYMBOL,
+            value = usd(VALUE)
+        )
+        val btcTx = stoTx.copy(
+            action = BUY_TO_CLOSE,
+            value = usd(-VALUE)
+        )
+        whenever(exchangeRateRepository.monthlyRateUsdToEur(any()))
+            .thenReturn(1.0f, 2.0f)
+
+        // When
+        eventPublisher.publishEvent(NewTransactionEvent(stoTx))
+        eventPublisher.publishEvent(NewTransactionEvent(btcTx))
+
+        // Then LOSS equal to value due to exchange rate
+        assertThat(fiscalYearRepository.getFiscalYear(YEAR_2021).profits())
+            .isEqualTo(ProfitsSummary(eur(0), eur(VALUE), eur(0)))
+    }
 
 
     companion object {
         private val YEAR_2021 = Year.of(2021)
         private val SYMBOL = randomString("symbol")
+        private val VALUE = RandomUtils.nextFloat()
     }
 }
