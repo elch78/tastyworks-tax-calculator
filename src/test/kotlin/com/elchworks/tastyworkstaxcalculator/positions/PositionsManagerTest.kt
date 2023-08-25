@@ -4,7 +4,9 @@ import com.elchworks.tastyworkstaxcalculator.positions.option.OptionBuyToCloseEv
 import com.elchworks.tastyworkstaxcalculator.positions.option.OptionSellToOpenEvent
 import com.elchworks.tastyworkstaxcalculator.positions.stock.StockSellToCloseEvent
 import com.elchworks.tastyworkstaxcalculator.test.randomAssignment
+import com.elchworks.tastyworkstaxcalculator.test.randomDate
 import com.elchworks.tastyworkstaxcalculator.test.randomOptionTrade
+import com.elchworks.tastyworkstaxcalculator.test.randomUsdAmount
 import com.elchworks.tastyworkstaxcalculator.transactions.Action.BUY_TO_CLOSE
 import com.elchworks.tastyworkstaxcalculator.transactions.Action.BUY_TO_OPEN
 import com.elchworks.tastyworkstaxcalculator.transactions.Action.SELL_TO_CLOSE
@@ -17,7 +19,9 @@ import org.springframework.context.PayloadApplicationEvent
 import org.springframework.test.context.event.ApplicationEvents
 import org.springframework.test.context.event.RecordApplicationEvents
 import org.springframework.test.context.event.TestContextEvent
-import java.time.LocalDate
+import java.time.Month
+import java.time.Year
+import java.time.ZoneId
 import java.util.stream.Collectors
 
 private const val SYMBOL = "ABC"
@@ -30,27 +34,34 @@ class PositionsManagerTest @Autowired constructor(
 
     @Test
     fun optionPositionsAreClosedFIFO(eventPublisher: ApplicationEvents) {
-        val expirationDate1 = LocalDate.now()
+        val expirationDate1 = randomDate(Year.of(2021), Month.JANUARY).atZone(ZoneId.of("CET")).toLocalDate()
+        val expirationDate2 = randomDate(Year.of(2021), Month.JANUARY).atZone(ZoneId.of("CET")).toLocalDate()
+        val strikePrice1 = randomUsdAmount(0.1f, 100f)
+        val strikePrice2 = randomUsdAmount(0.1f, 100f)
         // Given
         val stoTx1 = randomOptionTrade().copy(
             rootSymbol = SYMBOL,
             action = SELL_TO_OPEN,
             expirationDate = expirationDate1,
+            strikePrice = strikePrice1,
         )
         val stoTx2 = randomOptionTrade().copy(
             rootSymbol = SYMBOL,
             action = SELL_TO_OPEN,
-            expirationDate = expirationDate1,
+            expirationDate = expirationDate2,
+            strikePrice = strikePrice2,
         )
         val btcTx1 = randomOptionTrade().copy(
             rootSymbol = SYMBOL,
             action = BUY_TO_CLOSE,
             expirationDate = expirationDate1,
+            strikePrice = strikePrice1,
         )
         val btcTx2 = randomOptionTrade().copy(
             rootSymbol = SYMBOL,
             action = BUY_TO_CLOSE,
-            expirationDate = expirationDate1,
+            expirationDate = expirationDate2,
+            strikePrice = strikePrice2
         )
 
         // When

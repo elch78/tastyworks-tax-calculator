@@ -261,7 +261,8 @@ class End2EndTest @Autowired constructor(
         value = usd(SELL_VALUE_USD),
         callOrPut = "PUT",
         strikePrice = usd(STRIKE_PRICE),
-        expirationDate = EXPIRATION_DATE
+        expirationDate = EXPIRATION_DATE,
+        commissions = usd(COMMISSIONS)
     )
 
     companion object {
@@ -274,6 +275,8 @@ class End2EndTest @Autowired constructor(
         private val BUY_VALUE_USD = randomBigDecimal()
         private val BUY_VALUE_EUR = BUY_VALUE_USD * EXCHANGE_RATE
         private val STRIKE_PRICE = randomBigDecimal()
+        private val COMMISSIONS = randomBigDecimal()
+        private val FEE = randomBigDecimal()
         private val EXPIRATION_DATE = LocalDate.now()
 
         @JvmStatic

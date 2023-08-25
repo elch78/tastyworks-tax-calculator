@@ -21,8 +21,8 @@ data class OptionTrade(
     val value: MonetaryAmount,
     val quantity: Int,
     val averagePrice: MonetaryAmount,
-    val commissions: Float,
-    val fees: Float,
+    val commissions: MonetaryAmount,
+    val fees: MonetaryAmount,
     val multiplier: Int,
     val underlyingSymbol: String,
     val orderNr: Int
@@ -36,8 +36,8 @@ data class StockTrade(
     override val quantity: Int,
     override val averagePrice: MonetaryAmount,
     val description: String,
-    val commissions: Float,
-    val fees: Float
+    val commissions: MonetaryAmount,
+    val fees: MonetaryAmount
 ): StockTransaction
 
 data class OptionRemoval(
@@ -56,7 +56,7 @@ data class OptionAssignment(
     override val value: MonetaryAmount,
     override val quantity: Int,
     override val averagePrice: MonetaryAmount,
-    val fees: Float
+    val fees: MonetaryAmount
 ): StockTransaction
 
 interface Transaction {

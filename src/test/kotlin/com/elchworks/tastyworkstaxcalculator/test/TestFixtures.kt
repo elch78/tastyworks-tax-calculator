@@ -33,13 +33,13 @@ fun randomOptionTrade() =
         value = randomUsdAmount(),
         quantity = 1, // not random for now. In order to prevent error message "Currently only complete closing of positions is supported."
         averagePrice = Money.of(0, "USD"),
-        commissions = 0f,
-        fees = 0f,
+        commissions = usd(randomBigDecimal(1,6)),
+        fees = usd(BigDecimal.ZERO),
         multiplier = 100,
         rootSymbol = "rootSymbol",
         underlyingSymbol = "",
         expirationDate = randomLocalDate(),
-        strikePrice = usd(BigDecimal("5.0")),
+        strikePrice = usd(randomBigDecimal()),
         callOrPut = "PUT",
         orderNr = 0
     )
@@ -65,7 +65,7 @@ fun randomAssignment() =
         value = randomUsdAmount(),
         quantity = RandomUtils.nextInt(),
         averagePrice = randomUsdAmount(),
-        fees = RandomUtils.nextFloat(),
+        fees = randomUsdAmount()
     )
 
 private fun randomLocalDate(): LocalDate = LocalDate.now()
@@ -77,8 +77,8 @@ fun randomStockTrade() =
         quantity = RandomUtils.nextInt(),
         value = randomUsdAmount(),
         date = randomDateIn2021(),
-        fees = RandomUtils.nextFloat(),
-        commissions = RandomUtils.nextFloat(),
+        fees = randomUsdAmount(),
+        commissions = randomUsdAmount(),
         averagePrice = randomUsdAmount(),
         description = "randomDescription"
     )
@@ -94,4 +94,5 @@ fun randomDate(year: Year, month: Month): Instant =
 
 fun randomString(id: String) = "$id-${RandomStringUtils.randomAlphabetic(3)}"
 
-fun randomBigDecimal() = BigDecimal(BigInteger.valueOf(RandomUtils.nextLong(1, 101)), 2)
+fun randomBigDecimal() = randomBigDecimal(1, 101)
+fun randomBigDecimal(startInclusive: Long, endExclusive: Long) = BigDecimal(BigInteger.valueOf(RandomUtils.nextLong(startInclusive, endExclusive)), 2)

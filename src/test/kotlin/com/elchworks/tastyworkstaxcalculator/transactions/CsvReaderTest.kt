@@ -73,8 +73,8 @@ class CsvReaderTest {
                     value = usd(20.0f),
                     quantity = 2,
                     averagePrice = usd(10.0f),
-                    commissions = -2.0f,
-                    fees = -0.254f,
+                    commissions = usd(-2.0f),
+                    fees = usd(-0.254f),
                     multiplier = 100,
                     underlyingSymbol = "PACB",
                     orderNr = 247462519
@@ -92,8 +92,8 @@ class CsvReaderTest {
                     value = usd(-9.0f),
                     quantity = 1,
                     averagePrice = usd(-9.0f),
-                    commissions = 0.0f,
-                    fees = -0.12f,
+                    commissions = usd(0.0f),
+                    fees = usd(-0.12f),
                     multiplier = 100,
                     underlyingSymbol = "TLRY",
                     orderNr = 244821597
@@ -111,8 +111,8 @@ class CsvReaderTest {
                     value = usd(20.0f),
                     quantity = 1,
                     averagePrice = usd(20.0f),
-                    commissions = -1.0f,
-                    fees = -0.142f,
+                    commissions = usd(-1.0f),
+                    fees = usd(-0.142f),
                     multiplier = 100,
                     underlyingSymbol = "PACB",
                     orderNr = 238917621
@@ -130,8 +130,8 @@ class CsvReaderTest {
                     value = usd(-20.0f),
                     quantity = 1,
                     averagePrice = usd(-20.0f),
-                    commissions = 0.0f,
-                    fees = -0.12f,
+                    commissions = usd(0.0f),
+                    fees = usd(-0.12f),
                     multiplier = 100,
                     underlyingSymbol = "MNMD",
                     orderNr = 236070484
@@ -150,7 +150,7 @@ class CsvReaderTest {
                     value = usd(100.0f),
                     quantity = 100,
                     averagePrice = usd(1.0f),
-                    fees = -5.023f
+                    fees = usd(-5.023f)
                 ),
                 OptionAssignment(
                     date = Instant.parse("2022-12-16T22:00:00Z"),
@@ -159,7 +159,7 @@ class CsvReaderTest {
                     value = usd(-700.0f),
                     quantity = 200,
                     averagePrice = usd(-3.5f),
-                    fees = -5.0f
+                    fees = usd(-5.0f)
                 ),
             ))
     }
@@ -175,8 +175,8 @@ class CsvReaderTest {
                     description = "Sold 100 APPH @ 6.02",
                     quantity = 100,
                     averagePrice = usd(6.02f),
-                    commissions = 0.0f,
-                    fees = -0.102f
+                    commissions = usd(0.0f),
+                    fees = usd(-0.102f)
                 )
             ))
     }
