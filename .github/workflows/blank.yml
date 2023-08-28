@@ -27,4 +27,4 @@ jobs:
 
       # Runs a single command using the runners shell
       - name: Maven
-        run: mvn clean verify
+        run: ./gradlew test
