@@ -93,7 +93,7 @@ class End2EndTest @Autowired constructor(
             value = usd(-SELL_VALUE_USD)
         )
         withExchangeRate(sellDate, ONE)
-        withExchangeRate(buyDate, BigDecimal("2.0"))
+        withExchangeRate(buyDate, TWO)
 
         // When
         eventPublisher.publishEvent(NewTransactionEvent(stoTx))
@@ -120,8 +120,8 @@ class End2EndTest @Autowired constructor(
             action = BUY_TO_CLOSE,
             value = usd(-SELL_VALUE_USD)
         )
-        withExchangeRate(sellDate, BigDecimal("2.0"))
-        withExchangeRate(buyDate, BigDecimal.ONE)
+        withExchangeRate(sellDate, TWO)
+        withExchangeRate(buyDate, ONE)
 
         // When
         eventPublisher.publishEvent(NewTransactionEvent(stoTx))
@@ -266,10 +266,11 @@ class End2EndTest @Autowired constructor(
     )
 
     companion object {
+        private val TWO = BigDecimal("2.0")
         private val YEAR_2021 = Year.of(2021)
         private val YEAR_2022 = Year.of(2022)
         private val SYMBOL = randomString("symbol")
-        private val EXCHANGE_RATE = BigDecimal("2.0")
+        private val EXCHANGE_RATE = TWO
         private val SELL_VALUE_USD = randomBigDecimal()
         private val SELL_VALUE_EUR = SELL_VALUE_USD * EXCHANGE_RATE
         private val BUY_VALUE_USD = randomBigDecimal()
