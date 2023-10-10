@@ -11,7 +11,7 @@ import java.io.File
 
 @Component
 class ApplicationRunner(
-    private val csvReader: CsvReader,
+    private val transactionsCsvReader: TransactionCsvReader,
     private val eventPublisher: ApplicationEventPublisher,
     private val fiscalYearManager: FiscalYearManager,
 ): ApplicationRunner {
@@ -23,7 +23,7 @@ class ApplicationRunner(
             .filter { it.isFile }
             .map {
                 log.info("reading $it")
-                csvReader.readCsv(it)
+                transactionsCsvReader.read(it)
             }
             .flatten()
             .sortedBy { it.date }

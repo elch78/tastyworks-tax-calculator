@@ -21,10 +21,10 @@ import java.time.format.SignStyle
 import java.time.temporal.ChronoField
 
 @Component
-class CsvReader {
-    private val log = LoggerFactory.getLogger(CsvReader::class.java)
+class TransactionCsvReader {
+    private val log = LoggerFactory.getLogger(TransactionCsvReader::class.java)
 
-    fun readCsv(file: File): List<Transaction> {
+    fun read(file: File): List<Transaction> {
 
         val csvReader =
             CSVReaderBuilder(FileReader(file.absoluteFile)).build()

@@ -1,6 +1,6 @@
 package com.elchworks.tastyworkstaxcalculator.transactions
 
-import com.elchworks.tastyworkstaxcalculator.CsvReader
+import com.elchworks.tastyworkstaxcalculator.TransactionCsvReader
 import com.elchworks.tastyworkstaxcalculator.positions.option.OptionPositionStatus.ASSIGNED
 import com.elchworks.tastyworkstaxcalculator.positions.option.OptionPositionStatus.EXPIRED
 import com.elchworks.tastyworkstaxcalculator.transactions.Action.BUY_TO_CLOSE
@@ -15,7 +15,7 @@ import java.math.BigDecimal
 import java.time.Instant
 import java.time.LocalDate
 
-class CsvReaderTest {
+class TransactionCsvReaderTest {
 
     @Test
     fun optionRemoval() {
@@ -182,5 +182,5 @@ class CsvReaderTest {
     }
 
     private fun readFile(csvFile: String) =
-        CsvReader().readCsv(ClassPathResource(csvFile).file)
+        TransactionCsvReader().read(ClassPathResource(csvFile).file)
 }
