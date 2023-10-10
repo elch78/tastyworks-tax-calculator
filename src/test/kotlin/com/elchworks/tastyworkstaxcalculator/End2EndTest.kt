@@ -100,8 +100,9 @@ class End2EndTest @Autowired constructor(
         eventPublisher.publishEvent(NewTransactionEvent(btcTx))
 
         // Then loss due to different exchange rate
+        val lossesFromOptions = eur(SELL_VALUE_USD)
         assertThat(fiscalYearRepository.getFiscalYear(YEAR_2021).profits())
-            .isEqualTo(ProfitsSummary(eur(0), eur(SELL_VALUE_USD), eur(0)))
+            .isEqualTo(ProfitsSummary(eur(0), lossesFromOptions, eur(0)))
     }
 
     @Test
@@ -128,8 +129,9 @@ class End2EndTest @Autowired constructor(
         eventPublisher.publishEvent(NewTransactionEvent(btcTx))
 
         // Then loss due to different exchange rate
+        val profitsFromOptions = eur(SELL_VALUE_USD)
         assertThat(fiscalYearRepository.getFiscalYear(YEAR_2021).profits())
-            .isEqualTo(ProfitsSummary(eur(SELL_VALUE_USD), eur(0), eur(0)))
+            .isEqualTo(ProfitsSummary(profitsFromOptions, eur(0), eur(0)))
     }
 
     @Test
