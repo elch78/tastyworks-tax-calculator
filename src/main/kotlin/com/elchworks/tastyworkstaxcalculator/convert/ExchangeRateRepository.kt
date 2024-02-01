@@ -7,6 +7,7 @@ import org.springframework.core.io.ClassPathResource
 import org.springframework.stereotype.Component
 import java.io.FileReader
 import java.math.BigDecimal
+import java.math.RoundingMode
 import java.time.LocalDate
 
 @Component
@@ -15,6 +16,8 @@ class ExchangeRateRepository {
 
     // source: https://de.statista.com/statistik/daten/studie/214878/umfrage/wechselkurs-des-euro-gegenueber-dem-us-dollar-monatliche-entwicklung/
     private val rates = HashMap<LocalDate, BigDecimal>()
+
+    private val ONE_SCALE_2 = BigDecimal.ONE.setScale(2)
 
     @PostConstruct
     fun readCsv() {
@@ -32,7 +35,8 @@ class ExchangeRateRepository {
     }
 
     fun monthlyRateUsdToEur(date: LocalDate): BigDecimal {
-        val rate = BigDecimal.ONE / (rates[date] ?: error("No rate for date $date"))
+        val rateEurToUsd = (rates[date] ?: error("No rate for date $date"))
+        val rate = ONE_SCALE_2.divide(rateEurToUsd, RoundingMode.HALF_UP)
         log.debug("usdToEur rate='{}'", rate)
         return rate
     }
