@@ -14,12 +14,12 @@ data class OptionTrade(
     override val expirationDate: LocalDate,
     override val strikePrice: MonetaryAmount,
     override val callOrPut: String,
+    override val quantity: Int,
     val action: Action,
     val symbol: String,
     val instrumentType: String,
     val description: String,
     val value: MonetaryAmount,
-    val quantity: Int,
     val averagePrice: MonetaryAmount,
     val commissions: MonetaryAmount,
     val fees: MonetaryAmount,
@@ -47,6 +47,7 @@ data class OptionRemoval(
     override val expirationDate: LocalDate,
     override val strikePrice: MonetaryAmount,
     override val callOrPut: String,
+    override val quantity: Int,
     val status: OptionPositionStatus,
 ): OptionTransaction
 
@@ -69,6 +70,7 @@ interface OptionTransaction: Transaction {
     val rootSymbol: String
     val expirationDate: LocalDate
     val strikePrice: MonetaryAmount
+    val quantity: Int
 }
 
 interface StockTransaction : Transaction{

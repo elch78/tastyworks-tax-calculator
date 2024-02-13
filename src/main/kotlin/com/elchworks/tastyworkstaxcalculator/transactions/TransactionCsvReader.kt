@@ -126,7 +126,8 @@ class TransactionCsvReader {
             rootSymbol = colums.rootSymbol(),
             expirationDate = parsLocalDate(colums.expirationDate()),
             strikePrice = colums.strikePrice(),
-            callOrPut = colums.callOrPut()
+            callOrPut = colums.callOrPut(),
+            quantity = colums.quantity(),
         )
 
     private fun optionTrade(columns: Array<String>) = OptionTrade(

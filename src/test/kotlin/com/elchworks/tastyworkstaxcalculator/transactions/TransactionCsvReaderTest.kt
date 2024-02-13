@@ -27,6 +27,7 @@ class TransactionCsvReaderTest {
                     expirationDate = LocalDate.parse("2022-12-30"),
                     strikePrice = usd(BigDecimal("10.5")),
                     callOrPut = "CALL",
+                    quantity = 20,
                     status = EXPIRED
                 ),
                 OptionRemoval(
@@ -35,6 +36,7 @@ class TransactionCsvReaderTest {
                     expirationDate = LocalDate.parse("2022-10-28"),
                     strikePrice = usd(BigDecimal("7.0")),
                     callOrPut = "PUT",
+                    quantity = 10,
                     status = EXPIRED
                 ),
                 OptionRemoval(
@@ -43,6 +45,7 @@ class TransactionCsvReaderTest {
                     expirationDate = LocalDate.parse("2022-12-02"),
                     strikePrice = usd(BigDecimal("4.0")),
                     callOrPut = "CALL",
+                    quantity = 1,
                     status = ASSIGNED
                 ),
                 OptionRemoval(
@@ -51,6 +54,7 @@ class TransactionCsvReaderTest {
                     expirationDate = LocalDate.parse("2022-11-25"),
                     strikePrice = usd(BigDecimal("1.5")),
                     callOrPut = "PUT",
+                    quantity = 5,
                     status = ASSIGNED
                 ),
             ))

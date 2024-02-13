@@ -54,7 +54,8 @@ fun randomOptionRemoval() =
         expirationDate = randomLocalDate(),
         strikePrice = usd(randomBigDecimal()),
         callOrPut = "PUT",
-        status = OptionPositionStatus.EXPIRED
+        status = OptionPositionStatus.EXPIRED,
+        quantity = 1,
     )
 
 fun randomAssignment() =
