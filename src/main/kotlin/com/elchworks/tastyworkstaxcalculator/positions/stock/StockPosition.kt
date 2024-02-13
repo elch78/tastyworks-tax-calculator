@@ -8,18 +8,17 @@ import kotlin.math.min
 class StockPosition(
     val btoTx: StockTransaction
 ) {
-    private val log = LoggerFactory.getLogger(StockPosition::class.java)
     private var quantityLeft: Int = btoTx.quantity
 
     fun sellToClose(quantity: Int): PositionCloseResult {
         val numSold = min(quantity, quantityLeft)
-        log.debug("sellToClose btoTx.quantity='{}', sold='{}', quantity='{}', numSold='{}'", btoTx.quantity,
+        LOG.debug("sellToClose btoTx.quantity='{}', sold='{}', quantity='{}', numSold='{}'", btoTx.quantity,
             this.quantityLeft, quantity, numSold)
         quantityLeft -= numSold
-        log.debug("sellToClose quantityLeft='{}'", quantityLeft)
+        LOG.debug("sellToClose quantityLeft='{}'", quantityLeft)
         val quantityLeftInTx = quantity - numSold
         val positionCloseResult = PositionCloseResult(numSold, quantityLeftInTx, quantityLeft)
-        log.debug("positionCloseResult='{}'", positionCloseResult)
+        LOG.debug("positionCloseResult='{}'", positionCloseResult)
         return positionCloseResult
     }
 
@@ -27,5 +26,7 @@ class StockPosition(
         return "StockPosition(btoTx=$btoTx, sold=$quantityLeft)"
     }
 
-
+    companion object {
+        private val LOG = LoggerFactory.getLogger(StockPosition::class.java)
+    }
 }

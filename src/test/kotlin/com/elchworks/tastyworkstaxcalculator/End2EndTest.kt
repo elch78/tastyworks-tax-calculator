@@ -163,20 +163,23 @@ class End2EndTest @Autowired constructor(
     }
 
     @Test
-    @Disabled("TODO ")
+    @Disabled("TODO fix #2")
     fun optionPostionClosedPartially() {
-        // Given
+        val sellValue = usd(2)
+        val buyValue = usd(-1)
+        // Given stoTx with quantity 2
         val stoTx = randomOptionTrade().copy(
-            date = randomDate(YEAR_2021, DECEMBER),
+            date = randomDate(YEAR_2021, JANUARY),
             action = SELL_TO_OPEN,
             rootSymbol = SYMBOL,
-            value = usd(SELL_VALUE_USD),
+            value = sellValue,
             quantity = 2
         )
+        // btcTx with quantity 1
         val btcTx = stoTx.copy(
-            date = randomDate(YEAR_2021, JANUARY),
+            date = randomDate(YEAR_2021, FEBRUARY),
             action = BUY_TO_CLOSE,
-            value = usd(-BUY_VALUE_USD),
+            value = buyValue,
             quantity = 1
         )
         withFixedExchangeRate()
@@ -184,9 +187,17 @@ class End2EndTest @Autowired constructor(
         // When
         eventPublisher.publishEvent(NewTransactionEvent(stoTx))
         eventPublisher.publishEvent(NewTransactionEvent(btcTx))
+
+        // Then only one option is sold
+        assertThat(fiscalYearRepository.getFiscalYear(YEAR_2021).profits())
+            .isEqualTo(ProfitsSummary(eur( sellValue.plus(buyValue).number), eur(0), eur(0)))
+
+        // When another btc tx with amount 1
         eventPublisher.publishEvent(NewTransactionEvent(btcTx))
 
-        // Then
+        // Then the second option is closed
+        assertThat(fiscalYearRepository.getFiscalYear(YEAR_2021).profits())
+            .isEqualTo(ProfitsSummary(eur( (sellValue.plus(buyValue)).multiply(BigDecimal(2)).number), eur(0), eur(0)))
     }
 
     @Test
