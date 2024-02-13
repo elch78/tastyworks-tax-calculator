@@ -170,6 +170,7 @@ class End2EndTest @Autowired constructor(
     }
 
     // TODO test partial close with loss and different year ...
+    //  btc tx that consumes more than one sto tx. e.g. sell 1 + sell 2 + buy 2
 
     @Test
     fun optionPostionClosedPartiallySameYear() {
