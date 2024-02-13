@@ -63,6 +63,7 @@ data class OptionAssignment(
 
 interface Transaction {
     val date: Instant
+    val quantity: Int
 }
 
 interface OptionTransaction: Transaction {
@@ -70,13 +71,11 @@ interface OptionTransaction: Transaction {
     val rootSymbol: String
     val expirationDate: LocalDate
     val strikePrice: MonetaryAmount
-    val quantity: Int
 }
 
 interface StockTransaction : Transaction{
     val action: Action
     val symbol: String
-    val quantity: Int
     val value: MonetaryAmount
     val averagePrice: MonetaryAmount
 }
