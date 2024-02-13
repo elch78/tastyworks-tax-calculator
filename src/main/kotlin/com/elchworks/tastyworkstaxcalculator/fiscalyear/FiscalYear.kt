@@ -12,6 +12,7 @@ import com.elchworks.tastyworkstaxcalculator.positions.plus
 import com.elchworks.tastyworkstaxcalculator.positions.stock.StockSellToCloseEvent
 import com.elchworks.tastyworkstaxcalculator.times
 import com.elchworks.tastyworkstaxcalculator.transactions.OptionTrade
+import com.elchworks.tastyworkstaxcalculator.transactions.Transaction
 import com.elchworks.tastyworkstaxcalculator.transactions.optionDescription
 import com.elchworks.tastyworkstaxcalculator.transactions.year
 import org.javamoney.moneta.Money
@@ -70,20 +71,26 @@ class FiscalYear(
     fun onStockPositionClosed(event: StockSellToCloseEvent) {
         val symbol = event.btoTx.symbol
         val quantitySold = event.quantitySold
-        val sellPrice = event.stcTx.averagePrice
-        val buyPrice = event.btoTx.averagePrice
-        log.debug("onStockPositionClosed symbol='{}', quantitySold='{}', buyPrice='{}', sellPrice='{}'", symbol, quantitySold, format(buyPrice), format(sellPrice))
-        val buyValue = buyPrice * quantitySold
-        val buyValueEur = currencyExchange.usdToEur(Profit(buyValue, event.btoTx.date))
-        log.debug("onStockPositionClosed buyValue='{}', buyValueEur='{}'", format(buyValue), format(buyValueEur))
-        val sellValue = sellPrice * quantitySold
-        val sellValueEur = currencyExchange.usdToEur(Profit(sellValue, event.stcTx.date))
-        log.debug("onStockPositionClosed sellValue='{}', sellValueEur='{}'", format(sellValue), format(sellValueEur))
-        // buy value is negative. Thus we have to add the values
-        val netProfit = sellValueEur + buyValueEur
+        val netProfit = netProfit(event.btoTx, event.stcTx, event.quantitySold)
         profitAndLossFromStocks += netProfit
         log.info("Stock sold. symbol='{}', quantity='{}', netProfit='{}', profitFromStocks='{}'",
             symbol, quantitySold, format(netProfit), format(profitAndLossFromStocks))
+    }
+
+    private fun netProfit(buyTx: Transaction, sellTx: Transaction, quantity: Int): MonetaryAmount {
+        val sellPrice = sellTx.averagePrice
+        val buyPrice = buyTx.averagePrice
+        log.debug("netProfit quantity='{}', buyPrice='{}', sellPrice='{}'", quantity, format(buyPrice), format(sellPrice))
+        val buyValue = buyPrice * quantity
+        val buyValueEur = currencyExchange.usdToEur(Profit(buyValue, buyTx.date))
+        log.debug("netProfit buyValue='{}', buyValueEur='{}'", format(buyValue), format(buyValueEur))
+        val sellValue = sellPrice * quantity
+        val sellValueEur = currencyExchange.usdToEur(Profit(sellValue, sellTx.date))
+        log.debug("netProfit sellValue='{}', sellValueEur='{}'", format(sellValue), format(sellValueEur))
+        // buy value is negative. Thus, we have to add the values
+        val netProfit = sellValueEur + buyValueEur
+        log.debug("netProfit='{}'", format(netProfit))
+        return netProfit
     }
 
     private fun isLoss(netProfit: MonetaryAmount): Boolean {
