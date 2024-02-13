@@ -18,6 +18,7 @@ import com.elchworks.tastyworkstaxcalculator.transactions.Action.BUY_TO_OPEN
 import com.elchworks.tastyworkstaxcalculator.transactions.Action.SELL_TO_CLOSE
 import com.elchworks.tastyworkstaxcalculator.transactions.Action.SELL_TO_OPEN
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
@@ -159,6 +160,33 @@ class End2EndTest @Autowired constructor(
             .isEqualTo(ProfitsSummary(eur(SELL_VALUE_EUR), eur(0), eur(0)))
         assertThat(fiscalYearRepository.getFiscalYear(YEAR_2022).profits())
             .isEqualTo(ProfitsSummary(eur(0), eur(BUY_VALUE_EUR), eur(0)))
+    }
+
+    @Test
+    @Disabled("TODO ")
+    fun optionPostionClosedPartially() {
+        // Given
+        val stoTx = randomOptionTrade().copy(
+            date = randomDate(YEAR_2021, DECEMBER),
+            action = SELL_TO_OPEN,
+            rootSymbol = SYMBOL,
+            value = usd(SELL_VALUE_USD),
+            quantity = 2
+        )
+        val btcTx = stoTx.copy(
+            date = randomDate(YEAR_2021, JANUARY),
+            action = BUY_TO_CLOSE,
+            value = usd(-BUY_VALUE_USD),
+            quantity = 1
+        )
+        withFixedExchangeRate()
+
+        // When
+        eventPublisher.publishEvent(NewTransactionEvent(stoTx))
+        eventPublisher.publishEvent(NewTransactionEvent(btcTx))
+        eventPublisher.publishEvent(NewTransactionEvent(btcTx))
+
+        // Then
     }
 
     @Test
