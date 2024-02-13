@@ -9,23 +9,22 @@ class StockPosition(
     val btoTx: StockTransaction
 ) {
     private val log = LoggerFactory.getLogger(StockPosition::class.java)
-    private var sold: Int = 0
+    private var quantityLeft: Int = btoTx.quantity
 
     fun sellToClose(quantity: Int): PositionCloseResult {
-        val quantityLeft = btoTx.quantity - sold
         val currentSold = min(quantity, quantityLeft)
-        log.debug("sellToClose btoTx.quantity='{}', sold='{}', quantity='{}', currentSold='{}'", btoTx.quantity, sold, quantity, currentSold)
-        sold += currentSold
-        log.debug("sellToClose new sold='{}'", sold)
+        log.debug("sellToClose btoTx.quantity='{}', sold='{}', quantity='{}', currentSold='{}'", btoTx.quantity,
+            this.quantityLeft, quantity, currentSold)
+        quantityLeft -= currentSold
+        log.debug("sellToClose quantityLeft='{}'", quantityLeft)
         val quantityLeftInTx = quantity - currentSold
-        val quantityLeftInPosition = btoTx.quantity - sold
-        val positionCloseResult = PositionCloseResult(currentSold, quantityLeftInTx, quantityLeftInPosition)
+        val positionCloseResult = PositionCloseResult(currentSold, quantityLeftInTx, quantityLeft)
         log.debug("positionCloseResult='{}'", positionCloseResult)
         return positionCloseResult
     }
 
     override fun toString(): String {
-        return "StockPosition(btoTx=$btoTx, sold=$sold)"
+        return "StockPosition(btoTx=$btoTx, sold=$quantityLeft)"
     }
 
 
