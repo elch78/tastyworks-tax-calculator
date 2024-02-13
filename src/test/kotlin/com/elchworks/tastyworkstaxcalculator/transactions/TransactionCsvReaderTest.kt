@@ -12,6 +12,7 @@ import org.assertj.core.api.Assertions.assertThatList
 import org.junit.jupiter.api.Test
 import org.springframework.core.io.ClassPathResource
 import java.math.BigDecimal
+import java.math.BigDecimal.ZERO
 import java.time.Instant
 import java.time.LocalDate
 
@@ -28,7 +29,8 @@ class TransactionCsvReaderTest {
                     strikePrice = usd(BigDecimal("10.5")),
                     callOrPut = "CALL",
                     quantity = 20,
-                    status = EXPIRED
+                    status = EXPIRED,
+                    averagePrice = usd(ZERO),
                 ),
                 OptionRemoval(
                     date = Instant.parse("2022-10-28T20:00:00Z"),
@@ -37,7 +39,8 @@ class TransactionCsvReaderTest {
                     strikePrice = usd(BigDecimal("7.0")),
                     callOrPut = "PUT",
                     quantity = 10,
-                    status = EXPIRED
+                    status = EXPIRED,
+                    averagePrice = usd(ZERO),
                 ),
                 OptionRemoval(
                     date = Instant.parse("2022-12-02T22:00:00Z"),
@@ -46,7 +49,8 @@ class TransactionCsvReaderTest {
                     strikePrice = usd(BigDecimal("4.0")),
                     callOrPut = "CALL",
                     quantity = 1,
-                    status = ASSIGNED
+                    status = ASSIGNED,
+                    averagePrice = usd(ZERO),
                 ),
                 OptionRemoval(
                     date = Instant.parse("2022-11-25T22:00:00Z"),
@@ -55,7 +59,8 @@ class TransactionCsvReaderTest {
                     strikePrice = usd(BigDecimal("1.5")),
                     callOrPut = "PUT",
                     quantity = 5,
-                    status = ASSIGNED
+                    status = ASSIGNED,
+                    averagePrice = usd(ZERO),
                 ),
             ))
     }

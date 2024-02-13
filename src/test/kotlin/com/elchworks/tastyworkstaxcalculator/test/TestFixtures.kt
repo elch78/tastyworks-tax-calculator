@@ -14,6 +14,7 @@ import org.apache.commons.lang3.RandomStringUtils
 import org.apache.commons.lang3.RandomUtils
 import org.javamoney.moneta.Money
 import java.math.BigDecimal
+import java.math.BigDecimal.ZERO
 import java.math.BigInteger
 import java.time.Instant
 import java.time.LocalDate
@@ -34,7 +35,7 @@ fun randomOptionTrade() =
         quantity = 1, // not random for now. In order to prevent error message "Currently only complete closing of positions is supported."
         averagePrice = Money.of(0, "USD"),
         commissions = usd(randomBigDecimal(1,6)),
-        fees = usd(BigDecimal.ZERO),
+        fees = usd(ZERO),
         multiplier = 100,
         rootSymbol = "rootSymbol",
         underlyingSymbol = "",
@@ -56,6 +57,7 @@ fun randomOptionRemoval() =
         callOrPut = "PUT",
         status = OptionPositionStatus.EXPIRED,
         quantity = 1,
+        averagePrice = usd(ZERO),
     )
 
 fun randomAssignment() =

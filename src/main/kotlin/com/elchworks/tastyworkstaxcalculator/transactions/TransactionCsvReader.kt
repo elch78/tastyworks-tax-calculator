@@ -128,6 +128,7 @@ class TransactionCsvReader {
             strikePrice = colums.strikePrice(),
             callOrPut = colums.callOrPut(),
             quantity = colums.quantity(),
+            averagePrice = colums.averagePrice(),
         )
 
     private fun optionTrade(columns: Array<String>) = OptionTrade(
