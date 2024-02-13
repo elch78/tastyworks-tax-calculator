@@ -45,10 +45,10 @@ class FiscalYear(
     fun onOptionPositionClosed(btcEvent: OptionBuyToCloseEvent) {
         val btcTx = btcEvent.btcTx
         val stoTx = btcEvent.stoTx
+        val premium = currencyExchange.usdToEur(Profit(stoTx.averagePrice.multiply(btcEvent.quantitySold), stoTx.date))
+        val buyValue = currencyExchange.usdToEur(Profit(btcTx.averagePrice.multiply(btcEvent.quantitySold), btcTx.date))
         if(positionWasOpenedInThisFiscalYear(stoTx)) {
-            val premium = txValueInEur(stoTx)
-            val buyValue = txValueInEur(btcTx)
-            val netProfit = netProfit(premium, buyValue)
+            val netProfit = netProfit(btcTx, stoTx, btcEvent.quantitySold)
             if(isLoss(netProfit)) {
                 // is loss. Reduce profit by the whole premium, increase loss by netProfit
                 profitAndLossFromOptions += ProfitAndLoss(premium.negate(), netProfit.negate())
@@ -62,9 +62,8 @@ class FiscalYear(
             }
         } else {
             // the position was not opened in the same year. The whole value of the buy transaction is a loss for the current year
-            val netProfit = txValueInEur(btcTx)
-            profitAndLossFromOptions += ProfitAndLoss(eur(0), netProfit.negate())
-            log.info("Option position closed that was opened in a different fiscal year. netProfit='{}', profitAndLoss='{}'", format(netProfit), profitAndLossFromOptions)
+            profitAndLossFromOptions += ProfitAndLoss(eur(0), buyValue.negate())
+            log.info("Option position closed that was opened in a different fiscal year. netProfit='{}', profitAndLoss='{}'", format(buyValue), profitAndLossFromOptions)
         }
     }
 

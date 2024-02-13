@@ -4,6 +4,7 @@ import com.elchworks.tastyworkstaxcalculator.positions.option.OptionBuyToCloseEv
 import com.elchworks.tastyworkstaxcalculator.positions.option.OptionPositionStatus.ASSIGNED
 import com.elchworks.tastyworkstaxcalculator.positions.option.OptionPositionStatus.EXPIRED
 import com.elchworks.tastyworkstaxcalculator.positions.option.OptionSellToOpenEvent
+import com.elchworks.tastyworkstaxcalculator.positions.option.OptionShortPosition
 import com.elchworks.tastyworkstaxcalculator.positions.stock.StockPosition
 import com.elchworks.tastyworkstaxcalculator.positions.stock.StockSellToCloseEvent
 import com.elchworks.tastyworkstaxcalculator.transactions.Action.BUY_TO_CLOSE
@@ -28,7 +29,7 @@ class PositionsManager(
     private val eventPublisher: ApplicationEventPublisher,
 ) {
     private val log = LoggerFactory.getLogger(PositionsManager::class.java)
-    private val optionPositions = mutableMapOf<String, Queue<OptionTrade>>()
+    private val optionPositions = mutableMapOf<String, Queue<OptionShortPosition>>()
     private val stockPositions = mutableMapOf<String, Queue<StockPosition>>()
 
     @EventListener(NewTransactionEvent::class)
@@ -58,8 +59,7 @@ class PositionsManager(
             log.debug("optionAssignmentSellToClose position='{}'", position)
             val positionCloseResult = position.sellToClose(quantityToClose)
             log.debug("optionAssignmentSellToClose positionCloseResult='{}'", positionCloseResult)
-            val positionDepleted = positionCloseResult.quantityLeftInPosition == 0
-            if (positionDepleted) stockPositions[stcTx.symbol]!!.remove()
+            if (positionCloseResult.positionDepleted()) stockPositions[stcTx.symbol]!!.remove()
             quantityToClose -= positionCloseResult.quantityClosed
             log.debug("optionAssignmentSellToClose quantityToClose='{}'", quantityToClose)
             eventPublisher.publishEvent(StockSellToCloseEvent(position.btoTx, stcTx, positionCloseResult.quantityClosed))
@@ -81,23 +81,30 @@ class PositionsManager(
     }
 
     private fun optionRemoval(tx: OptionRemoval) {
-        val stoTx = removePositionFifo(tx)
+        val position = removePositionFifo(tx)
         when(tx.status) {
-            ASSIGNED -> log.info("position assigned. position='{}'", stoTx.optionDescription())
-            EXPIRED -> log.info("position expired. position='{}'", stoTx.optionDescription())
+            ASSIGNED -> log.info("position assigned. position='{}'", position.stoTx.optionDescription())
+            EXPIRED -> log.info("position expired. position='{}'", position.stoTx.optionDescription())
             else -> error("unexpected status ${tx.status}")
         }
     }
 
     private fun optionPositionBuyToClose(btcTx: OptionTrade) {
-        val stoTx = removePositionFifo(btcTx)
-        log.debug("closed stoTx='{}'", stoTx)
-        eventPublisher.publishEvent(OptionBuyToCloseEvent(stoTx, btcTx))
+        var quantityToClose = btcTx.quantity
+        do {
+            val position = optionPositions[btcTx.key()]!!.peek()
+                ?: throw RuntimeException("No position for ${btcTx.key()}")
+            val buyToCloseResult = position.buyToClose(quantityToClose)
+            if (buyToCloseResult.positionDepleted()) optionPositions[btcTx.key()]!!.remove()
+            eventPublisher.publishEvent(OptionBuyToCloseEvent(position.stoTx, btcTx, buyToCloseResult.quantityClosed))
+            quantityToClose -= buyToCloseResult.quantityClosed
+        } while (quantityToClose != 0)
+
     }
 
     private fun optionPositionSellToOpen(tx: OptionTrade) {
         optionPositions.computeIfAbsent(tx.key()) { LinkedList() }
-            .offer(tx)
+            .offer(OptionShortPosition(tx))
         log.debug("opened stoTx='{}'", tx)
         eventPublisher.publishEvent(OptionSellToOpenEvent(tx))
     }

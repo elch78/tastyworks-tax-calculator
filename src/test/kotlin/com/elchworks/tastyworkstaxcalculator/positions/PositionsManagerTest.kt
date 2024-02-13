@@ -75,8 +75,8 @@ class PositionsManagerTest @Autowired constructor(
             listOf(
                 OptionSellToOpenEvent(stoTx1),
                 OptionSellToOpenEvent(stoTx2),
-                OptionBuyToCloseEvent(stoTx1, btcTx1),
-                OptionBuyToCloseEvent(stoTx2, btcTx2),
+                OptionBuyToCloseEvent(stoTx1, btcTx1, 1),
+                OptionBuyToCloseEvent(stoTx2, btcTx2, 1),
             ))
     }
 

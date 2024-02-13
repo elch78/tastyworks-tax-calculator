@@ -59,13 +59,14 @@ class FiscalYearTest {
     fun optionClosed(netProfit: MonetaryAmount) {
         // Given
         val premium = randomUsdAmount()
-        val stoTx = randomOptionTrade().copy(value = premium, quantity = 1)
-        val btcTx = randomOptionTrade().copy(value = premium.negate() + netProfit, quantity = 1)
+        val buyPrice = premium.negate() + netProfit
+        val stoTx = randomOptionTrade().copy(value = premium, averagePrice = premium, quantity = 1)
+        val btcTx = randomOptionTrade().copy(value = buyPrice, averagePrice = buyPrice, quantity = 1)
         withRateUsdToEur()
 
         // When
         sut.onOptionPositionOpened(OptionSellToOpenEvent(stoTx))
-        sut.onOptionPositionClosed(OptionBuyToCloseEvent(stoTx, btcTx))
+        sut.onOptionPositionClosed(OptionBuyToCloseEvent(stoTx, btcTx, 1))
 
         // Then
         val expectedNetProfitEur = (netProfit * 2).toEur()

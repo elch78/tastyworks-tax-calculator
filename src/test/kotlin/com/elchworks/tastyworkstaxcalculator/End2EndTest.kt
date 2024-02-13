@@ -18,7 +18,6 @@ import com.elchworks.tastyworkstaxcalculator.transactions.Action.BUY_TO_OPEN
 import com.elchworks.tastyworkstaxcalculator.transactions.Action.SELL_TO_CLOSE
 import com.elchworks.tastyworkstaxcalculator.transactions.Action.SELL_TO_OPEN
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
@@ -60,11 +59,13 @@ class End2EndTest @Autowired constructor(
             randomDate(YEAR_2021, JANUARY),
             action = SELL_TO_OPEN,
             rootSymbol = SYMBOL,
-            value = value
+            averagePrice = value,
+            value = value,
         )
         val btcTx = stoTx.copy(
             action = BUY_TO_CLOSE,
-            value = value.negate()
+            averagePrice = value.negate(),
+            value = value.negate(),
         )
         withFixedExchangeRate()
 
@@ -86,12 +87,14 @@ class End2EndTest @Autowired constructor(
             date = sellDate,
             action = SELL_TO_OPEN,
             rootSymbol = SYMBOL,
-            value = usd(SELL_VALUE_USD)
+            value = usd(SELL_VALUE_USD),
+            averagePrice = usd(SELL_VALUE_USD),
         )
         val btcTx = stoTx.copy(
             date = buyDate,
             action = BUY_TO_CLOSE,
-            value = usd(-SELL_VALUE_USD)
+            value = usd(-SELL_VALUE_USD),
+            averagePrice = usd(-SELL_VALUE_USD),
         )
         withExchangeRate(sellDate, ONE)
         withExchangeRate(buyDate, TWO)
@@ -115,12 +118,14 @@ class End2EndTest @Autowired constructor(
             date = sellDate,
             action = SELL_TO_OPEN,
             rootSymbol = SYMBOL,
-            value = usd(SELL_VALUE_USD)
+            averagePrice = usd(SELL_VALUE_USD),
+            value = usd(SELL_VALUE_USD),
         )
         val btcTx = stoTx.copy(
             date = buyDate,
             action = BUY_TO_CLOSE,
-            value = usd(-SELL_VALUE_USD)
+            averagePrice = usd(-SELL_VALUE_USD),
+            value = usd(-SELL_VALUE_USD),
         )
         withExchangeRate(sellDate, TWO)
         withExchangeRate(buyDate, ONE)
@@ -142,12 +147,14 @@ class End2EndTest @Autowired constructor(
             date = randomDate(YEAR_2021, DECEMBER),
             action = SELL_TO_OPEN,
             rootSymbol = SYMBOL,
-            value = usd(SELL_VALUE_USD)
+            averagePrice = usd(SELL_VALUE_USD),
+            value = usd(SELL_VALUE_USD),
         )
         val btcTx = stoTx.copy(
             date = randomDate(YEAR_2022, JANUARY),
             action = BUY_TO_CLOSE,
-            value = usd(-BUY_VALUE_USD)
+            averagePrice = usd(-BUY_VALUE_USD),
+            value = usd(-BUY_VALUE_USD),
         )
         withFixedExchangeRate()
 
@@ -162,42 +169,52 @@ class End2EndTest @Autowired constructor(
             .isEqualTo(ProfitsSummary(eur(0), eur(BUY_VALUE_EUR), eur(0)))
     }
 
+    // TODO test partial close with loss and different year ...
+
     @Test
-    @Disabled("TODO fix #2")
-    fun optionPostionClosedPartially() {
-        val sellValue = usd(2)
-        val buyValue = usd(-1)
+    fun optionPostionClosedPartiallySameYear() {
+        val sellPrice = usd(2)
+        val buyPrice = usd(-2)
         // Given stoTx with quantity 2
         val stoTx = randomOptionTrade().copy(
             date = randomDate(YEAR_2021, JANUARY),
             action = SELL_TO_OPEN,
             rootSymbol = SYMBOL,
-            value = sellValue,
+            value = sellPrice * 2,
+            averagePrice = sellPrice,
             quantity = 2
         )
         // btcTx with quantity 1
         val btcTx = stoTx.copy(
             date = randomDate(YEAR_2021, FEBRUARY),
             action = BUY_TO_CLOSE,
-            value = buyValue,
+            rootSymbol = SYMBOL,
+            value = buyPrice,
+            averagePrice = buyPrice,
             quantity = 1
         )
         withFixedExchangeRate()
 
         // When
         eventPublisher.publishEvent(NewTransactionEvent(stoTx))
+
+        // Then profit contains premium of two options
+        assertThat(fiscalYearRepository.getFiscalYear(YEAR_2021).profits())
+            .isEqualTo(ProfitsSummary(eur(8), eur(0), eur(0)))
+
+        // When
         eventPublisher.publishEvent(NewTransactionEvent(btcTx))
 
-        // Then only one option is sold
+        // Then only one option is sold. Premium of one option is left
         assertThat(fiscalYearRepository.getFiscalYear(YEAR_2021).profits())
-            .isEqualTo(ProfitsSummary(eur( sellValue.plus(buyValue).number), eur(0), eur(0)))
+            .isEqualTo(ProfitsSummary(eur(4), eur(0), eur(0)))
 
         // When another btc tx with amount 1
         eventPublisher.publishEvent(NewTransactionEvent(btcTx))
 
-        // Then the second option is closed
+        // Then the second option is closed. No profit left
         assertThat(fiscalYearRepository.getFiscalYear(YEAR_2021).profits())
-            .isEqualTo(ProfitsSummary(eur( (sellValue.plus(buyValue)).multiply(BigDecimal(2)).number), eur(0), eur(0)))
+            .isEqualTo(ProfitsSummary(eur(0), eur(0), eur(0)))
     }
 
     @Test
