@@ -12,13 +12,13 @@ class StockPosition(
     private var quantityLeft: Int = btoTx.quantity
 
     fun sellToClose(quantity: Int): PositionCloseResult {
-        val currentSold = min(quantity, quantityLeft)
-        log.debug("sellToClose btoTx.quantity='{}', sold='{}', quantity='{}', currentSold='{}'", btoTx.quantity,
-            this.quantityLeft, quantity, currentSold)
-        quantityLeft -= currentSold
+        val numSold = min(quantity, quantityLeft)
+        log.debug("sellToClose btoTx.quantity='{}', sold='{}', quantity='{}', numSold='{}'", btoTx.quantity,
+            this.quantityLeft, quantity, numSold)
+        quantityLeft -= numSold
         log.debug("sellToClose quantityLeft='{}'", quantityLeft)
-        val quantityLeftInTx = quantity - currentSold
-        val positionCloseResult = PositionCloseResult(currentSold, quantityLeftInTx, quantityLeft)
+        val quantityLeftInTx = quantity - numSold
+        val positionCloseResult = PositionCloseResult(numSold, quantityLeftInTx, quantityLeft)
         log.debug("positionCloseResult='{}'", positionCloseResult)
         return positionCloseResult
     }
