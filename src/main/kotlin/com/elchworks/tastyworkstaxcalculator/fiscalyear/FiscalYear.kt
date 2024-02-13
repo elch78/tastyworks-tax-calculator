@@ -67,12 +67,6 @@ class FiscalYear(
         }
     }
 
-    private fun openedInThisFiscalYear(stoTx: OptionTrade): Boolean {
-        val openedInThisFiscalYear = stoTx.year() == fiscalYear
-        log.debug("openedInThisFiscalYear stoYear='{}', fiscalYear='{}', openedInThisFiscalYear='{}'", stoTx.year(), fiscalYear, openedInThisFiscalYear)
-        return openedInThisFiscalYear
-    }
-
     fun onStockPositionClosed(event: StockSellToCloseEvent) {
         val symbol = event.btoTx.symbol
         val quantitySold = event.quantitySold
