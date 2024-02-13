@@ -26,6 +26,7 @@ data class OptionTrade(
     val multiplier: Int,
     val underlyingSymbol: String,
     val orderNr: Int
+    // FIXME: Transaction unnecessary
 ): Transaction, OptionTransaction
 
 data class StockTrade(
