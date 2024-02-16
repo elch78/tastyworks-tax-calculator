@@ -19,7 +19,7 @@ class ExchangeRateRepository {
     @PostConstruct
     fun readCsv() {
         val ecbHistoricExchangeRates = ClassPathResource("eurofxref-hist.csv").file
-        val one = BigDecimal.ONE.setScale(2)
+        val one = BigDecimal.ONE.setScale(4)
         CSVReaderBuilder(FileReader(ecbHistoricExchangeRates.absoluteFile))
             .withSkipLines(1)// skip header
             .build()
