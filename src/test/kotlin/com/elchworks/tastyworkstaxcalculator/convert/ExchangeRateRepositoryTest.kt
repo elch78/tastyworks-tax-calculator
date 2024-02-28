@@ -16,6 +16,6 @@ class ExchangeRateRepositoryTest {
         val rate = sut.monthlyRateUsdToEur(LocalDate.of(2024, 1, 25))
 
         // Then
-        assertThat(rate).isEqualTo(BigDecimal.valueOf(0.9180))
+        assertThat(rate).isEqualTo(BigDecimal.valueOf(0.9180).setScale(4))
     }
 }
