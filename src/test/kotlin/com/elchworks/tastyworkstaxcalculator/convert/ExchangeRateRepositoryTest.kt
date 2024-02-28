@@ -7,7 +7,7 @@ import java.time.LocalDate
 
 class ExchangeRateRepositoryTest {
     @Test
-    fun test() {
+    fun readCsv() {
         // Given
         val sut = ExchangeRateRepository()
 
