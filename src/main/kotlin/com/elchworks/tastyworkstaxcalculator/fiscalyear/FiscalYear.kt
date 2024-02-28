@@ -52,28 +52,25 @@ class FiscalYear(
             if(isLoss(netProfit)) {
                 // is loss. Reduce profit by the whole premium, increase loss by netProfit
                 profitAndLossFromOptions += ProfitAndLoss(premium.negate(), netProfit.negate())
-                log.info("Close with net loss. position='{}', netProfit='{}', profit='{}', loss='{}'",
+                log.debug("Close with net loss. position='{}', netProfit='{}', profit='{}', loss='{}'",
                     stoTx.optionDescription(), format(netProfit), format(profitAndLossFromOptions.profit), format(profitAndLossFromOptions.loss))
             } else {
                 // no loss. Only reduce profit by buyValue.
                 profitAndLossFromOptions += ProfitAndLoss(buyValue, eur(0))
-                log.info("Close with net profit. position='{}', netProfit='{}', profit='{}', loss='{}'",
+                log.debug("Close with net profit. position='{}', netProfit='{}', profit='{}', loss='{}'",
                     stoTx.optionDescription(), format(netProfit), format(profitAndLossFromOptions.profit), format(profitAndLossFromOptions.loss))
             }
         } else {
             // the position was not opened in the same year. The whole value of the buy transaction is a loss for the current year
             profitAndLossFromOptions += ProfitAndLoss(eur(0), buyValue.negate())
-            log.info("Option position closed that was opened in a different fiscal year. netProfit='{}', profitAndLoss='{}'", format(buyValue), profitAndLossFromOptions)
+            log.debug("Option position closed that was opened in a different fiscal year. netProfit='{}', profitAndLoss='{}'", format(buyValue), profitAndLossFromOptions)
         }
     }
 
     fun onStockPositionClosed(event: StockSellToCloseEvent) {
-        val symbol = event.btoTx.symbol
-        val quantitySold = event.quantitySold
         val netProfit = netProfit(event.btoTx, event.stcTx, event.quantitySold)
         profitAndLossFromStocks += netProfit
-        log.info("Stock sold. symbol='{}', quantity='{}', netProfit='{}', profitFromStocks='{}'",
-            symbol, quantitySold, format(netProfit), format(profitAndLossFromStocks))
+        log.debug("profitFromStocks='{}'", format(profitAndLossFromStocks))
     }
 
     private fun netProfit(buyTx: Transaction, sellTx: Transaction, quantity: Int): MonetaryAmount {
@@ -88,7 +85,7 @@ class FiscalYear(
         log.debug("netProfit sellValue='{}', sellValueEur='{}'", format(sellValue), format(sellValueEur))
         // buy value is negative. Thus, we have to add the values
         val netProfit = sellValueEur + buyValueEur
-        log.debug("netProfit='{}'", format(netProfit))
+        log.info("buy value {}, sell value {}, netProfit='{}'", format(buyValueEur), format(sellValueEur), format(netProfit))
         return netProfit
     }
 

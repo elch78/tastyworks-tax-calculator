@@ -53,16 +53,18 @@ class PositionsManager(
     }
 
     private fun closeStockPosition(stcTx: StockTransaction) {
+        log.info("Stock STC symbol='{}' stcTx date {} quantity {} price {}",
+            stcTx.symbol, stcTx.date, stcTx.quantity, stcTx.averagePrice)
         var quantityToClose = stcTx.quantity
         do {
             val position = stockPositions[stcTx.symbol]!!.peek()
             log.debug("optionAssignmentSellToClose position='{}'", position)
             val positionCloseResult = position.sellToClose(quantityToClose)
-            log.debug("optionAssignmentSellToClose positionCloseResult='{}'", positionCloseResult)
             if (positionCloseResult.positionDepleted()) stockPositions[stcTx.symbol]!!.remove()
+            log.info("Closing position='{}', result='{}'", position.description(), positionCloseResult)
+            eventPublisher.publishEvent(StockSellToCloseEvent(position.btoTx, stcTx, positionCloseResult.quantityClosed))
             quantityToClose -= positionCloseResult.quantityClosed
             log.debug("optionAssignmentSellToClose quantityToClose='{}'", quantityToClose)
-            eventPublisher.publishEvent(StockSellToCloseEvent(position.btoTx, stcTx, positionCloseResult.quantityClosed))
         } while (quantityToClose != 0)
     }
 
@@ -83,21 +85,25 @@ class PositionsManager(
     private fun optionRemoval(tx: OptionRemoval) {
         val position = removePositionFifo(tx)
         when(tx.status) {
-            ASSIGNED -> log.info("position assigned. position='{}'", position.stoTx.optionDescription())
-            EXPIRED -> log.info("position expired. position='{}'", position.stoTx.optionDescription())
+            ASSIGNED -> log.info("position assigned. position='{}'", position.description())
+            EXPIRED -> log.info("position expired. position='{}'", position.description())
             else -> error("unexpected status ${tx.status}")
         }
     }
 
     private fun optionPositionBuyToClose(btcTx: OptionTrade) {
+        log.info("Option BTC option='{}' btcTx date {} quantity {} price {}", btcTx.optionDescription(),
+            btcTx.date, btcTx.quantity, btcTx.averagePrice)
         var quantityToClose = btcTx.quantity
         do {
             val position = optionPositions[btcTx.key()]!!.peek()
                 ?: throw RuntimeException("No position for ${btcTx.key()}")
             val buyToCloseResult = position.buyToClose(quantityToClose)
             if (buyToCloseResult.positionDepleted()) optionPositions[btcTx.key()]!!.remove()
+            log.info("Closing position='{}', result='{}'", position.description(), buyToCloseResult)
             eventPublisher.publishEvent(OptionBuyToCloseEvent(position.stoTx, btcTx, buyToCloseResult.quantityClosed))
             quantityToClose -= buyToCloseResult.quantityClosed
+            log.debug("optionPositionBuyToClose quantityToClose='{}'", quantityToClose)
         } while (quantityToClose != 0)
 
     }

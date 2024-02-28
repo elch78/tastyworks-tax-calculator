@@ -22,6 +22,8 @@ class StockPosition(
         return positionCloseResult
     }
 
+    fun description() = "symbol ${btoTx.symbol}, btoTx date ${btoTx.date} quantity ${btoTx.quantity} price ${btoTx.averagePrice}"
+
     override fun toString(): String {
         return "StockPosition(btoTx=$btoTx, sold=$quantityLeft)"
     }
