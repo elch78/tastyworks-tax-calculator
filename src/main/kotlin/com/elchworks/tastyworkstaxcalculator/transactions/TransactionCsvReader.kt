@@ -58,7 +58,7 @@ class TransactionCsvReader {
             isOptionRemoval(columns) -> optionRemoval(columns)
             isStockTrade(columns) -> stockTrade(columns)
             isAssignment(columns) -> optionAssignment(columns)
-            else -> error("TODO")
+            else -> error("Unknown transaction type. columns='${columns.joinToString(",")}'")
         }
     }
 
