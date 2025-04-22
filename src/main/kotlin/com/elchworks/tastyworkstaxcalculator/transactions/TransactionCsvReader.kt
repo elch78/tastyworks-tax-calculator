@@ -89,11 +89,14 @@ class TransactionCsvReader {
         return isOptionTrade
     }
 
+    /**
+     * @return true if option is removed due to expiration or removal
+     */
     private fun isOptionRemoval(columns: Array<String>): Boolean {
         val type = columns.type()
-        val action = columns.action()
-        val isOptionRemoval = type == "Receive Deliver" && action.isBlank()
-        log.debug("isOptionRemoval type='{}', action='{}', isOptionRemoval='{}'", type, action, isOptionRemoval)
+        val instrumentType = columns.instrumentType()
+        val isOptionRemoval = type == "Receive Deliver" && instrumentType == "Equity Option"
+        log.debug("isOptionRemoval type='{}', instrumentType='{}', isOptionRemoval='{}'", type, instrumentType, isOptionRemoval)
         return isOptionRemoval
     }
 
@@ -181,22 +184,22 @@ class TransactionCsvReader {
 
 fun Array<String>.date() = this[0]
 fun Array<String>.type() = this[1]
-fun Array<String>.action() = this[2]
-fun Array<String>.symbol() = this[3]
-fun Array<String>.instrumentType() = this[4]
-fun Array<String>.description() = this[5]
-fun Array<String>.value() = this[6].replace(",", "").toFloat().toMonetaryAmountUsd()
-fun Array<String>.quantity() = this[7].toInt()
-fun Array<String>.averagePrice() = this[8].toFloat().toMonetaryAmountUsd()
-fun Array<String>.commissions() = this[9].toFloat().toMonetaryAmountUsd()
-fun Array<String>.fees() = this[10].toFloat().toMonetaryAmountUsd()
-fun Array<String>.multiplier() = this[11]
-fun Array<String>.rootSymbol() = this[12]
-fun Array<String>.underlyingSymbol() = this[13]
-fun Array<String>.expirationDate() = this[14]
-fun Array<String>.strikePrice() = this[15].toFloat().toMonetaryAmountUsd()
-fun Array<String>.callOrPut() = this[16]
-fun Array<String>.orderNr() = this[17]
+fun Array<String>.action() = this[3]
+fun Array<String>.symbol() = this[4]
+fun Array<String>.instrumentType() = this[5]
+fun Array<String>.description() = this[6]
+fun Array<String>.value() = this[7].replace(",", "").toFloat().toMonetaryAmountUsd()
+fun Array<String>.quantity() = this[8].toInt()
+fun Array<String>.averagePrice() = this[9].toFloat().toMonetaryAmountUsd()
+fun Array<String>.commissions() = this[10].toFloat().toMonetaryAmountUsd()
+fun Array<String>.fees() = this[11].toFloat().toMonetaryAmountUsd()
+fun Array<String>.multiplier() = this[12]
+fun Array<String>.rootSymbol() = this[13]
+fun Array<String>.underlyingSymbol() = this[14]
+fun Array<String>.expirationDate() = this[15]
+fun Array<String>.strikePrice() = this[16].toFloat().toMonetaryAmountUsd()
+fun Array<String>.callOrPut() = this[17]
+fun Array<String>.orderNr() = this[18]
 
 
 operator fun <T> List<T>.component6() = this[5]
