@@ -118,12 +118,6 @@ class Portfolio(
 
         val positions = stockPositions[splitTransaction.symbol]!!
         val totalBuyValue = positions.fold(usd(0.0)) { sum, position -> sum.add(position.buyValue()) }
-        val totalQuantity = positions.fold(0) { sum, position -> sum + position.quantity() }
-
-        if (stcTx.quantity != totalQuantity) {
-            throw RuntimeException("Quantity of reverse split STC transaction (${stcTx.quantity}) doesn't " +
-                    "match quantity in portfolio ($totalQuantity).")
-        }
 
         val newQuantity = btoTx.quantity
         val averagePrice = totalBuyValue.divide(newQuantity)
@@ -145,7 +139,7 @@ class Portfolio(
         val positionAfterSplit = LinkedList<StockPosition>()
         positionAfterSplit.offer(newPostion)
         stockPositions[splitTransaction.symbol] = positionAfterSplit
-        log.info("Stock reverse split. totalQuantity='{}', newQuantity'{}', averagePrice='{}'", totalQuantity, newPostion.quantity(), averagePrice)
+        log.info("Stock reverse split. newQuantity'{}', averagePrice='{}'", newPostion.quantity(), averagePrice)
     }
 
 //    private fun totalValue(symbol: String) = stockPositions[symbol]!!.reduce { totalValue, position ->
