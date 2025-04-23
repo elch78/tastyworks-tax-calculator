@@ -116,8 +116,7 @@ class Portfolio(
 
         log.debug("split btoTx='{}', stc='{}'", btoTx, stcTx)
 
-        val positions = stockPositions[splitTransaction.symbol]!!
-        val totalBuyValue = positions.fold(usd(0.0)) { sum, position -> sum.add(position.buyValue()) }
+        val totalBuyValue = stockPositions[splitTransaction.symbol]!!.totalBuyValue()
 
         val newQuantity = btoTx.quantity
         val averagePrice = totalBuyValue.divide(newQuantity)
@@ -142,13 +141,8 @@ class Portfolio(
         log.info("Stock reverse split. newQuantity'{}', averagePrice='{}'", newPostion.quantity(), averagePrice)
     }
 
-//    private fun totalValue(symbol: String) = stockPositions[symbol]!!.reduce { totalValue, position ->
-//        {
-//            val positionBuyValue = position.btoTx.averagePrice.multiply(
-//                position.quantity()
-//            )
-//            totalValue.add(positionBuyValue)
-//        }  }
+    fun Queue<StockPosition>.totalBuyValue() =
+        fold(usd(0.0)) { sum, position -> sum.add(position.buyValue()) }
 
     private fun StockTransaction.validateMatchingSplitTransaction(stockTrade: StockTransaction) {
         if(this.date != stockTrade.date) {
