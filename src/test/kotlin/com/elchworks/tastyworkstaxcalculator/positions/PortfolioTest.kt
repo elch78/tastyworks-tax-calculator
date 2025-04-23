@@ -26,10 +26,10 @@ import java.util.stream.Collectors
 
 private const val SYMBOL = "ABC"
 
-@SpringBootTest(classes = [PositionsManager::class])
+@SpringBootTest(classes = [Portfolio::class])
 @RecordApplicationEvents
-class PositionsManagerTest @Autowired constructor(
-    private val sut: PositionsManager,
+class PortfolioTest @Autowired constructor(
+    private val sut: Portfolio,
 ) {
 
     @Test

@@ -25,10 +25,10 @@ import org.springframework.stereotype.Component
 import java.util.*
 
 @Component
-class PositionsManager(
+class Portfolio(
     private val eventPublisher: ApplicationEventPublisher,
 ) {
-    private val log = LoggerFactory.getLogger(PositionsManager::class.java)
+    private val log = LoggerFactory.getLogger(Portfolio::class.java)
     private val optionPositions = mutableMapOf<String, Queue<OptionShortPosition>>()
     private val stockPositions = mutableMapOf<String, Queue<StockPosition>>()
 
