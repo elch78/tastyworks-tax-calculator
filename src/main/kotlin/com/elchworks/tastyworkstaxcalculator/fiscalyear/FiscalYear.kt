@@ -45,8 +45,8 @@ class FiscalYear(
     fun onOptionPositionClosed(btcEvent: OptionBuyToCloseEvent) {
         val btcTx = btcEvent.btcTx
         val stoTx = btcEvent.stoTx
-        val premium = currencyExchange.usdToEur(Profit(stoTx.averagePrice.multiply(btcEvent.quantitySold), stoTx.date))
-        val buyValue = currencyExchange.usdToEur(Profit(btcTx.averagePrice.multiply(btcEvent.quantitySold), btcTx.date))
+        val premium = currencyExchange.usdToEur(stoTx.averagePrice.multiply(btcEvent.quantitySold), stoTx.date)
+        val buyValue = currencyExchange.usdToEur(btcTx.averagePrice.multiply(btcEvent.quantitySold), btcTx.date)
         if(positionWasOpenedInThisFiscalYear(stoTx)) {
             val netProfit = netProfit(btcTx, stoTx, btcEvent.quantitySold)
             if(isLoss(netProfit)) {
@@ -78,10 +78,10 @@ class FiscalYear(
         val buyPrice = buyTx.averagePrice
         log.debug("netProfit quantity='{}', buyPrice='{}', sellPrice='{}'", quantity, format(buyPrice), format(sellPrice))
         val buyValue = buyPrice * quantity
-        val buyValueEur = currencyExchange.usdToEur(Profit(buyValue, buyTx.date))
+        val buyValueEur = currencyExchange.usdToEur(buyValue, buyTx.date)
         log.debug("netProfit buyValue='{}', buyValueEur='{}'", format(buyValue), format(buyValueEur))
         val sellValue = sellPrice * quantity
-        val sellValueEur = currencyExchange.usdToEur(Profit(sellValue, sellTx.date))
+        val sellValueEur = currencyExchange.usdToEur(sellValue, sellTx.date)
         log.debug("netProfit sellValue='{}', sellValueEur='{}'", format(sellValue), format(sellValueEur))
         // buy value is negative. Thus, we have to add the values
         val netProfit = sellValueEur + buyValueEur
@@ -109,6 +109,6 @@ class FiscalYear(
         return netProfit
     }
 
-    private fun txValueInEur(btcTx: OptionTrade) = currencyExchange.usdToEur(Profit(btcTx.value, btcTx.date))
+    private fun txValueInEur(btcTx: OptionTrade) = currencyExchange.usdToEur(btcTx.value, btcTx.date)
 
 }
