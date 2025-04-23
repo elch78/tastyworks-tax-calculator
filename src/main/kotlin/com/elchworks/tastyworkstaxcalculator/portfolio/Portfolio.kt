@@ -138,6 +138,7 @@ class Portfolio(
         val positionAfterSplit = LinkedList<StockPosition>()
         positionAfterSplit.offer(newPostion)
         stockPositions[splitTransaction.symbol] = positionAfterSplit
+        splitTransactionCounterpart = null
         log.info("Stock reverse split. newQuantity'{}', averagePrice='{}'", newPostion.quantity(), averagePrice)
     }
 
