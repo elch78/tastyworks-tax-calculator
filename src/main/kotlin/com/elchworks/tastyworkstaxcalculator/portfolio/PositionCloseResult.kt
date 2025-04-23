@@ -1,4 +1,4 @@
-package com.elchworks.tastyworkstaxcalculator.positions
+package com.elchworks.tastyworkstaxcalculator.portfolio
 
 data class PositionCloseResult(
     val quantityClosed: Int,

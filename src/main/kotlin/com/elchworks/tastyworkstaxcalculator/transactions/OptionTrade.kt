@@ -1,6 +1,6 @@
 package com.elchworks.tastyworkstaxcalculator.transactions
 
-import com.elchworks.tastyworkstaxcalculator.positions.option.OptionPositionStatus
+import com.elchworks.tastyworkstaxcalculator.portfolio.option.OptionPositionStatus
 import java.time.Instant
 import java.time.LocalDate
 import java.time.Year

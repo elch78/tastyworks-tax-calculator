@@ -1,6 +1,6 @@
-package com.elchworks.tastyworkstaxcalculator.positions
+package com.elchworks.tastyworkstaxcalculator.portfolio
 
-import com.elchworks.tastyworkstaxcalculator.positions.stock.StockPosition
+import com.elchworks.tastyworkstaxcalculator.portfolio.stock.StockPosition
 import com.elchworks.tastyworkstaxcalculator.test.randomStockTrade
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test

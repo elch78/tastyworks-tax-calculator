@@ -1,8 +1,8 @@
 package com.elchworks.tastyworkstaxcalculator.test.positions
 
 import com.elchworks.tastyworkstaxcalculator.eur
-import com.elchworks.tastyworkstaxcalculator.positions.ProfitAndLoss
-import com.elchworks.tastyworkstaxcalculator.positions.plus
+import com.elchworks.tastyworkstaxcalculator.portfolio.ProfitAndLoss
+import com.elchworks.tastyworkstaxcalculator.portfolio.plus
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 

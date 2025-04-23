@@ -1,8 +1,8 @@
-package com.elchworks.tastyworkstaxcalculator.positions
+package com.elchworks.tastyworkstaxcalculator.portfolio
 
-import com.elchworks.tastyworkstaxcalculator.positions.option.OptionBuyToCloseEvent
-import com.elchworks.tastyworkstaxcalculator.positions.option.OptionSellToOpenEvent
-import com.elchworks.tastyworkstaxcalculator.positions.stock.StockSellToCloseEvent
+import com.elchworks.tastyworkstaxcalculator.portfolio.option.OptionBuyToCloseEvent
+import com.elchworks.tastyworkstaxcalculator.portfolio.option.OptionSellToOpenEvent
+import com.elchworks.tastyworkstaxcalculator.portfolio.stock.StockSellToCloseEvent
 import com.elchworks.tastyworkstaxcalculator.test.randomAssignment
 import com.elchworks.tastyworkstaxcalculator.test.randomDate
 import com.elchworks.tastyworkstaxcalculator.test.randomOptionTrade

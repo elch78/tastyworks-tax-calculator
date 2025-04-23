@@ -1,6 +1,6 @@
 package com.elchworks.tastyworkstaxcalculator.convert
 
-import com.elchworks.tastyworkstaxcalculator.positions.Profit
+import com.elchworks.tastyworkstaxcalculator.portfolio.Profit
 import com.elchworks.tastyworkstaxcalculator.times
 import org.javamoney.moneta.Money
 import org.slf4j.LoggerFactory

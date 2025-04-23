@@ -1,7 +1,7 @@
 package com.elchworks.tastyworkstaxcalculator
 
 import com.elchworks.tastyworkstaxcalculator.fiscalyear.FiscalYearManager
-import com.elchworks.tastyworkstaxcalculator.positions.NewTransactionEvent
+import com.elchworks.tastyworkstaxcalculator.portfolio.NewTransactionEvent
 import org.slf4j.LoggerFactory
 import org.springframework.boot.ApplicationArguments
 import org.springframework.boot.ApplicationRunner

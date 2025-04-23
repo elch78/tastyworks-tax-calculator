@@ -1,8 +1,8 @@
 package com.elchworks.tastyworkstaxcalculator.transactions
 
 import com.elchworks.tastyworkstaxcalculator.TransactionCsvReader
-import com.elchworks.tastyworkstaxcalculator.positions.option.OptionPositionStatus.ASSIGNED
-import com.elchworks.tastyworkstaxcalculator.positions.option.OptionPositionStatus.EXPIRED
+import com.elchworks.tastyworkstaxcalculator.portfolio.option.OptionPositionStatus.ASSIGNED
+import com.elchworks.tastyworkstaxcalculator.portfolio.option.OptionPositionStatus.EXPIRED
 import com.elchworks.tastyworkstaxcalculator.transactions.Action.BUY_TO_CLOSE
 import com.elchworks.tastyworkstaxcalculator.transactions.Action.BUY_TO_OPEN
 import com.elchworks.tastyworkstaxcalculator.transactions.Action.SELL_TO_CLOSE

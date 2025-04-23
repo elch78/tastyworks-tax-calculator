@@ -6,9 +6,9 @@ import com.elchworks.tastyworkstaxcalculator.eur
 import com.elchworks.tastyworkstaxcalculator.fiscalyear.FiscalYear
 import com.elchworks.tastyworkstaxcalculator.fiscalyear.ProfitsSummary
 import com.elchworks.tastyworkstaxcalculator.plus
-import com.elchworks.tastyworkstaxcalculator.positions.option.OptionBuyToCloseEvent
-import com.elchworks.tastyworkstaxcalculator.positions.option.OptionSellToOpenEvent
-import com.elchworks.tastyworkstaxcalculator.positions.stock.StockSellToCloseEvent
+import com.elchworks.tastyworkstaxcalculator.portfolio.option.OptionBuyToCloseEvent
+import com.elchworks.tastyworkstaxcalculator.portfolio.option.OptionSellToOpenEvent
+import com.elchworks.tastyworkstaxcalculator.portfolio.stock.StockSellToCloseEvent
 import com.elchworks.tastyworkstaxcalculator.test.randomOptionTrade
 import com.elchworks.tastyworkstaxcalculator.test.randomStockTrade
 import com.elchworks.tastyworkstaxcalculator.test.randomUsdAmount

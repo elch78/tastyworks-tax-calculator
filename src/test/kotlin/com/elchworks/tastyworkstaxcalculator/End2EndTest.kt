@@ -5,8 +5,8 @@ package com.elchworks.tastyworkstaxcalculator
 import com.elchworks.tastyworkstaxcalculator.convert.ExchangeRateRepository
 import com.elchworks.tastyworkstaxcalculator.fiscalyear.FiscalYearRepository
 import com.elchworks.tastyworkstaxcalculator.fiscalyear.ProfitsSummary
-import com.elchworks.tastyworkstaxcalculator.positions.NewTransactionEvent
-import com.elchworks.tastyworkstaxcalculator.positions.option.OptionPositionStatus.ASSIGNED
+import com.elchworks.tastyworkstaxcalculator.portfolio.NewTransactionEvent
+import com.elchworks.tastyworkstaxcalculator.portfolio.option.OptionPositionStatus.ASSIGNED
 import com.elchworks.tastyworkstaxcalculator.test.randomBigDecimal
 import com.elchworks.tastyworkstaxcalculator.test.randomDate
 import com.elchworks.tastyworkstaxcalculator.test.randomOptionRemoval

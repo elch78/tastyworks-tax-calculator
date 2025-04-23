@@ -1,6 +1,6 @@
-package com.elchworks.tastyworkstaxcalculator.positions.option
+package com.elchworks.tastyworkstaxcalculator.portfolio.option
 
-import com.elchworks.tastyworkstaxcalculator.positions.PositionCloseResult
+import com.elchworks.tastyworkstaxcalculator.portfolio.PositionCloseResult
 import com.elchworks.tastyworkstaxcalculator.transactions.OptionTrade
 import com.elchworks.tastyworkstaxcalculator.transactions.optionDescription
 import org.slf4j.LoggerFactory
