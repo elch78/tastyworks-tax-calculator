@@ -70,8 +70,8 @@ class End2EndTest @Autowired constructor(
         withFixedExchangeRate()
 
         // When
-        eventPublisher.publishEvent(NewTransactionEvent(stoTx))
-        eventPublisher.publishEvent(NewTransactionEvent(btcTx))
+        publishTx(stoTx)
+        publishTx(btcTx)
 
         // Then
         assertThat(fiscalYearRepository.getFiscalYear(YEAR_2021).profits())
@@ -100,8 +100,8 @@ class End2EndTest @Autowired constructor(
         withExchangeRate(buyDate, TWO)
 
         // When
-        eventPublisher.publishEvent(NewTransactionEvent(stoTx))
-        eventPublisher.publishEvent(NewTransactionEvent(btcTx))
+        publishTx(stoTx)
+        publishTx(btcTx)
 
         // Then loss due to different exchange rate
         val lossesFromOptions = eur(SELL_VALUE_USD)
@@ -131,8 +131,8 @@ class End2EndTest @Autowired constructor(
         withExchangeRate(buyDate, ONE)
 
         // When
-        eventPublisher.publishEvent(NewTransactionEvent(stoTx))
-        eventPublisher.publishEvent(NewTransactionEvent(btcTx))
+        publishTx(stoTx)
+        publishTx(btcTx)
 
         // Then loss due to different exchange rate
         val profitsFromOptions = eur(SELL_VALUE_USD)
@@ -159,8 +159,8 @@ class End2EndTest @Autowired constructor(
         withFixedExchangeRate()
 
         // When
-        eventPublisher.publishEvent(NewTransactionEvent(stoTx))
-        eventPublisher.publishEvent(NewTransactionEvent(btcTx))
+        publishTx(stoTx)
+        publishTx(btcTx)
 
         // Then sell value is profit for 2021 and buy value is a loss for 2022
         assertThat(fiscalYearRepository.getFiscalYear(YEAR_2021).profits())
@@ -197,21 +197,21 @@ class End2EndTest @Autowired constructor(
         withFixedExchangeRate()
 
         // When
-        eventPublisher.publishEvent(NewTransactionEvent(stoTx))
+        publishTx(stoTx)
 
         // Then profit contains premium of two options
         assertThat(fiscalYearRepository.getFiscalYear(YEAR_2021).profits())
             .isEqualTo(ProfitsSummary(eur(8), eur(0), eur(0)))
 
         // When
-        eventPublisher.publishEvent(NewTransactionEvent(btcTx))
+        publishTx(btcTx)
 
         // Then only one option is sold. Premium of one option is left
         assertThat(fiscalYearRepository.getFiscalYear(YEAR_2021).profits())
             .isEqualTo(ProfitsSummary(eur(4), eur(0), eur(0)))
 
         // When another btc tx with amount 1
-        eventPublisher.publishEvent(NewTransactionEvent(btcTx))
+        publishTx(btcTx)
 
         // Then the second option is closed. No profit left
         assertThat(fiscalYearRepository.getFiscalYear(YEAR_2021).profits())
@@ -231,8 +231,8 @@ class End2EndTest @Autowired constructor(
         withFixedExchangeRate()
 
         // When
-        eventPublisher.publishEvent(NewTransactionEvent(stoTx))
-        eventPublisher.publishEvent(NewTransactionEvent(assignmentTx))
+        publishTx(stoTx)
+        publishTx(assignmentTx)
 
         // Then
         assertThat(fiscalYearRepository.getFiscalYear(YEAR_2021).profits())
@@ -273,12 +273,12 @@ class End2EndTest @Autowired constructor(
         withFixedExchangeRate()
 
         // When
-        eventPublisher.publishEvent(NewTransactionEvent(stoTxPut))
-        eventPublisher.publishEvent(NewTransactionEvent(assignmentPut))
-        eventPublisher.publishEvent(NewTransactionEvent(stockBtoTx))
-        eventPublisher.publishEvent(NewTransactionEvent(stoTxCall))
-        eventPublisher.publishEvent(NewTransactionEvent(assignmentCall))
-        eventPublisher.publishEvent(NewTransactionEvent(stockStcTx))
+        publishTx(stoTxPut)
+        publishTx(assignmentPut)
+        publishTx(stockBtoTx)
+        publishTx(stoTxCall)
+        publishTx(assignmentCall)
+        publishTx(stockStcTx)
 
         // Then
         val expectedStockProfit = profitPerStock * BigDecimal("100") * EXCHANGE_RATE
@@ -324,6 +324,10 @@ class End2EndTest @Autowired constructor(
         commissions = usd(COMMISSIONS)
     )
 
+    private fun publishTx(stoTxPut: Transaction) {
+        eventPublisher.publishEvent(NewTransactionEvent(stoTxPut))
+    }
+
     companion object {
         private val TWO = BigDecimal("2.0")
         private val YEAR_2021 = Year.of(2021)
@@ -345,4 +349,6 @@ class End2EndTest @Autowired constructor(
             Arguments.of(BigDecimal("-10.0"))
         )
     }
+
 }
+
