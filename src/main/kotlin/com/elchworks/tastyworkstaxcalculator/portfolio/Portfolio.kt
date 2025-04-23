@@ -139,7 +139,7 @@ class Portfolio(
         positionAfterSplit.offer(newPostion)
         stockPositions[splitTransaction.symbol] = positionAfterSplit
         splitTransactionCounterpart = null
-        log.info("Stock reverse split. newQuantity'{}', averagePrice='{}'", newPostion.quantity(), averagePrice)
+        log.info("Stock reverse split. oldQuantity='{}', newQuantity='{}', totalBuyValue='{}', averagePrice='{}'", stcTx.quantity, btoTx.quantity, totalBuyValue, averagePrice)
     }
 
     fun Queue<StockPosition>.totalBuyValue() =
