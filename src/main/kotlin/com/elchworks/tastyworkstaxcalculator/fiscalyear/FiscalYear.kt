@@ -108,13 +108,6 @@ class FiscalYear(
         return positionWasOpenedInThisFiscalYear
     }
 
-    private fun netProfit(premium: MonetaryAmount, buyValue: MonetaryAmount): MonetaryAmount {
-        // buyValue is negative
-        val netProfit = premium + buyValue
-        log.debug("netProfit premium='{}', buyValue='{}', netProfit='{}'", format(premium), format(buyValue), format(netProfit))
-        return netProfit
-    }
-
     private fun txValueInEur(btcTx: OptionTrade) = currencyExchange.usdToEur(btcTx.value, btcTx.date)
 
 }
