@@ -303,6 +303,7 @@ class End2EndTest @Autowired constructor(
         withFixedExchangeRate()
 
         // When
+        // two assignments. Average price 15
         // assignments 100@10
         publishTx(
             defaultOptionStoTx().copy(
