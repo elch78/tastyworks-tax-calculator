@@ -2,12 +2,8 @@ package com.elchworks.tastyworkstaxcalculator
 
 import com.elchworks.tastyworkstaxcalculator.portfolio.option.OptionPositionStatus.ASSIGNED
 import com.elchworks.tastyworkstaxcalculator.portfolio.option.OptionPositionStatus.EXPIRED
-import com.elchworks.tastyworkstaxcalculator.transactions.Action
-import com.elchworks.tastyworkstaxcalculator.transactions.OptionAssignment
-import com.elchworks.tastyworkstaxcalculator.transactions.OptionRemoval
-import com.elchworks.tastyworkstaxcalculator.transactions.OptionTrade
-import com.elchworks.tastyworkstaxcalculator.transactions.StockTrade
-import com.elchworks.tastyworkstaxcalculator.transactions.Transaction
+import com.elchworks.tastyworkstaxcalculator.transactions.*
+import com.elchworks.tastyworkstaxcalculator.transactions.Action.BUY_TO_OPEN
 import com.opencsv.CSVReaderBuilder
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
@@ -19,6 +15,7 @@ import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeFormatterBuilder
 import java.time.format.SignStyle
 import java.time.temporal.ChronoField
+import java.time.temporal.ChronoUnit.SECONDS
 
 @Component
 class TransactionCsvReader {
@@ -56,7 +53,7 @@ class TransactionCsvReader {
         return when {
             isOptionTrade(columns) -> optionTrade(columns)
             isOptionRemoval(columns) -> optionRemoval(columns)
-            isStockTrade(columns) -> stockTrade(columns)
+            isStockTrade(columns) || isReverseSplit(columns) -> stockTrade(columns)
             isAssignment(columns) -> optionAssignment(columns)
             else -> error("Unknown transaction type. columns='${columns.joinToString(",")}'")
         }
@@ -66,6 +63,7 @@ class TransactionCsvReader {
         OptionAssignment(
             date = parseDate(columns.date()),
             action = Action.valueOf(columns.action()),
+            type = columns.subType(),
             symbol = columns.symbol(),
             value = columns.value(),
             quantity = columns.quantity(),
@@ -90,6 +88,15 @@ class TransactionCsvReader {
         return isOptionTrade
     }
 
+    private fun isReverseSplit(columns: Array<String>): Boolean {
+        val type = columns.type()
+        val instrumentType = columns.instrumentType()
+        val subType = columns.subType()
+        val isReverseSplit = type == "Receive Deliver" && subType == "Reverse Split" && instrumentType == "Equity"
+        log.debug("isReverseSplit type='{}', subType='{}', instrumentType='{}', isOptionTrade='{}'", type, subType, instrumentType, isReverseSplit)
+        return isReverseSplit
+    }
+
     /**
      * @return true if option is removed due to expiration or removal
      */
@@ -110,18 +117,34 @@ class TransactionCsvReader {
         return isStockTrade
     }
 
-    private fun stockTrade(columns: Array<String>) =
-        StockTrade(
-            date = parseDate(columns.date()),
+    private fun stockTrade(columns: Array<String>): StockTrade {
+        val action = Action.valueOf(columns.action())
+        var date = parseDate(columns.date())
+
+        // deal with reverse splits.
+        // To not make things unnecessarily complicated we just handle them as normal stock
+        // transactions. Because the timestamp is identical for the BTO and STC transactions
+        // add a second to the BTO transaction to make sure they are ordered correctly
+        val isReverseSplit = isReverseSplit(columns)
+        if(isReverseSplit && action == BUY_TO_OPEN) {
+            date = date.plus(1, SECONDS)
+        }
+        // for reverse split there are no commissions
+        val commissions = if (isReverseSplit) usd(0.0) else columns.commissions()
+
+        return StockTrade(
+            date = date,
             symbol = columns.symbol(),
-            action = Action.valueOf(columns.action()),
+            action = action,
+            type = columns.subType(),
             value = columns.value(),
             description = columns.description(),
             quantity = columns.quantity(),
             averagePrice = columns.averagePrice(),
-            commissions = columns.commissions(),
+            commissions = commissions,
             fees = columns.fees(),
         )
+    }
 
     private fun optionRemoval(columns: Array<String>) =
         OptionRemoval(
@@ -185,6 +208,7 @@ class TransactionCsvReader {
 
 fun Array<String>.date() = this[0]
 fun Array<String>.type() = this[1]
+fun Array<String>.subType() = this[2]
 fun Array<String>.action() = this[3]
 fun Array<String>.symbol() = this[4]
 fun Array<String>.instrumentType() = this[5]

@@ -32,6 +32,7 @@ data class StockTrade(
     override val date: Instant,
     override val symbol: String,
     override val action: Action,
+    override val type: String,
     override val value: MonetaryAmount,
     override val quantity: Int,
     override val averagePrice: MonetaryAmount,
@@ -55,6 +56,7 @@ data class OptionRemoval(
 data class OptionAssignment(
     override val date: Instant,
     override val action: Action,
+    override val type: String,
     override val symbol: String,
     override val value: MonetaryAmount,
     override val quantity: Int,
@@ -80,6 +82,7 @@ interface OptionTransaction: Transaction {
 interface StockTransaction : Transaction{
     val action: Action
     val value: MonetaryAmount
+    val type: String
 }
 
 fun Transaction.year(): Year = Year.of(this.date.atZone(ZoneId.of("CET")).get(ChronoField.YEAR))

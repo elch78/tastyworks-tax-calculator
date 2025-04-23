@@ -65,6 +65,7 @@ fun randomAssignment() =
     OptionAssignment(
         date = randomDateIn2021(),
         action = BUY_TO_OPEN,
+        type = "Buy to Open",
         symbol = "symbol",
         value = randomUsdAmount(),
         quantity = RandomUtils.nextInt(),
@@ -79,6 +80,7 @@ fun randomStockTrade() =
     StockTrade(
         symbol = "symbol",
         action = SELL_TO_CLOSE,
+        type = "Buy to Open",
         quantity = RandomUtils.nextInt(),
         value = randomUsdAmount(),
         date = randomDateIn2021(),

@@ -15,6 +15,8 @@ import java.math.BigDecimal
 import java.math.BigDecimal.ZERO
 import java.time.Instant
 import java.time.LocalDate
+import java.time.temporal.ChronoUnit
+import java.time.temporal.ChronoUnit.SECONDS
 
 class TransactionCsvReaderTest {
 
@@ -155,6 +157,7 @@ class TransactionCsvReaderTest {
                 OptionAssignment(
                     date = Instant.parse("2022-11-18T22:00:00Z"),
                     action = SELL_TO_CLOSE,
+                    type = "Sell to Close",
                     symbol = "MMAT",
                     value = usd(100.0f),
                     quantity = 100,
@@ -165,6 +168,7 @@ class TransactionCsvReaderTest {
                 OptionAssignment(
                     date = Instant.parse("2022-12-16T22:00:00Z"),
                     action = BUY_TO_OPEN,
+                    type = "Buy to Open",
                     symbol = "TLRY",
                     value = usd(-700.0f),
                     quantity = 200,
@@ -182,13 +186,41 @@ class TransactionCsvReaderTest {
                     date = Instant.parse("2022-03-28T13:30:27Z"),
                     symbol = "APPH",
                     action = SELL_TO_CLOSE,
+                    type = "Sell to Close",
                     value = usd(601.71f),
                     description = "Sold 100 APPH @ 6.02",
                     quantity = 100,
                     averagePrice = usd(6.02f),
                     commissions = usd(0.0f),
                     fees = usd(-0.102f)
-                )
+                ),
+                StockTrade(
+                    date = Instant.parse("2024-06-17T10:47:02Z")
+                        // timestamps in csv are identical for splits
+                        // make sure the events are ordered correctly
+                        .plus(1, SECONDS),
+                    symbol = "WKHS",
+                    action = BUY_TO_OPEN,
+                    type = "Reverse Split",
+                    value = usd(-1100.00),
+                    description = "Reverse split: Open 20.0 WKHS",
+                    quantity = 20,
+                    averagePrice = usd(-55.0f),
+                    commissions = usd(0.0f),
+                    fees = usd(0.0f)
+                ),
+                StockTrade(
+                    date = Instant.parse("2024-06-17T10:47:02Z"),
+                    symbol = "WKHS",
+                    action = SELL_TO_CLOSE,
+                    type = "Reverse Split",
+                    value = usd(1100.00),
+                    description = "Reverse split: Close 400.0 WKHS",
+                    quantity = 400,
+                    averagePrice = usd(2.75f),
+                    commissions = usd(0.0f),
+                    fees = usd(0.0f)
+                ),
             ))
     }
 

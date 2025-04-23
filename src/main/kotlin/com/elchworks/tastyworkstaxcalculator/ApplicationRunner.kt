@@ -2,6 +2,7 @@ package com.elchworks.tastyworkstaxcalculator
 
 import com.elchworks.tastyworkstaxcalculator.fiscalyear.FiscalYearManager
 import com.elchworks.tastyworkstaxcalculator.portfolio.NewTransactionEvent
+import com.elchworks.tastyworkstaxcalculator.portfolio.Portfolio
 import org.slf4j.LoggerFactory
 import org.springframework.boot.ApplicationArguments
 import org.springframework.boot.ApplicationRunner
@@ -14,6 +15,7 @@ class ApplicationRunner(
     private val transactionsCsvReader: TransactionCsvReader,
     private val eventPublisher: ApplicationEventPublisher,
     private val fiscalYearManager: FiscalYearManager,
+    private val portfolio: Portfolio,
 ): ApplicationRunner {
     private val log = LoggerFactory.getLogger(TastyworksTaxCalculatorApplication::class.java)
     override fun run(args: ApplicationArguments) {

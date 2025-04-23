@@ -13,10 +13,12 @@ import com.elchworks.tastyworkstaxcalculator.test.randomOptionRemoval
 import com.elchworks.tastyworkstaxcalculator.test.randomOptionTrade
 import com.elchworks.tastyworkstaxcalculator.test.randomStockTrade
 import com.elchworks.tastyworkstaxcalculator.test.randomString
+import com.elchworks.tastyworkstaxcalculator.test.randomUsdAmount
 import com.elchworks.tastyworkstaxcalculator.transactions.Action.BUY_TO_CLOSE
 import com.elchworks.tastyworkstaxcalculator.transactions.Action.BUY_TO_OPEN
 import com.elchworks.tastyworkstaxcalculator.transactions.Action.SELL_TO_CLOSE
 import com.elchworks.tastyworkstaxcalculator.transactions.Action.SELL_TO_OPEN
+import com.elchworks.tastyworkstaxcalculator.transactions.Transaction
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
@@ -34,12 +36,14 @@ import java.math.BigDecimal
 import java.math.BigDecimal.ONE
 import java.time.Instant
 import java.time.LocalDate
+import java.time.Month
 import java.time.Month.DECEMBER
 import java.time.Month.FEBRUARY
 import java.time.Month.JANUARY
 import java.time.Year
 import java.time.ZoneId
 import java.util.stream.Stream
+import kotlin.plus
 
 @SpringBootTest
 // Beans are stateful
@@ -286,6 +290,96 @@ class End2EndTest @Autowired constructor(
         assertThat(fiscalYearRepository.getFiscalYear(YEAR_2021).profits())
             .isEqualTo(ProfitsSummary(eur(expectedProfitFromOptions), eur(0), eur(expectedStockProfit)))
     }
+
+    @Test
+    fun reverseSplit() {
+        // Given
+        val strikePrice1 = usd(10.0)
+        val strikePrice2 = usd(20.0)
+        val stockSellPrice = usd(400.0)
+        val premiumPut = usd(0.0)
+        val splitDate = randomDate(YEAR_2022, Month.FEBRUARY);
+//        val stockSellPrice = stockBuyPrice + profitPerStock
+
+        withFixedExchangeRate()
+
+        // When
+        // assignments 100@10
+        publishTx(
+            defaultOptionStoTx().copy(
+                callOrPut = "PUT",
+                value = premiumPut,
+            )
+        )
+        publishTx(
+            defaultAssignment().copy(
+                callOrPut = "PUT",
+                averagePrice = strikePrice1,
+            )
+        )
+        publishTx(
+            defaultStockTrade().copy(
+                action = BUY_TO_OPEN,
+                averagePrice = strikePrice1.negate(),
+            )
+        )
+        // assignments 100@20
+        publishTx(
+            defaultOptionStoTx().copy(
+                callOrPut = "PUT",
+                value = premiumPut,
+            )
+        )
+        publishTx(
+            defaultAssignment().copy(
+                callOrPut = "PUT",
+                averagePrice = strikePrice2,
+            )
+        )
+        publishTx(
+            defaultStockTrade().copy(
+                action = BUY_TO_OPEN,
+                averagePrice = strikePrice2.negate(),
+            )
+        )
+
+        // Reverse split 20:1
+        // new average price: 300
+        publishTx(defaultReverseSplitTransaction().copy(
+            date = splitDate,
+            quantity = 200,
+            // price of the reverse split transaction must be ignored. The original
+            // buy price of the portfolio has to be retained for the tax calculation.
+            averagePrice = randomUsdAmount(),
+            action = SELL_TO_CLOSE
+        ))
+        publishTx(defaultReverseSplitTransaction().copy(
+            date = splitDate,
+            quantity = 10,
+            // price of the reverse split transaction must be ignored. The original
+            // buy price of the portfolio has to be retained for the tax calculation.
+            averagePrice = randomUsdAmount(),
+            action = BUY_TO_OPEN
+        ))
+
+        // STC 5
+        publishTx(defaultStockTrade().copy(
+            action = SELL_TO_CLOSE,
+            quantity = 5,
+            averagePrice = stockSellPrice
+        ))
+
+        // Then
+        // 5 stocks sold, 100 USD (200 EUR) profit per stock
+        val expectedProfitFromStocks = eur(1000.00)
+        assertThat(fiscalYearRepository.getFiscalYear(YEAR_2021).profits())
+            .isEqualTo(ProfitsSummary(eur(0.0), eur(0), expectedProfitFromStocks))
+    }
+
+    private fun defaultReverseSplitTransaction() =
+        defaultStockTrade().copy(
+            type = "Reverse Split"
+        )
 
     private fun defaultStockTrade() = randomStockTrade().copy(
         symbol = SYMBOL,
