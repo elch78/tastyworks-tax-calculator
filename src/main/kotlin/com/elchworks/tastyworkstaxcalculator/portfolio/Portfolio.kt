@@ -24,7 +24,6 @@ import org.springframework.context.ApplicationEventPublisher
 import org.springframework.context.event.EventListener
 import org.springframework.stereotype.Component
 import java.util.*
-import javax.money.MonetaryAmount
 
 @Component
 class Portfolio(
@@ -117,14 +116,10 @@ class Portfolio(
 
         log.debug("split btoTx='{}', stc='{}'", btoTx, stcTx)
 
-        var totalQuantity = 0
-        var totalBuyValue: MonetaryAmount = usd(0.0)
-        val symbol = splitTransaction.symbol
-        for (position in stockPositions[symbol]!!) {
-            totalQuantity += position.quantity()
-            val positionBuyValue = position.btoTx.averagePrice.multiply(position.quantity())
-            totalBuyValue = totalBuyValue.add(positionBuyValue)
-        }
+        val positions = stockPositions[splitTransaction.symbol]!!
+        val totalBuyValue = positions.fold(usd(0.0)) { sum, position -> sum.add(position.buyValue()) }
+        val totalQuantity = positions.fold(0) { sum, position -> sum + position.quantity() }
+
         if (stcTx.quantity != totalQuantity) {
             throw RuntimeException("Quantity of reverse split STC transaction (${stcTx.quantity}) doesn't " +
                     "match quantity in portfolio ($totalQuantity).")
@@ -135,7 +130,7 @@ class Portfolio(
         val newPostion = StockPosition(
             StockTrade(
                 date = btoTx.date,
-                symbol = symbol,
+                symbol = splitTransaction.symbol,
                 action = BUY_TO_OPEN,
                 type = btoTx.type,
                 value = totalBuyValue,
@@ -149,7 +144,7 @@ class Portfolio(
         log.debug("new postion='{}'", newPostion)
         val positionAfterSplit = LinkedList<StockPosition>()
         positionAfterSplit.offer(newPostion)
-        stockPositions[symbol] = positionAfterSplit
+        stockPositions[splitTransaction.symbol] = positionAfterSplit
         log.info("Stock reverse split. totalQuantity='{}', newQuantity'{}', averagePrice='{}'", totalQuantity, newPostion.quantity(), averagePrice)
     }
 

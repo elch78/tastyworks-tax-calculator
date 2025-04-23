@@ -26,6 +26,8 @@ class StockPosition(
 
     fun quantity() = quantityLeft
 
+    fun buyValue() = btoTx.averagePrice.multiply(quantityLeft)
+
     override fun toString(): String {
         return "StockPosition(btoTx=$btoTx, sold=$quantityLeft)"
     }
