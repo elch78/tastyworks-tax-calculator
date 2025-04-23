@@ -1,4 +1,4 @@
-package com.elchworks.tastyworkstaxcalculator.test.positions
+package com.elchworks.tastyworkstaxcalculator.positions
 
 import com.elchworks.tastyworkstaxcalculator.eur
 import com.elchworks.tastyworkstaxcalculator.portfolio.ProfitAndLoss
