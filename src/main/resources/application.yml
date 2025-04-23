@@ -1,7 +1,7 @@
 logging.level:
     com.elchworks: INFO
     # suppress info logs of portfolio
-    com.elchworks.tastyworkstaxcalculator.portfolio: DEBUG
+#    com.elchworks.tastyworkstaxcalculator.portfolio: DEBUG
 #    com.elchworks.tastyworkstaxcalculator.convert: INFO
 #    com.elchworks.tastyworkstaxcalculator.CsvReader: INFO
 #    com.elchworks.tastyworkstaxcalculator.fiscalyear.FiscalYear: INFO
