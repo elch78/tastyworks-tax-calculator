@@ -70,7 +70,8 @@ class TransactionCsvReader {
             value = columns.value(),
             quantity = columns.quantity(),
             averagePrice = columns.averagePrice(),
-            fees = columns.fees()
+            fees = columns.fees(),
+            description = columns.description(),
         )
 
     private fun isAssignment(columns: Array<String>): Boolean {
@@ -119,19 +120,20 @@ class TransactionCsvReader {
             quantity = columns.quantity(),
             averagePrice = columns.averagePrice(),
             commissions = columns.commissions(),
-            fees = columns.fees()
+            fees = columns.fees(),
         )
 
-    private fun optionRemoval(colums: Array<String>) =
+    private fun optionRemoval(columns: Array<String>) =
         OptionRemoval(
-            date = parseDate(colums.date()),
-            status = if (colums.description().contains("assignment")) ASSIGNED else EXPIRED,
-            symbol = colums.rootSymbol(),
-            expirationDate = parsLocalDate(colums.expirationDate()),
-            strikePrice = colums.strikePrice(),
-            callOrPut = colums.callOrPut(),
-            quantity = colums.quantity(),
-            averagePrice = colums.averagePrice(),
+            date = parseDate(columns.date()),
+            status = if (columns.description().contains("assignment")) ASSIGNED else EXPIRED,
+            symbol = columns.rootSymbol(),
+            expirationDate = parsLocalDate(columns.expirationDate()),
+            strikePrice = columns.strikePrice(),
+            callOrPut = columns.callOrPut(),
+            quantity = columns.quantity(),
+            averagePrice = columns.averagePrice(),
+            description = columns.description(),
         )
 
     private fun optionTrade(columns: Array<String>) = OptionTrade(

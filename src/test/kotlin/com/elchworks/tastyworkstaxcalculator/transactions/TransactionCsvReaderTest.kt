@@ -31,6 +31,7 @@ class TransactionCsvReaderTest {
                     quantity = 20,
                     status = EXPIRED,
                     averagePrice = usd(ZERO),
+                    description = "Removal of 2.0 PACB 12/30/22 Call 10.50 due to expiration."
                 ),
                 OptionRemoval(
                     date = Instant.parse("2022-10-28T20:00:00Z"),
@@ -41,6 +42,7 @@ class TransactionCsvReaderTest {
                     quantity = 10,
                     status = EXPIRED,
                     averagePrice = usd(ZERO),
+                    description = "Removal of 1.0 PACB 10/28/22 Put 7.00 due to expiration."
                 ),
                 OptionRemoval(
                     date = Instant.parse("2022-12-02T22:00:00Z"),
@@ -51,6 +53,7 @@ class TransactionCsvReaderTest {
                     quantity = 1,
                     status = ASSIGNED,
                     averagePrice = usd(ZERO),
+                    description = "Removal of option due to assignment"
                 ),
                 OptionRemoval(
                     date = Instant.parse("2022-11-25T22:00:00Z"),
@@ -61,6 +64,7 @@ class TransactionCsvReaderTest {
                     quantity = 5,
                     status = ASSIGNED,
                     averagePrice = usd(ZERO),
+                    description = "Removal of option due to assignment"
                 ),
             ))
     }
@@ -155,7 +159,8 @@ class TransactionCsvReaderTest {
                     value = usd(100.0f),
                     quantity = 100,
                     averagePrice = usd(1.0f),
-                    fees = usd(-5.023f)
+                    fees = usd(-5.023f),
+                    description = "Sell to Close 100 MMAT @ 1.00"
                 ),
                 OptionAssignment(
                     date = Instant.parse("2022-12-16T22:00:00Z"),
@@ -164,7 +169,8 @@ class TransactionCsvReaderTest {
                     value = usd(-700.0f),
                     quantity = 200,
                     averagePrice = usd(-3.5f),
-                    fees = usd(-5.0f)
+                    fees = usd(-5.0f),
+                    description = "Buy to Open 200 TLRY @ 3.50"
                 ),
             ))
     }

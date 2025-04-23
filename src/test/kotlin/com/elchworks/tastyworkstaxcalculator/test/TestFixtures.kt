@@ -1,5 +1,6 @@
 package com.elchworks.tastyworkstaxcalculator.test
 
+import com.elchworks.tastyworkstaxcalculator.description
 import com.elchworks.tastyworkstaxcalculator.portfolio.option.OptionPositionStatus
 import com.elchworks.tastyworkstaxcalculator.toMonetaryAmountUsd
 import com.elchworks.tastyworkstaxcalculator.transactions.Action.BUY_TO_OPEN
@@ -57,6 +58,7 @@ fun randomOptionRemoval() =
         status = OptionPositionStatus.EXPIRED,
         quantity = 1,
         averagePrice = usd(ZERO),
+        description = "description",
     )
 
 fun randomAssignment() =
@@ -67,7 +69,8 @@ fun randomAssignment() =
         value = randomUsdAmount(),
         quantity = RandomUtils.nextInt(),
         averagePrice = randomUsdAmount(),
-        fees = randomUsdAmount()
+        fees = randomUsdAmount(),
+        description = "description",
     )
 
 private fun randomLocalDate(): LocalDate = LocalDate.now()

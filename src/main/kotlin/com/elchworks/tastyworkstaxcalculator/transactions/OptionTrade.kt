@@ -16,9 +16,9 @@ data class OptionTrade(
     override val callOrPut: String,
     override val quantity: Int,
     override val averagePrice: MonetaryAmount,
+    override val description: String,
     val action: Action,
     val instrumentType: String,
-    val description: String,
     val value: MonetaryAmount,
     val commissions: MonetaryAmount,
     val fees: MonetaryAmount,
@@ -35,7 +35,7 @@ data class StockTrade(
     override val value: MonetaryAmount,
     override val quantity: Int,
     override val averagePrice: MonetaryAmount,
-    val description: String,
+    override val description: String,
     val commissions: MonetaryAmount,
     val fees: MonetaryAmount
 ): StockTransaction
@@ -48,6 +48,7 @@ data class OptionRemoval(
     override val callOrPut: String,
     override val quantity: Int,
     override val averagePrice: MonetaryAmount,
+    override val description: String,
     val status: OptionPositionStatus,
 ): OptionTransaction
 
@@ -58,6 +59,7 @@ data class OptionAssignment(
     override val value: MonetaryAmount,
     override val quantity: Int,
     override val averagePrice: MonetaryAmount,
+    override val description: String,
     val fees: MonetaryAmount
 ): StockTransaction
 
@@ -66,6 +68,7 @@ interface Transaction {
     val symbol: String
     val quantity: Int
     val averagePrice: MonetaryAmount
+    val description: String
 }
 
 interface OptionTransaction: Transaction {
