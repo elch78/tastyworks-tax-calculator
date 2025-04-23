@@ -5,8 +5,8 @@ package com.elchworks.tastyworkstaxcalculator
 import com.elchworks.tastyworkstaxcalculator.convert.ExchangeRateRepository
 import com.elchworks.tastyworkstaxcalculator.fiscalyear.FiscalYearRepository
 import com.elchworks.tastyworkstaxcalculator.fiscalyear.ProfitsSummary
-import com.elchworks.tastyworkstaxcalculator.portfolio.NewTransactionEvent
 import com.elchworks.tastyworkstaxcalculator.portfolio.option.OptionPositionStatus.ASSIGNED
+import com.elchworks.tastyworkstaxcalculator.test.Context
 import com.elchworks.tastyworkstaxcalculator.test.randomBigDecimal
 import com.elchworks.tastyworkstaxcalculator.test.randomDate
 import com.elchworks.tastyworkstaxcalculator.test.randomOptionRemoval
@@ -18,7 +18,6 @@ import com.elchworks.tastyworkstaxcalculator.transactions.Action.BUY_TO_CLOSE
 import com.elchworks.tastyworkstaxcalculator.transactions.Action.BUY_TO_OPEN
 import com.elchworks.tastyworkstaxcalculator.transactions.Action.SELL_TO_CLOSE
 import com.elchworks.tastyworkstaxcalculator.transactions.Action.SELL_TO_OPEN
-import com.elchworks.tastyworkstaxcalculator.transactions.Transaction
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
@@ -30,7 +29,6 @@ import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.mock.mockito.MockBean
-import org.springframework.context.ApplicationEventPublisher
 import org.springframework.test.annotation.DirtiesContext
 import java.math.BigDecimal
 import java.math.BigDecimal.ONE
@@ -51,8 +49,8 @@ import kotlin.plus
 class End2EndTest @Autowired constructor(
     // mocked to prevent it from running
     @MockBean private val application: ApplicationRunner,
-    private val eventPublisher: ApplicationEventPublisher,
     private val fiscalYearRepository: FiscalYearRepository,
+    private val ctx: Context,
     @MockBean private val exchangeRateRepository: ExchangeRateRepository
 ) {
     @Test
@@ -74,8 +72,8 @@ class End2EndTest @Autowired constructor(
         withFixedExchangeRate()
 
         // When
-        publishTx(stoTx)
-        publishTx(btcTx)
+        ctx.publishTx(stoTx)
+        ctx.publishTx(btcTx)
 
         // Then
         assertThat(fiscalYearRepository.getFiscalYear(YEAR_2021).profits())
@@ -104,8 +102,8 @@ class End2EndTest @Autowired constructor(
         withExchangeRate(buyDate, TWO)
 
         // When
-        publishTx(stoTx)
-        publishTx(btcTx)
+        ctx.publishTx(stoTx)
+        ctx.publishTx(btcTx)
 
         // Then loss due to different exchange rate
         val lossesFromOptions = eur(SELL_VALUE_USD)
@@ -135,8 +133,8 @@ class End2EndTest @Autowired constructor(
         withExchangeRate(buyDate, ONE)
 
         // When
-        publishTx(stoTx)
-        publishTx(btcTx)
+        ctx.publishTx(stoTx)
+        ctx.publishTx(btcTx)
 
         // Then loss due to different exchange rate
         val profitsFromOptions = eur(SELL_VALUE_USD)
@@ -163,8 +161,8 @@ class End2EndTest @Autowired constructor(
         withFixedExchangeRate()
 
         // When
-        publishTx(stoTx)
-        publishTx(btcTx)
+        ctx.publishTx(stoTx)
+        ctx.publishTx(btcTx)
 
         // Then sell value is profit for 2021 and buy value is a loss for 2022
         assertThat(fiscalYearRepository.getFiscalYear(YEAR_2021).profits())
@@ -201,21 +199,21 @@ class End2EndTest @Autowired constructor(
         withFixedExchangeRate()
 
         // When
-        publishTx(stoTx)
+        ctx.publishTx(stoTx)
 
         // Then profit contains premium of two options
         assertThat(fiscalYearRepository.getFiscalYear(YEAR_2021).profits())
             .isEqualTo(ProfitsSummary(eur(8), eur(0), eur(0)))
 
         // When
-        publishTx(btcTx)
+        ctx.publishTx(btcTx)
 
         // Then only one option is sold. Premium of one option is left
         assertThat(fiscalYearRepository.getFiscalYear(YEAR_2021).profits())
             .isEqualTo(ProfitsSummary(eur(4), eur(0), eur(0)))
 
         // When another btc tx with amount 1
-        publishTx(btcTx)
+        ctx.publishTx(btcTx)
 
         // Then the second option is closed. No profit left
         assertThat(fiscalYearRepository.getFiscalYear(YEAR_2021).profits())
@@ -235,8 +233,8 @@ class End2EndTest @Autowired constructor(
         withFixedExchangeRate()
 
         // When
-        publishTx(stoTx)
-        publishTx(assignmentTx)
+        ctx.publishTx(stoTx)
+        ctx.publishTx(assignmentTx)
 
         // Then
         assertThat(fiscalYearRepository.getFiscalYear(YEAR_2021).profits())
@@ -277,12 +275,12 @@ class End2EndTest @Autowired constructor(
         withFixedExchangeRate()
 
         // When
-        publishTx(stoTxPut)
-        publishTx(assignmentPut)
-        publishTx(stockBtoTx)
-        publishTx(stoTxCall)
-        publishTx(assignmentCall)
-        publishTx(stockStcTx)
+        ctx.publishTx(stoTxPut)
+        ctx.publishTx(assignmentPut)
+        ctx.publishTx(stockBtoTx)
+        ctx.publishTx(stoTxCall)
+        ctx.publishTx(assignmentCall)
+        ctx.publishTx(stockStcTx)
 
         // Then
         val expectedStockProfit = profitPerStock * BigDecimal("100") * EXCHANGE_RATE
@@ -305,38 +303,38 @@ class End2EndTest @Autowired constructor(
         // When
         // two assignments. Average price 15
         // assignments 100@10
-        publishTx(
+        ctx.publishTx(
             defaultOptionStoTx().copy(
                 callOrPut = "PUT",
                 value = premiumPut,
             )
         )
-        publishTx(
+        ctx.publishTx(
             defaultAssignment().copy(
                 callOrPut = "PUT",
                 averagePrice = strikePrice1,
             )
         )
-        publishTx(
+        ctx.publishTx(
             defaultStockTrade().copy(
                 action = BUY_TO_OPEN,
                 averagePrice = strikePrice1.negate(),
             )
         )
         // assignments 100@20
-        publishTx(
+        ctx.publishTx(
             defaultOptionStoTx().copy(
                 callOrPut = "PUT",
                 value = premiumPut,
             )
         )
-        publishTx(
+        ctx.publishTx(
             defaultAssignment().copy(
                 callOrPut = "PUT",
                 averagePrice = strikePrice2,
             )
         )
-        publishTx(
+        ctx.publishTx(
             defaultStockTrade().copy(
                 action = BUY_TO_OPEN,
                 averagePrice = strikePrice2.negate(),
@@ -345,29 +343,35 @@ class End2EndTest @Autowired constructor(
 
         // Reverse split 20:1
         // new average price: 300
-        publishTx(defaultReverseSplitTransaction().copy(
-            date = splitDate,
-            quantity = 200,
-            // price of the reverse split transaction must be ignored. The original
-            // buy price of the portfolio has to be retained for the tax calculation.
-            averagePrice = randomUsdAmount(),
-            action = SELL_TO_CLOSE
-        ))
-        publishTx(defaultReverseSplitTransaction().copy(
-            date = splitDate,
-            quantity = 10,
-            // price of the reverse split transaction must be ignored. The original
-            // buy price of the portfolio has to be retained for the tax calculation.
-            averagePrice = randomUsdAmount(),
-            action = BUY_TO_OPEN
-        ))
+        ctx.publishTx(
+            defaultReverseSplitTransaction().copy(
+                date = splitDate,
+                quantity = 200,
+                // price of the reverse split transaction must be ignored. The original
+                // buy price of the portfolio has to be retained for the tax calculation.
+                averagePrice = randomUsdAmount(),
+                action = SELL_TO_CLOSE
+            )
+        )
+        ctx.publishTx(
+            defaultReverseSplitTransaction().copy(
+                date = splitDate,
+                quantity = 10,
+                // price of the reverse split transaction must be ignored. The original
+                // buy price of the portfolio has to be retained for the tax calculation.
+                averagePrice = randomUsdAmount(),
+                action = BUY_TO_OPEN
+            )
+        )
 
         // STC 5
-        publishTx(defaultStockTrade().copy(
-            action = SELL_TO_CLOSE,
-            quantity = 5,
-            averagePrice = stockSellPrice
-        ))
+        ctx.publishTx(
+            defaultStockTrade().copy(
+                action = SELL_TO_CLOSE,
+                quantity = 5,
+                averagePrice = stockSellPrice
+            )
+        )
 
         // Then
         // 5 stocks sold, 100 USD (200 EUR) profit per stock
@@ -417,10 +421,6 @@ class End2EndTest @Autowired constructor(
         expirationDate = EXPIRATION_DATE,
         commissions = usd(COMMISSIONS)
     )
-
-    private fun publishTx(stoTxPut: Transaction) {
-        eventPublisher.publishEvent(NewTransactionEvent(stoTxPut))
-    }
 
     companion object {
         private val TWO = BigDecimal("2.0")
