@@ -1,8 +1,7 @@
 logging.level:
     com.elchworks: INFO
-    com.elchworks.tastyworkstaxcalculator.convert: INFO
-    com.elchworks.tastyworkstaxcalculator.CsvReader: INFO
-    com.elchworks.tastyworkstaxcalculator.positions.PositionsManager: INFO
-    com.elchworks.tastyworkstaxcalculator.positions.StockPosition: INFO
-    com.elchworks.tastyworkstaxcalculator.positions.option.OptionShortPosition: INFO
-    com.elchworks.tastyworkstaxcalculator.fiscalyear.FiscalYear: INFO
+    # suppress info logs of portfolio
+    com.elchworks.tastyworkstaxcalculator.portfolio: WARN
+#    com.elchworks.tastyworkstaxcalculator.convert: INFO
+#    com.elchworks.tastyworkstaxcalculator.CsvReader: INFO
+#    com.elchworks.tastyworkstaxcalculator.fiscalyear.FiscalYear: INFO

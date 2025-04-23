@@ -17,7 +17,10 @@ import com.elchworks.tastyworkstaxcalculator.transactions.optionDescription
 import com.elchworks.tastyworkstaxcalculator.transactions.year
 import org.javamoney.moneta.Money
 import org.slf4j.LoggerFactory
+import java.time.Instant
 import java.time.Year
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 import javax.money.MonetaryAmount
 
 class FiscalYear(
@@ -38,8 +41,9 @@ class FiscalYear(
         val stoTx = stoEvent.stoTx
         val premium = txValueInEur(stoTx)
         profitAndLossFromOptions += ProfitAndLoss(premium, Money.of(0, "EUR"))
-        log.info("Option position opened. position='{}', premium='{}', profit='{}', loss='{}', fiscalYear='{}'",
+        log.debug("Option position opened. position='{}', premium='{}', profit='{}', loss='{}', fiscalYear='{}'",
             stoTx.optionDescription(), format(premium), format( profitAndLossFromOptions.profit), format(profitAndLossFromOptions.loss), fiscalYear)
+        log.debug("Option STO: {} premium {}", stoTx.symbol, format(premium))
     }
 
     fun onOptionPositionClosed(btcEvent: OptionBuyToCloseEvent) {
@@ -91,7 +95,8 @@ class FiscalYear(
         log.debug("netProfit sellValue='{}', sellValueEur='{}'", format(sellValue), format(sellValueEur))
         // buy value is negative. Thus, we have to add the values
         val netProfit = sellValueEur + buyValueEur
-        log.info("buy value {}, sell value {}, netProfit='{}'", format(buyValueEur), format(sellValueEur), format(netProfit))
+        log.debug("buy value {}, sell value {}, netProfit='{}'", format(buyValueEur), format(sellValueEur), format(netProfit))
+        log.info("{} {} {} buy {} {} sell {} {} profit {}", fiscalYear, buyTx.quantity, buyTx.symbol, buyTx.date.formatDateOnly(), format(buyValueEur), sellTx.date.formatDateOnly(), format(sellValueEur), format(netProfit))
         return netProfit
     }
 
@@ -110,4 +115,7 @@ class FiscalYear(
 
     private fun txValueInEur(btcTx: OptionTrade) = currencyExchange.usdToEur(btcTx.value, btcTx.date)
 
+    val dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+    // Use the same timezone as the currency exchange .. just in case
+    fun Instant.formatDateOnly(): String = atZone(ZoneId.of("CET")).toLocalDate().format(dateFormatter)
 }
