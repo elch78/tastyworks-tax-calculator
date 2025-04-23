@@ -58,7 +58,7 @@ class End2EndTest @Autowired constructor(
         val stoTx = randomOptionTrade().copy(
             randomDate(YEAR_2021, JANUARY),
             action = SELL_TO_OPEN,
-            rootSymbol = SYMBOL,
+            symbol = SYMBOL,
             averagePrice = value,
             value = value,
         )
@@ -86,7 +86,7 @@ class End2EndTest @Autowired constructor(
         val stoTx = randomOptionTrade().copy(
             date = sellDate,
             action = SELL_TO_OPEN,
-            rootSymbol = SYMBOL,
+            symbol = SYMBOL,
             value = usd(SELL_VALUE_USD),
             averagePrice = usd(SELL_VALUE_USD),
         )
@@ -117,7 +117,7 @@ class End2EndTest @Autowired constructor(
         val stoTx = randomOptionTrade().copy(
             date = sellDate,
             action = SELL_TO_OPEN,
-            rootSymbol = SYMBOL,
+            symbol = SYMBOL,
             averagePrice = usd(SELL_VALUE_USD),
             value = usd(SELL_VALUE_USD),
         )
@@ -146,7 +146,7 @@ class End2EndTest @Autowired constructor(
         val stoTx = randomOptionTrade().copy(
             date = randomDate(YEAR_2021, DECEMBER),
             action = SELL_TO_OPEN,
-            rootSymbol = SYMBOL,
+            symbol = SYMBOL,
             averagePrice = usd(SELL_VALUE_USD),
             value = usd(SELL_VALUE_USD),
         )
@@ -180,7 +180,7 @@ class End2EndTest @Autowired constructor(
         val stoTx = randomOptionTrade().copy(
             date = randomDate(YEAR_2021, JANUARY),
             action = SELL_TO_OPEN,
-            rootSymbol = SYMBOL,
+            symbol = SYMBOL,
             value = sellPrice * 2,
             averagePrice = sellPrice,
             quantity = 2
@@ -189,7 +189,7 @@ class End2EndTest @Autowired constructor(
         val btcTx = stoTx.copy(
             date = randomDate(YEAR_2021, FEBRUARY),
             action = BUY_TO_CLOSE,
-            rootSymbol = SYMBOL,
+            symbol = SYMBOL,
             value = buyPrice,
             averagePrice = buyPrice,
             quantity = 1
@@ -306,7 +306,7 @@ class End2EndTest @Autowired constructor(
 
     private fun defaultAssignment() = randomOptionRemoval().copy(
         date = randomDate(YEAR_2021, FEBRUARY),
-        rootSymbol = SYMBOL,
+        symbol = SYMBOL,
         status = ASSIGNED,
         callOrPut = "PUT",
         strikePrice = usd(STRIKE_PRICE),
@@ -316,7 +316,7 @@ class End2EndTest @Autowired constructor(
     private fun defaultOptionStoTx() = randomOptionTrade().copy(
         date = randomDate(YEAR_2021, JANUARY),
         action = SELL_TO_OPEN,
-        rootSymbol = SYMBOL,
+        symbol = SYMBOL,
         value = usd(SELL_VALUE_USD),
         callOrPut = "PUT",
         strikePrice = usd(STRIKE_PRICE),

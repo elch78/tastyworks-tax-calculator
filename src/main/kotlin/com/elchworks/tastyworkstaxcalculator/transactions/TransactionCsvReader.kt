@@ -126,7 +126,7 @@ class TransactionCsvReader {
         OptionRemoval(
             date = parseDate(colums.date()),
             status = if (colums.description().contains("assignment")) ASSIGNED else EXPIRED,
-            rootSymbol = colums.rootSymbol(),
+            symbol = colums.rootSymbol(),
             expirationDate = parsLocalDate(colums.expirationDate()),
             strikePrice = colums.strikePrice(),
             callOrPut = colums.callOrPut(),
@@ -137,7 +137,7 @@ class TransactionCsvReader {
     private fun optionTrade(columns: Array<String>) = OptionTrade(
         date = parseDate(columns.date()),
         action = Action.valueOf(columns.action()),
-        symbol = columns.symbol(),
+        symbol = columns.rootSymbol(),
         instrumentType = columns.instrumentType(),
         description = columns.description(),
         value = columns.value(),
@@ -146,7 +146,6 @@ class TransactionCsvReader {
         commissions = columns.commissions(),
         fees = columns.fees(),
         multiplier = columns.multiplier().toInt(),
-        rootSymbol = columns.rootSymbol(),
         underlyingSymbol = columns.underlyingSymbol(),
         expirationDate = parsLocalDate(columns.expirationDate()),
         strikePrice = columns.strikePrice(),

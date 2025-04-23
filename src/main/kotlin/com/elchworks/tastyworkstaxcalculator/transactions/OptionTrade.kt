@@ -10,14 +10,13 @@ import javax.money.MonetaryAmount
 
 data class OptionTrade(
     override val date: Instant,
-    override val rootSymbol: String,
+    override val symbol: String,
     override val expirationDate: LocalDate,
     override val strikePrice: MonetaryAmount,
     override val callOrPut: String,
     override val quantity: Int,
     override val averagePrice: MonetaryAmount,
     val action: Action,
-    val symbol: String,
     val instrumentType: String,
     val description: String,
     val value: MonetaryAmount,
@@ -43,7 +42,7 @@ data class StockTrade(
 
 data class OptionRemoval(
     override val date: Instant,
-    override val rootSymbol: String,
+    override val symbol: String,
     override val expirationDate: LocalDate,
     override val strikePrice: MonetaryAmount,
     override val callOrPut: String,
@@ -64,22 +63,21 @@ data class OptionAssignment(
 
 interface Transaction {
     val date: Instant
+    val symbol: String
     val quantity: Int
     val averagePrice: MonetaryAmount
 }
 
 interface OptionTransaction: Transaction {
     val callOrPut: String
-    val rootSymbol: String
     val expirationDate: LocalDate
     val strikePrice: MonetaryAmount
 }
 
 interface StockTransaction : Transaction{
     val action: Action
-    val symbol: String
     val value: MonetaryAmount
 }
 
 fun Transaction.year(): Year = Year.of(this.date.atZone(ZoneId.of("CET")).get(ChronoField.YEAR))
-fun OptionTrade.optionDescription() = "${this.rootSymbol} ${this.callOrPut} ${this.expirationDate}@${this.strikePrice}"
+fun OptionTrade.optionDescription() = "${this.symbol} ${this.callOrPut} ${this.expirationDate}@${this.strikePrice}"

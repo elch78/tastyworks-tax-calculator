@@ -118,5 +118,5 @@ class Portfolio(
     private fun removePositionFifo(tx: OptionTransaction) =
         optionPositions[tx.key()]!!.remove()
 
-    private fun OptionTransaction.key() = "${this.callOrPut}-${this.rootSymbol}-${this.expirationDate}-${this.strikePrice}"
+    private fun OptionTransaction.key() = "${this.callOrPut}-${this.symbol}-${this.expirationDate}-${this.strikePrice}"
 }

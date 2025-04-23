@@ -24,7 +24,7 @@ class TransactionCsvReaderTest {
             .isEqualTo(listOf(
                 OptionRemoval(
                     date = Instant.parse("2022-12-30T21:00:00Z"),
-                    rootSymbol = "PACB",
+                    symbol = "PACB",
                     expirationDate = LocalDate.parse("2022-12-30"),
                     strikePrice = usd(BigDecimal("10.5")),
                     callOrPut = "CALL",
@@ -34,7 +34,7 @@ class TransactionCsvReaderTest {
                 ),
                 OptionRemoval(
                     date = Instant.parse("2022-10-28T20:00:00Z"),
-                    rootSymbol = "PACB",
+                    symbol = "PACB",
                     expirationDate = LocalDate.parse("2022-10-28"),
                     strikePrice = usd(BigDecimal("7.0")),
                     callOrPut = "PUT",
@@ -44,7 +44,7 @@ class TransactionCsvReaderTest {
                 ),
                 OptionRemoval(
                     date = Instant.parse("2022-12-02T22:00:00Z"),
-                    rootSymbol = "TLRY",
+                    symbol = "TLRY",
                     expirationDate = LocalDate.parse("2022-12-02"),
                     strikePrice = usd(BigDecimal("4.0")),
                     callOrPut = "CALL",
@@ -54,7 +54,7 @@ class TransactionCsvReaderTest {
                 ),
                 OptionRemoval(
                     date = Instant.parse("2022-11-25T22:00:00Z"),
-                    rootSymbol = "APPH",
+                    symbol = "APPH",
                     expirationDate = LocalDate.parse("2022-11-25"),
                     strikePrice = usd(BigDecimal("1.5")),
                     callOrPut = "PUT",
@@ -71,12 +71,11 @@ class TransactionCsvReaderTest {
             .isEqualTo(listOf(
                 OptionTrade(
                     date = Instant.parse("2022-12-21T15:31:40Z"),
-                    rootSymbol = "PACB",
+                    symbol = "PACB",
                     expirationDate = LocalDate.parse("2022-12-30"),
                     strikePrice = usd(BigDecimal("10.5")),
                     callOrPut = "CALL",
                     action = SELL_TO_OPEN,
-                    symbol = "PACB  221230C00010500",
                     instrumentType = "Equity Option",
                     description = "Sold 2 PACB 12/30/22 Call 10.50 @ 0.10",
                     value = usd(20.0f),
@@ -90,12 +89,11 @@ class TransactionCsvReaderTest {
                 ),
                 OptionTrade(
                     date = Instant.parse("2022-12-02T14:30:04Z"),
-                    rootSymbol = "TLRY",
+                    symbol = "TLRY",
                     expirationDate = LocalDate.parse("2022-12-09"),
                     strikePrice = usd(BigDecimal("5.0")),
                     callOrPut = "CALL",
                     action = BUY_TO_CLOSE,
-                    symbol = "TLRY  221209C00005000",
                     instrumentType = "Equity Option",
                     description = "Bought 1 TLRY 12/09/22 Call 5.00 @ 0.09",
                     value = usd(-9.0f),
@@ -109,12 +107,11 @@ class TransactionCsvReaderTest {
                 ),
                 OptionTrade(
                     date = Instant.parse("2022-10-24T14:17:22Z"),
-                    rootSymbol = "PACB",
+                    symbol = "PACB",
                     expirationDate = LocalDate.parse("2022-10-28"),
                     strikePrice = usd(BigDecimal("7.0")),
                     callOrPut = "PUT",
                     action = SELL_TO_OPEN,
-                    symbol = "PACB  221028P00007000",
                     instrumentType = "Equity Option",
                     description = "Sold 1 PACB 10/28/22 Put 7.00 @ 0.20",
                     value = usd(20.0f),
@@ -128,12 +125,11 @@ class TransactionCsvReaderTest {
                 ),
                 OptionTrade(
                     date = Instant.parse("2022-10-05T13:30:00Z"),
-                    rootSymbol = "MNMD",
+                    symbol = "MNMD",
                     expirationDate = LocalDate.parse("2022-10-21"),
                     strikePrice = usd(BigDecimal("7.0")),
                     callOrPut = "PUT",
                     action = BUY_TO_CLOSE,
-                    symbol = "MNMD  221021P00002500",
                     instrumentType = "Equity Option",
                     description = "Bought 1 MNMD 10/21/22 Put 2.50 @ 0.20",
                     value = usd(-20.0f),

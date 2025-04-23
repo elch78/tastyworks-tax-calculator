@@ -40,25 +40,25 @@ class PortfolioTest @Autowired constructor(
         val strikePrice2 = randomUsdAmount(0.1f, 100f)
         // Given
         val stoTx1 = randomOptionTrade().copy(
-            rootSymbol = SYMBOL,
+            symbol = SYMBOL,
             action = SELL_TO_OPEN,
             expirationDate = expirationDate1,
             strikePrice = strikePrice1,
         )
         val stoTx2 = randomOptionTrade().copy(
-            rootSymbol = SYMBOL,
+            symbol = SYMBOL,
             action = SELL_TO_OPEN,
             expirationDate = expirationDate2,
             strikePrice = strikePrice2,
         )
         val btcTx1 = randomOptionTrade().copy(
-            rootSymbol = SYMBOL,
+            symbol = SYMBOL,
             action = BUY_TO_CLOSE,
             expirationDate = expirationDate1,
             strikePrice = strikePrice1,
         )
         val btcTx2 = randomOptionTrade().copy(
-            rootSymbol = SYMBOL,
+            symbol = SYMBOL,
             action = BUY_TO_CLOSE,
             expirationDate = expirationDate2,
             strikePrice = strikePrice2

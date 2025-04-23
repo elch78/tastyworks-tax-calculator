@@ -37,7 +37,6 @@ fun randomOptionTrade() =
         commissions = usd(randomBigDecimal(1,6)),
         fees = usd(ZERO),
         multiplier = 100,
-        rootSymbol = "rootSymbol",
         underlyingSymbol = "",
         expirationDate = randomLocalDate(),
         strikePrice = usd(randomBigDecimal()),
@@ -51,7 +50,7 @@ fun randomUsdAmount(startInclusive: Float, endExclusive: Float) = RandomUtils.ne
 fun randomOptionRemoval() =
     OptionRemoval(
         date = randomDateIn2021(),
-        rootSymbol = "rootSymbol",
+        symbol = "symbol",
         expirationDate = randomLocalDate(),
         strikePrice = usd(randomBigDecimal()),
         callOrPut = "PUT",
@@ -64,7 +63,7 @@ fun randomAssignment() =
     OptionAssignment(
         date = randomDateIn2021(),
         action = BUY_TO_OPEN,
-        symbol = "rootSymbol",
+        symbol = "symbol",
         value = randomUsdAmount(),
         quantity = RandomUtils.nextInt(),
         averagePrice = randomUsdAmount(),
