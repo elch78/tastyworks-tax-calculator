@@ -49,6 +49,12 @@ class FiscalYear(
         val buyValue = currencyExchange.usdToEur(btcTx.averagePrice.multiply(btcEvent.quantitySold), btcTx.date)
         if(positionWasOpenedInThisFiscalYear(stoTx)) {
             val netProfit = netProfit(btcTx, stoTx, btcEvent.quantitySold)
+            /*
+             * This is due to german tax laws.
+             * It is only allowed to deduct losses from option trades from profits from option trades
+             * (but from profits from stock trades).
+             * So we need to track losses from option trades separately
+             */
             if(isLoss(netProfit)) {
                 // is loss. Reduce profit by the whole premium, increase loss by netProfit
                 profitAndLossFromOptions += ProfitAndLoss(premium.negate(), netProfit.negate())
