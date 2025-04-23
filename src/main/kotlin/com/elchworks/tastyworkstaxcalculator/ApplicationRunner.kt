@@ -22,8 +22,10 @@ class ApplicationRunner(
             .walk()
             .filter { it.isFile }
             .map {
-                log.info("reading $it")
-                transactionsCsvReader.read(it)
+                log.debug("reading $it")
+                val tx = transactionsCsvReader.read(it)
+                log.info("read $it")
+                tx
             }
             .flatten()
             .sortedBy { it.date }
