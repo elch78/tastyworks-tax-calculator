@@ -195,10 +195,7 @@ class TransactionCsvReaderTest {
                     fees = usd(-0.102f)
                 ),
                 StockTrade(
-                    date = Instant.parse("2024-06-17T10:47:02Z")
-                        // timestamps in csv are identical for splits
-                        // make sure the events are ordered correctly
-                        .plus(1, SECONDS),
+                    date = Instant.parse("2024-06-17T10:47:02Z"),
                     symbol = "WKHS",
                     action = BUY_TO_OPEN,
                     type = "Reverse Split",

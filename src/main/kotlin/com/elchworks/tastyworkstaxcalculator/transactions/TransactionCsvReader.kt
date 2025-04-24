@@ -126,9 +126,6 @@ class TransactionCsvReader {
         // transactions. Because the timestamp is identical for the BTO and STC transactions
         // add a second to the BTO transaction to make sure they are ordered correctly
         val isReverseSplit = isReverseSplit(columns)
-        if(isReverseSplit && action == BUY_TO_OPEN) {
-            date = date.plus(1, SECONDS)
-        }
         // for reverse split there are no commissions
         val commissions = if (isReverseSplit) usd(0.0) else columns.commissions()
 
