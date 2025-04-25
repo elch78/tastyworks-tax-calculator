@@ -42,6 +42,26 @@ class TestScenario(
         )
     }
 
+    fun assignedCall(premium: MonetaryAmount = ZERO_USD, strikePrice: MonetaryAmount = usd(100.00)) {
+        publishTx(
+            defaultOptionStoTx().copy(
+                callOrPut = "CALL",
+                value = premium
+            )
+        )
+        publishTx(
+            defaultAssignment().copy(
+                callOrPut = "CALL",
+            )
+        )
+        publishTx(
+            defaultStockTrade().copy(
+                action = SELL_TO_CLOSE,
+                averagePrice = strikePrice
+            )
+        )
+    }
+
     fun sellStock(quantity: Int, price: MonetaryAmount) = publishTx(
         defaultStockTrade().copy(
             action = SELL_TO_CLOSE,
