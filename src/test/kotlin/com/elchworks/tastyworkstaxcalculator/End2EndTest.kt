@@ -158,7 +158,7 @@ class End2EndTest @Autowired constructor(
     //  btc tx that consumes more than one sto tx. e.g. sell 1 + sell 2 + buy 2
 
     @Test
-    fun optionPostionClosedPartiallySameYear() {
+    fun optionPositionClosedPartiallySameYear() {
         val sellPrice = usd(2)
         val buyPrice = usd(-2)
         // Given stoTx with quantity 2
