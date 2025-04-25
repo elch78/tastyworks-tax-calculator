@@ -228,21 +228,21 @@ class End2EndTest @Autowired constructor(
     @MethodSource
     fun simpleAssignmentPutAndCall(profitPerStock: BigDecimal) {
         // Given
-        val premiumPut = randomBigDecimal()
-        val premiumCall = randomBigDecimal()
-        val stockBuyPrice = randomBigDecimal()
-        val stockSellPrice = stockBuyPrice + profitPerStock
+        val premiumPut = randomUsdAmount()
+        val premiumCall = randomUsdAmount()
+        val stockBuyPrice = randomUsdAmount()
+        val stockSellPrice = stockBuyPrice + usd(profitPerStock)
         withFixedExchangeRate()
 
         // When
-        scenario.assignedPut(premium = usd(premiumPut), strikePrice = usd(stockBuyPrice))
-        scenario.assignedCall(premium = usd(premiumCall), strikePrice = usd(stockSellPrice))
+        scenario.assignedPut(premium = premiumPut, strikePrice = stockBuyPrice)
+        scenario.assignedCall(premium = premiumCall, strikePrice = stockSellPrice)
 
         // Then
         val expectedStockProfit = profitPerStock * BigDecimal("100") * EXCHANGE_RATE
-        val expectedProfitFromOptions = (premiumPut + premiumCall) * EXCHANGE_RATE
+        val expectedProfitFromOptions = ((premiumPut + premiumCall) * EXCHANGE_RATE).toEur()
         assertThat(fiscalYearRepository.getFiscalYear(YEAR_2021).profits())
-            .isEqualTo(ProfitsSummary(eur(expectedProfitFromOptions), eur(0), eur(expectedStockProfit)))
+            .isEqualTo(ProfitsSummary(expectedProfitFromOptions, eur(0), eur(expectedStockProfit)))
     }
 
     @Test
