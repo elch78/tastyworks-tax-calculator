@@ -299,7 +299,6 @@ class End2EndTest @Autowired constructor(
         val stockSellPrice = usd(400.0)
         val premiumPut = usd(0.0)
         val splitDate = randomDate(YEAR_2022, Month.FEBRUARY);
-//        val stockSellPrice = stockBuyPrice + profitPerStock
 
         withFixedExchangeRate()
 
