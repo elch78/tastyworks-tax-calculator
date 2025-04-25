@@ -1,6 +1,7 @@
 package com.elchworks.tastyworkstaxcalculator.test
 
 import com.elchworks.tastyworkstaxcalculator.portfolio.NewTransactionEvent
+import com.elchworks.tastyworkstaxcalculator.transactions.Action.BUY_TO_OPEN
 import com.elchworks.tastyworkstaxcalculator.transactions.Action.SELL_TO_OPEN
 import com.elchworks.tastyworkstaxcalculator.transactions.Transaction
 import com.elchworks.tastyworkstaxcalculator.usd
@@ -19,31 +20,5 @@ class Context(
         eventPublisher.publishEvent(NewTransactionEvent(tx))
     }
 
-    fun defaultOptionStoTx() = randomOptionTrade().copy(
-        date = randomDate(YEAR_2021, JANUARY),
-        action = SELL_TO_OPEN,
-        symbol = SYMBOL,
-        value = usd(SELL_VALUE_USD),
-        callOrPut = "PUT",
-        strikePrice = usd(STRIKE_PRICE),
-        expirationDate = EXPIRATION_DATE,
-        commissions = usd(COMMISSIONS)
-    )
 
-
-    companion object {
-        val TWO = BigDecimal("2.0")
-        val YEAR_2021 = Year.of(2021)
-        val YEAR_2022 = Year.of(2022)
-        val SYMBOL = randomString("symbol")
-        val EXCHANGE_RATE = TWO
-        val SELL_VALUE_USD = randomBigDecimal()
-        val SELL_VALUE_EUR = SELL_VALUE_USD * EXCHANGE_RATE
-        val BUY_VALUE_USD = randomBigDecimal()
-        val BUY_VALUE_EUR = BUY_VALUE_USD * EXCHANGE_RATE
-        val STRIKE_PRICE = randomBigDecimal()
-        val COMMISSIONS = randomBigDecimal()
-        val FEE = randomBigDecimal()
-        val EXPIRATION_DATE = LocalDate.now()
-    }
 }

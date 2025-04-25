@@ -1,11 +1,8 @@
 package com.elchworks.tastyworkstaxcalculator.test
 
-import com.elchworks.tastyworkstaxcalculator.description
 import com.elchworks.tastyworkstaxcalculator.portfolio.option.OptionPositionStatus
 import com.elchworks.tastyworkstaxcalculator.toMonetaryAmountUsd
-import com.elchworks.tastyworkstaxcalculator.transactions.Action.BUY_TO_OPEN
-import com.elchworks.tastyworkstaxcalculator.transactions.Action.SELL_TO_CLOSE
-import com.elchworks.tastyworkstaxcalculator.transactions.Action.SELL_TO_OPEN
+import com.elchworks.tastyworkstaxcalculator.transactions.Action.*
 import com.elchworks.tastyworkstaxcalculator.transactions.OptionAssignment
 import com.elchworks.tastyworkstaxcalculator.transactions.OptionRemoval
 import com.elchworks.tastyworkstaxcalculator.transactions.OptionTrade
@@ -17,13 +14,22 @@ import org.javamoney.moneta.Money
 import java.math.BigDecimal
 import java.math.BigDecimal.ZERO
 import java.math.BigInteger
-import java.time.Instant
-import java.time.LocalDate
-import java.time.Month
-import java.time.Year
-import java.time.ZoneId
-import java.time.ZonedDateTime
+import java.time.*
+import java.time.Month.JANUARY
 
+val TWO = BigDecimal("2.0")
+val YEAR_2021 = Year.of(2021)
+val YEAR_2022 = Year.of(2022)
+val SYMBOL = randomString("symbol")
+val EXCHANGE_RATE = TWO
+val SELL_VALUE_USD = randomBigDecimal()
+val SELL_VALUE_EUR = SELL_VALUE_USD * EXCHANGE_RATE
+val BUY_VALUE_USD = randomBigDecimal()
+val BUY_VALUE_EUR = BUY_VALUE_USD * EXCHANGE_RATE
+val STRIKE_PRICE = randomBigDecimal()
+val COMMISSIONS = randomBigDecimal()
+val FEE = randomBigDecimal()
+val EXPIRATION_DATE = LocalDate.now()
 
 fun randomOptionTrade() =
     OptionTrade(
@@ -89,6 +95,29 @@ fun randomStockTrade() =
         averagePrice = randomUsdAmount(),
         description = "randomDescription"
     )
+
+fun defaultOptionStoTx() = randomOptionTrade().copy(
+    date = randomDate(YEAR_2021, JANUARY),
+    action = SELL_TO_OPEN,
+    symbol = SYMBOL,
+    value = usd(SELL_VALUE_USD),
+    callOrPut = "PUT",
+    strikePrice = usd(STRIKE_PRICE),
+    expirationDate = EXPIRATION_DATE,
+    commissions = usd(COMMISSIONS)
+)
+
+fun defaultReverseSplitTransaction() =
+    defaultStockTrade().copy(
+        type = "Reverse Split"
+    )
+
+fun defaultStockTrade() = randomStockTrade().copy(
+    symbol = SYMBOL,
+    action = BUY_TO_OPEN,
+    quantity = 100,
+    averagePrice = usd(STRIKE_PRICE)
+)
 
 private fun randomDateIn2021(): Instant =
     ZonedDateTime.of(2021, 11, 1, 1, 1, 1, 0, ZoneId.of("CET"))

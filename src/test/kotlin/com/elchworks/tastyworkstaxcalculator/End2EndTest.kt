@@ -7,17 +7,6 @@ import com.elchworks.tastyworkstaxcalculator.fiscalyear.FiscalYearRepository
 import com.elchworks.tastyworkstaxcalculator.fiscalyear.ProfitsSummary
 import com.elchworks.tastyworkstaxcalculator.portfolio.option.OptionPositionStatus.ASSIGNED
 import com.elchworks.tastyworkstaxcalculator.test.*
-import com.elchworks.tastyworkstaxcalculator.test.Context.Companion.BUY_VALUE_EUR
-import com.elchworks.tastyworkstaxcalculator.test.Context.Companion.BUY_VALUE_USD
-import com.elchworks.tastyworkstaxcalculator.test.Context.Companion.EXCHANGE_RATE
-import com.elchworks.tastyworkstaxcalculator.test.Context.Companion.EXPIRATION_DATE
-import com.elchworks.tastyworkstaxcalculator.test.Context.Companion.SELL_VALUE_EUR
-import com.elchworks.tastyworkstaxcalculator.test.Context.Companion.SELL_VALUE_USD
-import com.elchworks.tastyworkstaxcalculator.test.Context.Companion.STRIKE_PRICE
-import com.elchworks.tastyworkstaxcalculator.test.Context.Companion.SYMBOL
-import com.elchworks.tastyworkstaxcalculator.test.Context.Companion.TWO
-import com.elchworks.tastyworkstaxcalculator.test.Context.Companion.YEAR_2021
-import com.elchworks.tastyworkstaxcalculator.test.Context.Companion.YEAR_2022
 import com.elchworks.tastyworkstaxcalculator.transactions.Action.*
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -220,7 +209,7 @@ class End2EndTest @Autowired constructor(
     fun simpleAssigment() {
         // Given
         val callOrPut = "PUT"
-        val stoTx = ctx.defaultOptionStoTx().copy(
+        val stoTx = defaultOptionStoTx().copy(
             callOrPut = callOrPut
         )
         val assignmentTx = defaultAssignment().copy(
@@ -246,7 +235,7 @@ class End2EndTest @Autowired constructor(
         val stockBuyPrice = randomBigDecimal()
         val stockSellPrice = stockBuyPrice + profitPerStock
 
-        val stoTxPut = ctx.defaultOptionStoTx().copy(
+        val stoTxPut = defaultOptionStoTx().copy(
             callOrPut = "PUT",
             value = usd(premiumPut),
         )
@@ -257,7 +246,7 @@ class End2EndTest @Autowired constructor(
             action = BUY_TO_OPEN,
             averagePrice = usd(-stockBuyPrice),
         )
-        val stoTxCall = ctx.defaultOptionStoTx().copy(
+        val stoTxCall = defaultOptionStoTx().copy(
             callOrPut = "CALL",
             value = usd(premiumCall)
         )
@@ -300,7 +289,7 @@ class End2EndTest @Autowired constructor(
         // two assignments. Average price 15
         // assignments 100@10
         ctx.publishTx(
-            ctx.defaultOptionStoTx().copy(
+            defaultOptionStoTx().copy(
                 callOrPut = "PUT",
                 value = premiumPut,
             )
@@ -319,7 +308,7 @@ class End2EndTest @Autowired constructor(
         )
         // assignments 100@20
         ctx.publishTx(
-            ctx.defaultOptionStoTx().copy(
+            defaultOptionStoTx().copy(
                 callOrPut = "PUT",
                 value = premiumPut,
             )
@@ -375,18 +364,6 @@ class End2EndTest @Autowired constructor(
         assertThat(fiscalYearRepository.getFiscalYear(YEAR_2021).profits())
             .isEqualTo(ProfitsSummary(eur(0.0), eur(0), expectedProfitFromStocks))
     }
-
-    private fun defaultReverseSplitTransaction() =
-        defaultStockTrade().copy(
-            type = "Reverse Split"
-        )
-
-    private fun defaultStockTrade() = randomStockTrade().copy(
-        symbol = SYMBOL,
-        action = BUY_TO_OPEN,
-        quantity = 100,
-        averagePrice = usd(STRIKE_PRICE)
-    )
 
     private fun withFixedExchangeRate() {
         whenever(exchangeRateRepository.monthlyRateUsdToEur(any())).thenReturn(EXCHANGE_RATE)
