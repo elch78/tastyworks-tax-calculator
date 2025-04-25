@@ -22,7 +22,6 @@ import org.springframework.test.annotation.DirtiesContext
 import java.math.BigDecimal
 import java.math.BigDecimal.ONE
 import java.time.Instant
-import java.time.Month
 import java.time.Month.*
 import java.time.ZoneId
 import java.util.stream.Stream
@@ -276,9 +275,6 @@ class End2EndTest @Autowired constructor(
     @Test
     fun reverseSplit() {
         // Given
-        val stockSellPrice = usd(400.0)
-        val splitDate = randomDate(YEAR_2022, Month.FEBRUARY);
-
         withFixedExchangeRate()
 
         // When
@@ -288,35 +284,10 @@ class End2EndTest @Autowired constructor(
 
         // Reverse split 20:1
         // new average price: 300
-        ctx.publishTx(
-            defaultReverseSplitTransaction().copy(
-                date = splitDate,
-                quantity = 200,
-                // price of the reverse split transaction must be ignored. The original
-                // buy price of the portfolio has to be retained for the tax calculation.
-                averagePrice = randomUsdAmount(),
-                action = SELL_TO_CLOSE
-            )
-        )
-        ctx.publishTx(
-            defaultReverseSplitTransaction().copy(
-                date = splitDate,
-                quantity = 10,
-                // price of the reverse split transaction must be ignored. The original
-                // buy price of the portfolio has to be retained for the tax calculation.
-                averagePrice = randomUsdAmount(),
-                action = BUY_TO_OPEN
-            )
-        )
+        ctx.reverseSplit(originalQuantity = 200, newQuantity = 10)
 
         // STC 5
-        ctx.publishTx(
-            defaultStockTrade().copy(
-                action = SELL_TO_CLOSE,
-                quantity = 5,
-                averagePrice = stockSellPrice
-            )
-        )
+        ctx.sellStock(quantity = 5, price = usd(400.0))
 
         // Then
         // 5 stocks sold, 100 USD (200 EUR) profit per stock
