@@ -10,8 +10,11 @@ import org.springframework.stereotype.Component
 import java.time.Month
 import javax.money.MonetaryAmount
 
+/**
+ * Test context to help with setting up scenarios
+ */
 @Component
-class Context(
+class TestScenario(
     private val eventPublisher: ApplicationEventPublisher,
 ) {
     fun publishTx(tx: Transaction) {

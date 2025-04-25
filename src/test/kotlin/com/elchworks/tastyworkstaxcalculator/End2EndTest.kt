@@ -33,7 +33,7 @@ class End2EndTest @Autowired constructor(
     // mocked to prevent it from running
     @MockBean private val application: ApplicationRunner,
     private val fiscalYearRepository: FiscalYearRepository,
-    private val ctx: Context,
+    private val scenario: TestScenario,
     @MockBean private val exchangeRateRepository: ExchangeRateRepository
 ) {
     @Test
@@ -55,8 +55,8 @@ class End2EndTest @Autowired constructor(
         withFixedExchangeRate()
 
         // When
-        ctx.publishTx(stoTx)
-        ctx.publishTx(btcTx)
+        scenario.publishTx(stoTx)
+        scenario.publishTx(btcTx)
 
         // Then
         assertThat(fiscalYearRepository.getFiscalYear(YEAR_2021).profits())
@@ -85,8 +85,8 @@ class End2EndTest @Autowired constructor(
         withExchangeRate(buyDate, TWO)
 
         // When
-        ctx.publishTx(stoTx)
-        ctx.publishTx(btcTx)
+        scenario.publishTx(stoTx)
+        scenario.publishTx(btcTx)
 
         // Then loss due to different exchange rate
         val lossesFromOptions = eur(SELL_VALUE_USD)
@@ -116,8 +116,8 @@ class End2EndTest @Autowired constructor(
         withExchangeRate(buyDate, ONE)
 
         // When
-        ctx.publishTx(stoTx)
-        ctx.publishTx(btcTx)
+        scenario.publishTx(stoTx)
+        scenario.publishTx(btcTx)
 
         // Then loss due to different exchange rate
         val profitsFromOptions = eur(SELL_VALUE_USD)
@@ -144,8 +144,8 @@ class End2EndTest @Autowired constructor(
         withFixedExchangeRate()
 
         // When
-        ctx.publishTx(stoTx)
-        ctx.publishTx(btcTx)
+        scenario.publishTx(stoTx)
+        scenario.publishTx(btcTx)
 
         // Then sell value is profit for 2021 and buy value is a loss for 2022
         assertThat(fiscalYearRepository.getFiscalYear(YEAR_2021).profits())
@@ -182,21 +182,21 @@ class End2EndTest @Autowired constructor(
         withFixedExchangeRate()
 
         // When
-        ctx.publishTx(stoTx)
+        scenario.publishTx(stoTx)
 
         // Then profit contains premium of two options
         assertThat(fiscalYearRepository.getFiscalYear(YEAR_2021).profits())
             .isEqualTo(ProfitsSummary(eur(8), eur(0), eur(0)))
 
         // When
-        ctx.publishTx(btcTx)
+        scenario.publishTx(btcTx)
 
         // Then only one option is sold. Premium of one option is left
         assertThat(fiscalYearRepository.getFiscalYear(YEAR_2021).profits())
             .isEqualTo(ProfitsSummary(eur(4), eur(0), eur(0)))
 
         // When another btc tx with amount 1
-        ctx.publishTx(btcTx)
+        scenario.publishTx(btcTx)
 
         // Then the second option is closed. No profit left
         assertThat(fiscalYearRepository.getFiscalYear(YEAR_2021).profits())
@@ -216,8 +216,8 @@ class End2EndTest @Autowired constructor(
         withFixedExchangeRate()
 
         // When
-        ctx.publishTx(stoTx)
-        ctx.publishTx(assignmentTx)
+        scenario.publishTx(stoTx)
+        scenario.publishTx(assignmentTx)
 
         // Then
         assertThat(fiscalYearRepository.getFiscalYear(YEAR_2021).profits())
@@ -258,12 +258,12 @@ class End2EndTest @Autowired constructor(
         withFixedExchangeRate()
 
         // When
-        ctx.publishTx(stoTxPut)
-        ctx.publishTx(assignmentPut)
-        ctx.publishTx(stockBtoTx)
-        ctx.publishTx(stoTxCall)
-        ctx.publishTx(assignmentCall)
-        ctx.publishTx(stockStcTx)
+        scenario.publishTx(stoTxPut)
+        scenario.publishTx(assignmentPut)
+        scenario.publishTx(stockBtoTx)
+        scenario.publishTx(stoTxCall)
+        scenario.publishTx(assignmentCall)
+        scenario.publishTx(stockStcTx)
 
         // Then
         val expectedStockProfit = profitPerStock * BigDecimal("100") * EXCHANGE_RATE
@@ -279,15 +279,15 @@ class End2EndTest @Autowired constructor(
 
         // When
         // two assignments. Average price 15
-        ctx.assignedPut(premium = ZERO_USD, strikePrice = usd(10.0))
-        ctx.assignedPut(premium = ZERO_USD, strikePrice = usd(20.0))
+        scenario.assignedPut(premium = ZERO_USD, strikePrice = usd(10.0))
+        scenario.assignedPut(premium = ZERO_USD, strikePrice = usd(20.0))
 
         // Reverse split 20:1
         // new average price: 300
-        ctx.reverseSplit(originalQuantity = 200, newQuantity = 10)
+        scenario.reverseSplit(originalQuantity = 200, newQuantity = 10)
 
         // STC 5
-        ctx.sellStock(quantity = 5, price = usd(400.0))
+        scenario.sellStock(quantity = 5, price = usd(400.0))
 
         // Then
         // 5 stocks sold, 100 USD (200 EUR) profit per stock
