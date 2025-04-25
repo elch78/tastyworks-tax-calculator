@@ -233,17 +233,6 @@ class End2EndTest @Autowired constructor(
         val stockBuyPrice = randomBigDecimal()
         val stockSellPrice = stockBuyPrice + profitPerStock
 
-        val stoTxPut = defaultOptionStoTx().copy(
-            callOrPut = "PUT",
-            value = usd(premiumPut),
-        )
-        val assignmentPut = defaultAssignment().copy(
-            callOrPut = "PUT",
-        )
-        val stockBtoTx = defaultStockTrade().copy(
-            action = BUY_TO_OPEN,
-            averagePrice = usd(-stockBuyPrice),
-        )
         val stoTxCall = defaultOptionStoTx().copy(
             callOrPut = "CALL",
             value = usd(premiumCall)
@@ -258,9 +247,7 @@ class End2EndTest @Autowired constructor(
         withFixedExchangeRate()
 
         // When
-        scenario.publishTx(stoTxPut)
-        scenario.publishTx(assignmentPut)
-        scenario.publishTx(stockBtoTx)
+        scenario.assignedPut(premium = usd(premiumPut), strikePrice = usd(stockBuyPrice))
         scenario.publishTx(stoTxCall)
         scenario.publishTx(assignmentCall)
         scenario.publishTx(stockStcTx)
