@@ -145,7 +145,7 @@ class Portfolio(
 
     private fun StockTransaction.validateMatchingSplitTransaction(stockTrade: StockTransaction) {
         if(this.date != stockTrade.date) {
-            throw RuntimeException("Dates of split transaction don't match")
+            throw RuntimeException("Dates of split transaction don't match. tx1=" + this + "tx2= "  + stockTrade)
         }
         if(this.symbol != stockTrade.symbol) {
             throw RuntimeException("Symbols of split transaction don't match")
