@@ -5,7 +5,6 @@ package com.elchworks.tastyworkstaxcalculator
 import com.elchworks.tastyworkstaxcalculator.convert.ExchangeRateRepository
 import com.elchworks.tastyworkstaxcalculator.fiscalyear.FiscalYearRepository
 import com.elchworks.tastyworkstaxcalculator.fiscalyear.ProfitsSummary
-import com.elchworks.tastyworkstaxcalculator.portfolio.option.OptionPositionStatus.ASSIGNED
 import com.elchworks.tastyworkstaxcalculator.test.*
 import com.elchworks.tastyworkstaxcalculator.transactions.Action.*
 import org.assertj.core.api.Assertions.assertThat
@@ -277,54 +276,15 @@ class End2EndTest @Autowired constructor(
     @Test
     fun reverseSplit() {
         // Given
-        val strikePrice1 = usd(10.0)
-        val strikePrice2 = usd(20.0)
         val stockSellPrice = usd(400.0)
-        val premiumPut = usd(0.0)
         val splitDate = randomDate(YEAR_2022, Month.FEBRUARY);
 
         withFixedExchangeRate()
 
         // When
         // two assignments. Average price 15
-        // assignments 100@10
-        ctx.publishTx(
-            defaultOptionStoTx().copy(
-                callOrPut = "PUT",
-                value = premiumPut,
-            )
-        )
-        ctx.publishTx(
-            defaultAssignment().copy(
-                callOrPut = "PUT",
-                averagePrice = strikePrice1,
-            )
-        )
-        ctx.publishTx(
-            defaultStockTrade().copy(
-                action = BUY_TO_OPEN,
-                averagePrice = strikePrice1.negate(),
-            )
-        )
-        // assignments 100@20
-        ctx.publishTx(
-            defaultOptionStoTx().copy(
-                callOrPut = "PUT",
-                value = premiumPut,
-            )
-        )
-        ctx.publishTx(
-            defaultAssignment().copy(
-                callOrPut = "PUT",
-                averagePrice = strikePrice2,
-            )
-        )
-        ctx.publishTx(
-            defaultStockTrade().copy(
-                action = BUY_TO_OPEN,
-                averagePrice = strikePrice2.negate(),
-            )
-        )
+        ctx.assignedPut(premium = ZERO_USD, strikePrice = usd(10.0))
+        ctx.assignedPut(premium = ZERO_USD, strikePrice = usd(20.0))
 
         // Reverse split 20:1
         // new average price: 300
@@ -374,15 +334,6 @@ class End2EndTest @Autowired constructor(
         whenever(exchangeRateRepository.monthlyRateUsdToEur(eq(localDate)))
             .thenReturn(exchangeRate)
     }
-
-    private fun defaultAssignment() = randomOptionRemoval().copy(
-        date = randomDate(YEAR_2021, FEBRUARY),
-        symbol = SYMBOL,
-        status = ASSIGNED,
-        callOrPut = "PUT",
-        strikePrice = usd(STRIKE_PRICE),
-        expirationDate = EXPIRATION_DATE
-    )
 
     companion object {
 
