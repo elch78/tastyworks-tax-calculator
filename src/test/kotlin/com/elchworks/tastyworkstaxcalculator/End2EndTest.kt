@@ -6,18 +6,19 @@ import com.elchworks.tastyworkstaxcalculator.convert.ExchangeRateRepository
 import com.elchworks.tastyworkstaxcalculator.fiscalyear.FiscalYearRepository
 import com.elchworks.tastyworkstaxcalculator.fiscalyear.ProfitsSummary
 import com.elchworks.tastyworkstaxcalculator.portfolio.option.OptionPositionStatus.ASSIGNED
-import com.elchworks.tastyworkstaxcalculator.test.Context
-import com.elchworks.tastyworkstaxcalculator.test.randomBigDecimal
-import com.elchworks.tastyworkstaxcalculator.test.randomDate
-import com.elchworks.tastyworkstaxcalculator.test.randomOptionRemoval
-import com.elchworks.tastyworkstaxcalculator.test.randomOptionTrade
-import com.elchworks.tastyworkstaxcalculator.test.randomStockTrade
-import com.elchworks.tastyworkstaxcalculator.test.randomString
-import com.elchworks.tastyworkstaxcalculator.test.randomUsdAmount
-import com.elchworks.tastyworkstaxcalculator.transactions.Action.BUY_TO_CLOSE
-import com.elchworks.tastyworkstaxcalculator.transactions.Action.BUY_TO_OPEN
-import com.elchworks.tastyworkstaxcalculator.transactions.Action.SELL_TO_CLOSE
-import com.elchworks.tastyworkstaxcalculator.transactions.Action.SELL_TO_OPEN
+import com.elchworks.tastyworkstaxcalculator.test.*
+import com.elchworks.tastyworkstaxcalculator.test.Context.Companion.BUY_VALUE_EUR
+import com.elchworks.tastyworkstaxcalculator.test.Context.Companion.BUY_VALUE_USD
+import com.elchworks.tastyworkstaxcalculator.test.Context.Companion.EXCHANGE_RATE
+import com.elchworks.tastyworkstaxcalculator.test.Context.Companion.EXPIRATION_DATE
+import com.elchworks.tastyworkstaxcalculator.test.Context.Companion.SELL_VALUE_EUR
+import com.elchworks.tastyworkstaxcalculator.test.Context.Companion.SELL_VALUE_USD
+import com.elchworks.tastyworkstaxcalculator.test.Context.Companion.STRIKE_PRICE
+import com.elchworks.tastyworkstaxcalculator.test.Context.Companion.SYMBOL
+import com.elchworks.tastyworkstaxcalculator.test.Context.Companion.TWO
+import com.elchworks.tastyworkstaxcalculator.test.Context.Companion.YEAR_2021
+import com.elchworks.tastyworkstaxcalculator.test.Context.Companion.YEAR_2022
+import com.elchworks.tastyworkstaxcalculator.transactions.Action.*
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
@@ -33,15 +34,10 @@ import org.springframework.test.annotation.DirtiesContext
 import java.math.BigDecimal
 import java.math.BigDecimal.ONE
 import java.time.Instant
-import java.time.LocalDate
 import java.time.Month
-import java.time.Month.DECEMBER
-import java.time.Month.FEBRUARY
-import java.time.Month.JANUARY
-import java.time.Year
+import java.time.Month.*
 import java.time.ZoneId
 import java.util.stream.Stream
-import kotlin.plus
 
 @SpringBootTest
 // Beans are stateful
@@ -224,7 +220,7 @@ class End2EndTest @Autowired constructor(
     fun simpleAssigment() {
         // Given
         val callOrPut = "PUT"
-        val stoTx = defaultOptionStoTx().copy(
+        val stoTx = ctx.defaultOptionStoTx().copy(
             callOrPut = callOrPut
         )
         val assignmentTx = defaultAssignment().copy(
@@ -250,7 +246,7 @@ class End2EndTest @Autowired constructor(
         val stockBuyPrice = randomBigDecimal()
         val stockSellPrice = stockBuyPrice + profitPerStock
 
-        val stoTxPut = defaultOptionStoTx().copy(
+        val stoTxPut = ctx.defaultOptionStoTx().copy(
             callOrPut = "PUT",
             value = usd(premiumPut),
         )
@@ -261,7 +257,7 @@ class End2EndTest @Autowired constructor(
             action = BUY_TO_OPEN,
             averagePrice = usd(-stockBuyPrice),
         )
-        val stoTxCall = defaultOptionStoTx().copy(
+        val stoTxCall = ctx.defaultOptionStoTx().copy(
             callOrPut = "CALL",
             value = usd(premiumCall)
         )
@@ -304,7 +300,7 @@ class End2EndTest @Autowired constructor(
         // two assignments. Average price 15
         // assignments 100@10
         ctx.publishTx(
-            defaultOptionStoTx().copy(
+            ctx.defaultOptionStoTx().copy(
                 callOrPut = "PUT",
                 value = premiumPut,
             )
@@ -323,7 +319,7 @@ class End2EndTest @Autowired constructor(
         )
         // assignments 100@20
         ctx.publishTx(
-            defaultOptionStoTx().copy(
+            ctx.defaultOptionStoTx().copy(
                 callOrPut = "PUT",
                 value = premiumPut,
             )
@@ -411,31 +407,8 @@ class End2EndTest @Autowired constructor(
         expirationDate = EXPIRATION_DATE
     )
 
-    private fun defaultOptionStoTx() = randomOptionTrade().copy(
-        date = randomDate(YEAR_2021, JANUARY),
-        action = SELL_TO_OPEN,
-        symbol = SYMBOL,
-        value = usd(SELL_VALUE_USD),
-        callOrPut = "PUT",
-        strikePrice = usd(STRIKE_PRICE),
-        expirationDate = EXPIRATION_DATE,
-        commissions = usd(COMMISSIONS)
-    )
-
     companion object {
-        private val TWO = BigDecimal("2.0")
-        private val YEAR_2021 = Year.of(2021)
-        private val YEAR_2022 = Year.of(2022)
-        private val SYMBOL = randomString("symbol")
-        private val EXCHANGE_RATE = TWO
-        private val SELL_VALUE_USD = randomBigDecimal()
-        private val SELL_VALUE_EUR = SELL_VALUE_USD * EXCHANGE_RATE
-        private val BUY_VALUE_USD = randomBigDecimal()
-        private val BUY_VALUE_EUR = BUY_VALUE_USD * EXCHANGE_RATE
-        private val STRIKE_PRICE = randomBigDecimal()
-        private val COMMISSIONS = randomBigDecimal()
-        private val FEE = randomBigDecimal()
-        private val EXPIRATION_DATE = LocalDate.now()
+
 
         @JvmStatic
         fun simpleAssignmentPutAndCall() = Stream.of(
