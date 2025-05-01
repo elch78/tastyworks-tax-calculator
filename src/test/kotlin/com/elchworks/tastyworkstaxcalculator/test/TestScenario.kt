@@ -22,12 +22,7 @@ class TestScenario(
     }
 
     fun assignedPut(premium: MonetaryAmount = ZERO_USD, strikePrice: MonetaryAmount = usd(100.00)) {
-        publishTx(
-            defaultOptionStoTx().copy(
-                callOrPut = "PUT",
-                value = premium,
-            )
-        )
+        sellOption("PUT", premium = premium)
         publishTx(
             defaultAssignment().copy(
                 callOrPut = "PUT",
@@ -38,6 +33,15 @@ class TestScenario(
             defaultStockTrade().copy(
                 action = BUY_TO_OPEN,
                 averagePrice = strikePrice.negate(),
+            )
+        )
+    }
+
+    fun sellOption(callOrPut: String, symbol: String = SYMBOL, premium: MonetaryAmount) {
+        publishTx(
+            defaultOptionStoTx().copy(
+                callOrPut = callOrPut,
+                value = premium,
             )
         )
     }

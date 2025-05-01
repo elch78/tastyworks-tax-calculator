@@ -51,6 +51,8 @@ class Portfolio(
         }
     }
 
+    fun getPositions(symbol: String) = stockPositions[symbol]
+
     private fun optionTrade(tx: OptionTrade) {
         when(tx.action) {
             SELL_TO_OPEN -> optionPositionSellToOpen(tx)

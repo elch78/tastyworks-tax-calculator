@@ -18,6 +18,7 @@ import java.math.BigInteger
 import java.time.*
 import java.time.Month.FEBRUARY
 import java.time.Month.JANUARY
+import java.time.format.DateTimeFormatter
 
 val TWO = BigDecimal("2.0")
 val YEAR_2021 = Year.of(2021)
@@ -110,6 +111,30 @@ fun defaultOptionStoTx() = randomOptionTrade().copy(
     commissions = usd(COMMISSIONS)
 )
 
+
+fun List<String>.symbol() = this[0]
+fun List<String>.value() = usd(this[5].toDouble() * 100)
+fun List<String>.callOrPut() = this[2].uppercase()
+fun List<String>.strikePrice() = usd(this[3].toDouble())
+fun List<String>.expirationDate(): LocalDate {
+    val formatter = DateTimeFormatter.ofPattern("dd/MM/yy")
+    return LocalDate.parse(this[1], formatter)
+}
+
+fun optionStoTx(optionDescription: String): OptionTrade {
+    val attributes = optionDescription.split(" ")
+    return randomOptionTrade().copy(
+        date = randomDate(YEAR_2021, FEBRUARY),
+        action = SELL_TO_OPEN,
+        symbol = attributes.symbol(),
+        value = attributes.value(),
+        callOrPut = attributes.callOrPut(),
+        strikePrice = attributes.strikePrice(),
+        expirationDate = attributes.expirationDate(),
+        commissions = usd(COMMISSIONS)
+    )
+}
+
 fun defaultReverseSplitTransaction() =
     defaultStockTrade().copy(
         type = "Reverse Split"
@@ -124,12 +149,34 @@ fun defaultAssignment() = randomOptionRemoval().copy(
     expirationDate = EXPIRATION_DATE
 )
 
+fun optionAssignment(optionDescription: String): OptionRemoval {
+    val attributes = optionDescription.split(" ")
+    return randomOptionRemoval().copy(
+        date = randomDate(YEAR_2021, FEBRUARY),
+        symbol = attributes.symbol(),
+        status = ASSIGNED,
+        callOrPut = attributes.callOrPut(),
+        strikePrice = attributes.strikePrice(),
+        expirationDate = attributes.expirationDate()
+    )
+}
+
 fun defaultStockTrade() = randomStockTrade().copy(
     symbol = SYMBOL,
     action = BUY_TO_OPEN,
     quantity = 100,
     averagePrice = usd(STRIKE_PRICE)
 )
+
+fun assignmentStockTrade(optionDescription: String): StockTrade {
+    val attributes = optionDescription.split(" ")
+    return randomStockTrade().copy(
+        symbol = attributes.symbol(),
+        action = BUY_TO_OPEN,
+        quantity = 100,
+        averagePrice = attributes.strikePrice(),
+    )
+}
 
 private fun randomDateIn2021(): Instant =
     ZonedDateTime.of(2021, 11, 1, 1, 1, 1, 0, ZoneId.of("CET"))

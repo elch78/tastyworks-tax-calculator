@@ -28,10 +28,16 @@ dependencies {
     implementation("javax.money:money-api:1.1")
     implementation("org.javamoney:moneta:1.2.1")
     implementation("com.opencsv:opencsv:5.7.1")
+    implementation(platform("io.cucumber:cucumber-bom:7.22.1")  )
     developmentOnly("org.springframework.boot:spring-boot-devtools")
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.mockito.kotlin:mockito-kotlin:4.1.0")
+    testImplementation("io.cucumber:cucumber-spring")
+    testImplementation("io.cucumber:cucumber-java")
+    testImplementation("io.cucumber:cucumber-junit-platform-engine")
+    testImplementation("org.junit.platform:junit-platform-suite")
+
 }
 
 tasks.withType<KotlinCompile> {
