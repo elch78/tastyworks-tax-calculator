@@ -14,6 +14,7 @@ import io.cucumber.java.en.When
 import io.cucumber.spring.CucumberContextConfiguration
 import org.assertj.core.api.Assertions.assertThat
 import org.mockito.Mockito
+import org.mockito.kotlin.any
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
@@ -43,20 +44,19 @@ class StepDefinitions @Autowired constructor(
             .thenReturn(BigDecimal(rate))
     }
 
+    @Given("Fixed exchange rate of {string} USD to EUR")
+    fun givenExchangeRate(rate: String) {
+
+        whenever(exchangeRateRepository.monthlyRateUsdToEur(any()))
+            .thenReturn(BigDecimal(rate))
+    }
+
     @When("Sell option {string} on {string}")
     fun sellOption(optionDescription: String, date: String) {
 
-        publishTx(optionStoTx(optionDescription).copy(date = date.toInstant()))
+        publishTx(optionStoTx(optionDescription).copy(date = date.toLocalDate().toInstant()))
     }
 
-    fun String.toInstant(): Instant {
-        return this.toLocalDate().atTime(12, 0).atZone(ZoneId.of("CET")).toInstant()
-    }
-
-    private fun String.toLocalDate(): LocalDate {
-        val formatter = DateTimeFormatter.ofPattern("dd/MM/yy")
-        return LocalDate.parse(this, formatter)
-    }
 
     @When("Assignment {string}")
     fun assignOption(optionDescription: String) {

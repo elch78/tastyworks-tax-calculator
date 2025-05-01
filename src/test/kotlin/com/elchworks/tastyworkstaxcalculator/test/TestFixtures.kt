@@ -172,10 +172,20 @@ fun assignmentStockTrade(optionDescription: String): StockTrade {
     val attributes = optionDescription.split(" ")
     return randomStockTrade().copy(
         symbol = attributes.symbol(),
-        action = BUY_TO_OPEN,
+        action = if(attributes.callOrPut() == "PUT") BUY_TO_OPEN else SELL_TO_CLOSE,
+        date = attributes.expirationDate().toInstant(),
         quantity = 100,
-        averagePrice = attributes.strikePrice(),
+        averagePrice = if(attributes.callOrPut() == "PUT") attributes.strikePrice().negate() else attributes.strikePrice(),
     )
+}
+
+fun LocalDate.toInstant(): Instant {
+    return this.atTime(12, 0).atZone(ZoneId.of("CET")).toInstant()
+}
+
+fun String.toLocalDate(): LocalDate {
+    val formatter = DateTimeFormatter.ofPattern("dd/MM/yy")
+    return LocalDate.parse(this, formatter)
 }
 
 private fun randomDateIn2021(): Instant =
