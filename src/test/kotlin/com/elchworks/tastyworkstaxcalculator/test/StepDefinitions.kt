@@ -1,32 +1,61 @@
 package com.elchworks.tastyworkstaxcalculator.test
 
 import com.elchworks.tastyworkstaxcalculator.ApplicationRunner
+import com.elchworks.tastyworkstaxcalculator.convert.ExchangeRateRepository
+import com.elchworks.tastyworkstaxcalculator.eur
+import com.elchworks.tastyworkstaxcalculator.fiscalyear.FiscalYearRepository
+import com.elchworks.tastyworkstaxcalculator.fiscalyear.ProfitsSummary
 import com.elchworks.tastyworkstaxcalculator.portfolio.NewTransactionEvent
 import com.elchworks.tastyworkstaxcalculator.portfolio.Portfolio
 import com.elchworks.tastyworkstaxcalculator.transactions.Transaction
+import io.cucumber.java.en.Given
 import io.cucumber.java.en.Then
 import io.cucumber.java.en.When
 import io.cucumber.spring.CucumberContextConfiguration
 import org.assertj.core.api.Assertions.assertThat
+import org.mockito.Mockito
+import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.test.context.bean.override.mockito.MockitoBean
+import java.math.BigDecimal
+import java.time.Instant
+import java.time.LocalDate
+import java.time.Year
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 
 @CucumberContextConfiguration
 @SpringBootTest
 class StepDefinitions @Autowired constructor(
     // mocked to prevent it from running
-    @MockitoBean
-    private val application: ApplicationRunner,
+    @MockitoBean private val application: ApplicationRunner,
     private val eventPublisher: ApplicationEventPublisher,
-    private val portfolio: Portfolio
+    private val portfolio: Portfolio,
+    private val fiscalYearRepository: FiscalYearRepository,
+    @MockitoBean private val exchangeRateRepository: ExchangeRateRepository,
 ){
+    @Given("Exchange rate on {string} is {string} USD to EUR")
+    fun givenExchangeRate(date: String, rate: String) {
 
+        whenever(exchangeRateRepository.monthlyRateUsdToEur(date.toLocalDate()))
+            .thenReturn(BigDecimal(rate))
+    }
 
-    @When("Sell option {string}")
-    fun sellOption(optionDescription: String) {
-        publishTx(optionStoTx(optionDescription))
+    @When("Sell option {string} on {string}")
+    fun sellOption(optionDescription: String, date: String) {
+
+        publishTx(optionStoTx(optionDescription).copy(date = date.toInstant()))
+    }
+
+    fun String.toInstant(): Instant {
+        return this.toLocalDate().atTime(12, 0).atZone(ZoneId.of("CET")).toInstant()
+    }
+
+    private fun String.toLocalDate(): LocalDate {
+        val formatter = DateTimeFormatter.ofPattern("dd/MM/yy")
+        return LocalDate.parse(this, formatter)
     }
 
     @When("Assignment {string}")
@@ -42,6 +71,18 @@ class StepDefinitions @Autowired constructor(
         assertThat(positions.peek().quantity()).isEqualTo(quantity)
 
     }
+
+    @Then("Profits for fiscal year {int} should be options profits {double} losses {double} stocks {double}")
+    fun portfolioHasPosition(year: Integer, profitsFromOptions: Double, lossesFromOptions: Double, profitsFromStocks: Double) {
+        val fiscalYear = fiscalYearRepository.getFiscalYear(Year.of(year.toInt()))
+        assertThat(fiscalYear.profits()).isEqualTo(
+            ProfitsSummary(
+                profitsFromOptions = eur(profitsFromOptions),
+                lossesFromOptions = eur(lossesFromOptions),
+                profitsFromStocks = eur(profitsFromStocks)
+            ))
+    }
+
 
     fun publishTx(tx: Transaction) {
         eventPublisher.publishEvent(NewTransactionEvent(tx))
