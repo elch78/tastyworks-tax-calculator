@@ -188,6 +188,8 @@ fun String.toLocalDate(): LocalDate {
     return LocalDate.parse(this, formatter)
 }
 
+fun String.toUsd() = usd(BigDecimal(this))
+
 private fun randomDateIn2021(): Instant =
     ZonedDateTime.of(2021, 11, 1, 1, 1, 1, 0, ZoneId.of("CET"))
         .plusMinutes(RandomUtils.nextLong(1,  1000))

@@ -12,4 +12,7 @@ class FiscalYearRepository(
 
     fun getFiscalYear(year: Year) = fiscalYears.computeIfAbsent(year) { FiscalYear(currencyExchange, year) }
     fun getAllSortedByYear() = fiscalYears.values.sortedBy { it.fiscalYear }
+    fun reset() {
+        fiscalYears.clear()
+    }
 }

@@ -7,7 +7,10 @@ import com.elchworks.tastyworkstaxcalculator.fiscalyear.FiscalYearRepository
 import com.elchworks.tastyworkstaxcalculator.fiscalyear.ProfitsSummary
 import com.elchworks.tastyworkstaxcalculator.portfolio.NewTransactionEvent
 import com.elchworks.tastyworkstaxcalculator.portfolio.Portfolio
+import com.elchworks.tastyworkstaxcalculator.transactions.Action
+import com.elchworks.tastyworkstaxcalculator.transactions.Action.SELL_TO_CLOSE
 import com.elchworks.tastyworkstaxcalculator.transactions.Transaction
+import io.cucumber.java.Before
 import io.cucumber.java.en.Given
 import io.cucumber.java.en.Then
 import io.cucumber.java.en.When
@@ -37,6 +40,12 @@ class StepDefinitions @Autowired constructor(
     private val fiscalYearRepository: FiscalYearRepository,
     @MockitoBean private val exchangeRateRepository: ExchangeRateRepository,
 ){
+    @Before
+    fun before() {
+        portfolio.reset()
+        fiscalYearRepository.reset()
+    }
+
     @Given("Exchange rate on {string} is {string} USD to EUR")
     fun givenExchangeRate(date: String, rate: String) {
 
@@ -55,6 +64,18 @@ class StepDefinitions @Autowired constructor(
     fun sellOption(optionDescription: String, date: String) {
 
         publishTx(optionStoTx(optionDescription).copy(date = date.toLocalDate().toInstant()))
+    }
+
+    @When("Sell stock {int} {string} on {string} average price: {string}")
+    fun sellStock(quantity: Int, symbol: String, date: String, price: String) {
+
+        publishTx(randomStockTrade().copy(
+            symbol = symbol,
+            quantity = quantity,
+            action = SELL_TO_CLOSE,
+            averagePrice = price.toUsd(),
+            date = date.toLocalDate().toInstant())
+        )
     }
 
 

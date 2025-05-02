@@ -203,27 +203,6 @@ class End2EndTest @Autowired constructor(
             .isEqualTo(ProfitsSummary(eur(0), eur(0), eur(0)))
     }
 
-    @Test
-    fun simpleAssigment() {
-        // Given
-        val callOrPut = "PUT"
-        val stoTx = defaultOptionStoTx().copy(
-            callOrPut = callOrPut
-        )
-        val assignmentTx = defaultAssignment().copy(
-            callOrPut = callOrPut
-        )
-        withFixedExchangeRate()
-
-        // When
-        scenario.publishTx(stoTx)
-        scenario.publishTx(assignmentTx)
-
-        // Then
-        assertThat(fiscalYearRepository.getFiscalYear(YEAR_2021).profits())
-            .isEqualTo(ProfitsSummary(eur(SELL_VALUE_EUR), eur(0), eur(0)))
-    }
-
     @ParameterizedTest
     @MethodSource
     fun simpleAssignmentPutAndCall(profitPerStock: BigDecimal) {

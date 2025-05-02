@@ -53,6 +53,11 @@ class Portfolio(
 
     fun getPositions(symbol: String) = stockPositions[symbol]
 
+    fun reset() {
+        optionPositions.clear()
+        stockPositions.clear()
+    }
+
     private fun optionTrade(tx: OptionTrade) {
         when(tx.action) {
             SELL_TO_OPEN -> optionPositionSellToOpen(tx)
