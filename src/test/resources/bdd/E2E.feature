@@ -11,6 +11,12 @@ Feature: Calculation of profits and losses from options trading
     When Assignment "CLF 25/01/24 Call 14.50 @ 0.32"
     Then Profits for fiscal year 2024 should be options profits 128.0 losses 0.0 stocks 200.0
 
+  Scenario: Simple expiration
+    Given Fixed exchange rate of "2.00" USD to EUR
+    When Sell option "CLF 15/01/24 Put 13.50 @ 0.32" on "10/01/24"
+    And Option expires "CLF 15/01/24 Put 13.50 @ 0.32" on "15/01/24"
+    Then Profits for fiscal year 2024 should be options profits 64.0 losses 0.0 stocks 0.0
+
   Scenario: Simple put assign sell stock
     Given Fixed exchange rate of "2.00" USD to EUR
     When Sell option "CLF 15/01/24 Put 13.50 @ 0.32" on "10/01/24"

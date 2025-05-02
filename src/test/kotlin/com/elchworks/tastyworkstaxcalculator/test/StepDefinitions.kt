@@ -66,6 +66,11 @@ class StepDefinitions @Autowired constructor(
         publishTx(optionStoTx(optionDescription).copy(date = date.toLocalDate().toInstant()))
     }
 
+    @When("Option expires {string} on {string}")
+    fun expireOption(optionDescription: String, date: String) {
+        publishTx(optionExpiration(optionDescription).copy(date = date.toLocalDate().toInstant()))
+    }
+
     @When("Sell stock {int} {string} on {string} average price: {string}")
     fun sellStock(quantity: Int, symbol: String, date: String, price: String) {
 

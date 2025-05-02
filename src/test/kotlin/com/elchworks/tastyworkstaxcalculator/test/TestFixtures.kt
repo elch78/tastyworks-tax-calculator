@@ -2,6 +2,7 @@ package com.elchworks.tastyworkstaxcalculator.test
 
 import com.elchworks.tastyworkstaxcalculator.portfolio.option.OptionPositionStatus
 import com.elchworks.tastyworkstaxcalculator.portfolio.option.OptionPositionStatus.ASSIGNED
+import com.elchworks.tastyworkstaxcalculator.portfolio.option.OptionPositionStatus.EXPIRED
 import com.elchworks.tastyworkstaxcalculator.toMonetaryAmountUsd
 import com.elchworks.tastyworkstaxcalculator.transactions.Action.*
 import com.elchworks.tastyworkstaxcalculator.transactions.OptionAssignment
@@ -65,7 +66,7 @@ fun randomOptionRemoval() =
         expirationDate = randomLocalDate(),
         strikePrice = usd(randomBigDecimal()),
         callOrPut = "PUT",
-        status = OptionPositionStatus.EXPIRED,
+        status = EXPIRED,
         quantity = 1,
         averagePrice = usd(ZERO),
         description = "description",
@@ -155,6 +156,18 @@ fun optionAssignment(optionDescription: String): OptionRemoval {
         date = randomDate(YEAR_2021, FEBRUARY),
         symbol = attributes.symbol(),
         status = ASSIGNED,
+        callOrPut = attributes.callOrPut(),
+        strikePrice = attributes.strikePrice(),
+        expirationDate = attributes.expirationDate()
+    )
+}
+
+fun optionExpiration(optionDescription: String): OptionRemoval {
+    val attributes = optionDescription.split(" ")
+    return randomOptionRemoval().copy(
+        date = randomDate(YEAR_2021, FEBRUARY),
+        symbol = attributes.symbol(),
+        status = EXPIRED,
         callOrPut = attributes.callOrPut(),
         strikePrice = attributes.strikePrice(),
         expirationDate = attributes.expirationDate()
