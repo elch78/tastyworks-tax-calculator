@@ -123,33 +123,35 @@ fun List<String>.expirationDate(): LocalDate {
     return LocalDate.parse(this[1], formatter)
 }
 
-fun optionStoTx(optionDescription: String): OptionTrade {
+fun optionStoTx(optionDescription: String, quantity: Int = 1): OptionTrade {
     val attributes = optionDescription.split(" ")
     return randomOptionTrade().copy(
         date = randomDate(YEAR_2021, FEBRUARY),
         action = SELL_TO_OPEN,
         symbol = attributes.symbol(),
         averagePrice =  attributes.averagePrice(),
-        value = attributes.value(),
+        value = attributes.value().multiply(quantity),
         callOrPut = attributes.callOrPut(),
         strikePrice = attributes.strikePrice(),
         expirationDate = attributes.expirationDate(),
-        commissions = usd(COMMISSIONS)
+        commissions = usd(COMMISSIONS),
+        quantity = quantity
     )
 }
 
-fun optionBtcTx(optionDescription: String): OptionTrade {
+fun optionBtcTx(optionDescription: String, quantity: Int = 1): OptionTrade {
     val attributes = optionDescription.split(" ")
     return randomOptionTrade().copy(
         date = randomDate(YEAR_2021, FEBRUARY),
         action = BUY_TO_CLOSE,
         symbol = attributes.symbol(),
         averagePrice =  attributes.averagePrice(),
-        value = attributes.value(),
+        value = attributes.value().multiply(quantity).negate(),
         callOrPut = attributes.callOrPut(),
         strikePrice = attributes.strikePrice(),
         expirationDate = attributes.expirationDate(),
-        commissions = usd(COMMISSIONS)
+        commissions = usd(COMMISSIONS),
+        quantity = quantity
     )
 }
 

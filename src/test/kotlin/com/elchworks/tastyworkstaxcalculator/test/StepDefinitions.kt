@@ -7,6 +7,7 @@ import com.elchworks.tastyworkstaxcalculator.fiscalyear.FiscalYearRepository
 import com.elchworks.tastyworkstaxcalculator.fiscalyear.ProfitsSummary
 import com.elchworks.tastyworkstaxcalculator.portfolio.NewTransactionEvent
 import com.elchworks.tastyworkstaxcalculator.portfolio.Portfolio
+import com.elchworks.tastyworkstaxcalculator.portfolio.option.OptionShortPosition
 import com.elchworks.tastyworkstaxcalculator.transactions.Action.SELL_TO_CLOSE
 import com.elchworks.tastyworkstaxcalculator.transactions.Transaction
 import io.cucumber.java.Before
@@ -24,6 +25,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.Year
+import java.time.ZoneId
 
 @CucumberContextConfiguration
 @SpringBootTest
@@ -59,9 +61,19 @@ class StepDefinitions @Autowired constructor(
         publishTx(optionStoTx(optionDescription).copy(date = date.toLocalDate().toInstant()))
     }
 
+    @When("Sell option {string} on {string} quantity {int}")
+    fun sellOption(optionDescription: String, date: String, quantity: Int) {
+        publishTx(optionStoTx(optionDescription, quantity).copy(date = date.toLocalDate().toInstant()))
+    }
+
     @When("Buy option {string} on {string}")
     fun buyOption(optionDescription: String, date: String) {
         publishTx(optionBtcTx(optionDescription).copy(date = date.toLocalDate().toInstant()))
+    }
+
+    @When("Buy option {string} on {string} quantity {int}")
+    fun buyOption(optionDescription: String, date: String, quantity: Int) {
+        publishTx(optionBtcTx(optionDescription, quantity).copy(date = date.toLocalDate().toInstant()))
     }
 
     @When("Option expires {string} on {string}")
@@ -109,6 +121,25 @@ class StepDefinitions @Autowired constructor(
         assertThat(optionPositions).hasSize(1)
         assertThat(optionPositions.peek().quantity()).isEqualTo(quantity)
     }
+
+    @Then("Portfolio should have an option position {string} with quantity {int} sold on {string}")
+    fun portfolioHasOptionPosition(optionDescription: String, quantity: Int, soldAt: String) {
+        val attributes = optionDescription.split(" ")
+        val optionPositions = portfolio.getOptionPositions(
+            attributes.callOrPut(),
+            attributes.symbol(),
+            attributes.expirationDate(),
+            attributes.strikePrice()
+        )
+        assertThat(optionPositions).isNotNull
+
+        val position = optionPositions.find { it.soldAt().equals(soldAt.toLocalDate()) }
+        assertThat(position).isNotNull
+        assertThat(position!!.quantity()).isEqualTo(quantity)
+    }
+
+    // returns the local date of the sto transaction
+    fun OptionShortPosition.soldAt() = this.stoTx.date.atZone(ZoneId.of("CET")).toLocalDate()
 
     @Then("Portfolio should have no option position {string}")
     fun portfolioHasNoOptionPosition(optionDescription: String) {
