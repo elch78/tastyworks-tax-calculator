@@ -43,7 +43,7 @@ Feature: Calculation of profits and losses from options trading
     When Buy option "CLF 15/01/24 Put 13.50 @ 0.32" on "01/01/25"
     Then Profits for fiscal year 2024 should be options profits 64.0 losses 0.0 stocks 0.0
     # Complete buy costs in 2025 are loss for that year
-    And Profits for fiscal year 2025 should be options profits 0.0 losses -64.0 stocks 0.0
+    And Profits for fiscal year 2025 should be options profits 0.0 losses 64.0 stocks 0.0
     And Portfolio should have no option position "CLF 15/01/24 Put 13.50 @ 0.32"
 
   Scenario: Simple expiration
@@ -63,3 +63,18 @@ Feature: Calculation of profits and losses from options trading
     And Portfolio should have no option position "CLF 15/01/24 Put 13.50 @ 0.32"
     When Sell stock 100 "CLF" on "20/01/24" average price: "14.50"
     Then Profits for fiscal year 2024 should be options profits 64.0 losses 0.0 stocks 200.0
+
+  Scenario: Partially close option position
+    Given Fixed exchange rate of "2.00" USD to EUR
+    When Sell option "CLF 20/01/24 Put 13.50 @ 0.32" on "10/01/24" quantity 2
+    When Buy option "CLF 20/01/24 Put 13.50 @ 0.32" on "15/01/24" quantity 1
+    Then Profits for fiscal year 2024 should be options profits 64.0 losses 0.0 stocks 0.0
+    And Portfolio should have an option position "CLF 20/01/24 Put 13.50 @ 0.32" with quantity 1
+
+  Scenario: Partially close option position (multiple positions)
+    Given Fixed exchange rate of "2.00" USD to EUR
+    When Sell option "CLF 20/01/24 Put 13.50 @ 0.32" on "10/01/24" quantity 1
+    When Sell option "CLF 20/01/24 Put 13.50 @ 0.32" on "11/01/24" quantity 2
+    When Buy option "CLF 20/01/24 Put 13.50 @ 0.32" on "15/01/24" quantity 2
+    And Portfolio should have an option position "CLF 20/01/24 Put 13.50 @ 0.32" with quantity 1 sold on "11/01/24"
+
