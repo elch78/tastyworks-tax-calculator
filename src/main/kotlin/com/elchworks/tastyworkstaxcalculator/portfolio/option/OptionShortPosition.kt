@@ -22,6 +22,8 @@ data class OptionShortPosition(val stoTx: OptionTrade) {
 
     fun description() = "option=${stoTx.optionDescription()}, stoTx date=${stoTx.date} quantity=${stoTx.quantity}"
 
+    fun quantity() = quantityLeft
+
     companion object {
         private val LOG = LoggerFactory.getLogger(OptionShortPosition::class.java)
     }

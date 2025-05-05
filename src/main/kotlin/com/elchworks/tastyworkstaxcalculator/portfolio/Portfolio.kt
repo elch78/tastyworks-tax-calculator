@@ -23,7 +23,9 @@ import org.slf4j.LoggerFactory
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.context.event.EventListener
 import org.springframework.stereotype.Component
+import java.time.LocalDate
 import java.util.*
+import javax.money.MonetaryAmount
 
 @Component
 class Portfolio(
@@ -51,7 +53,21 @@ class Portfolio(
         }
     }
 
-    fun getPositions(symbol: String) = stockPositions[symbol]
+    fun getStockPositions(symbol: String) = stockPositions[symbol]
+    fun getOptionPositions(
+        callOrPut: String,
+        symbol: String,
+        expirationDate: LocalDate,
+        strikePrice: MonetaryAmount
+    ): Queue<OptionShortPosition> {
+        val key = optionKey(
+            callOrPut = callOrPut,
+            symbol = symbol,
+            expirationDate = expirationDate,
+            strikePrice = strikePrice
+        )
+        return optionPositions[key] ?: LinkedList()
+    }
 
     fun reset() {
         optionPositions.clear()
@@ -195,5 +211,7 @@ class Portfolio(
     private fun removePositionFifo(tx: OptionTransaction) =
         optionPositions[tx.key()]!!.remove()
 
-    private fun OptionTransaction.key() = "${this.callOrPut}-${this.symbol}-${this.expirationDate}-${this.strikePrice}"
+    private fun optionKey(callOrPut: String, symbol: String, expirationDate: LocalDate, strikePrice: MonetaryAmount) = "${callOrPut}-${symbol}-${expirationDate}-${strikePrice}"
+
+    private fun OptionTransaction.key() = optionKey(this.callOrPut, this.symbol, this.expirationDate, this.strikePrice)
 }

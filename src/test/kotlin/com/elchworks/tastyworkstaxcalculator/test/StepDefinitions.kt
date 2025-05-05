@@ -7,7 +7,6 @@ import com.elchworks.tastyworkstaxcalculator.fiscalyear.FiscalYearRepository
 import com.elchworks.tastyworkstaxcalculator.fiscalyear.ProfitsSummary
 import com.elchworks.tastyworkstaxcalculator.portfolio.NewTransactionEvent
 import com.elchworks.tastyworkstaxcalculator.portfolio.Portfolio
-import com.elchworks.tastyworkstaxcalculator.transactions.Action
 import com.elchworks.tastyworkstaxcalculator.transactions.Action.SELL_TO_CLOSE
 import com.elchworks.tastyworkstaxcalculator.transactions.Transaction
 import io.cucumber.java.Before
@@ -16,7 +15,6 @@ import io.cucumber.java.en.Then
 import io.cucumber.java.en.When
 import io.cucumber.spring.CucumberContextConfiguration
 import org.assertj.core.api.Assertions.assertThat
-import org.mockito.Mockito
 import org.mockito.kotlin.any
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
@@ -24,11 +22,8 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import java.math.BigDecimal
-import java.time.Instant
 import java.time.LocalDate
 import java.time.Year
-import java.time.ZoneId
-import java.time.format.DateTimeFormatter
 
 @CucumberContextConfiguration
 @SpringBootTest
@@ -95,14 +90,41 @@ class StepDefinitions @Autowired constructor(
 
     @Then("Portfolio should have a stock position for symbol {string} with quantity {int}")
     fun portfolioHasPosition(symbol: String, quantity: Int) {
-        val positions = portfolio.getPositions(symbol)!!
+        val positions = portfolio.getStockPositions(symbol)
+        assertThat(positions).isNotNull
         assertThat(positions).hasSize(1)
-        assertThat(positions.peek().quantity()).isEqualTo(quantity)
+        assertThat(positions!!.peek().quantity()).isEqualTo(quantity)
+    }
 
+    @Then("Portfolio should have an option position {string} with quantity {int}")
+    fun portfolioHasOptionPosition(optionDescription: String, quantity: Int) {
+        val attributes = optionDescription.split(" ")
+        val optionPositions = portfolio.getOptionPositions(
+            attributes.callOrPut(),
+            attributes.symbol(),
+            attributes.expirationDate(),
+            attributes.strikePrice()
+        )
+        assertThat(optionPositions).isNotNull
+        assertThat(optionPositions).hasSize(1)
+        assertThat(optionPositions.peek().quantity()).isEqualTo(quantity)
+    }
+
+    @Then("Portfolio should have no option position {string}")
+    fun portfolioHasNoOptionPosition(optionDescription: String) {
+        val attributes = optionDescription.split(" ")
+        val optionPositions = portfolio.getOptionPositions(
+            attributes.callOrPut(),
+            attributes.symbol(),
+            attributes.expirationDate(),
+            attributes.strikePrice()
+        )
+        assertThat(optionPositions).isNotNull
+        assertThat(optionPositions).isEmpty()
     }
 
     @Then("Profits for fiscal year {int} should be options profits {double} losses {double} stocks {double}")
-    fun portfolioHasPosition(year: Integer, profitsFromOptions: Double, lossesFromOptions: Double, profitsFromStocks: Double) {
+    fun thenProfitsAre(year: Integer, profitsFromOptions: Double, lossesFromOptions: Double, profitsFromStocks: Double) {
         val fiscalYear = fiscalYearRepository.getFiscalYear(Year.of(year.toInt()))
         assertThat(fiscalYear.profits()).isEqualTo(
             ProfitsSummary(
@@ -111,7 +133,6 @@ class StepDefinitions @Autowired constructor(
                 profitsFromStocks = eur(profitsFromStocks)
             ))
     }
-
 
     fun publishTx(tx: Transaction) {
         eventPublisher.publishEvent(NewTransactionEvent(tx))
