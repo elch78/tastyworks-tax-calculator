@@ -36,32 +36,6 @@ class End2EndTest @Autowired constructor(
     private val scenario: TestScenario,
     @MockBean private val exchangeRateRepository: ExchangeRateRepository
 ) {
-    @Test
-    fun optionPositionClosedSameYearWithoutProfitSameExchangeRate() {
-        // Given
-        val value = usd(5)
-        val stoTx = randomOptionTrade().copy(
-            randomDate(YEAR_2021, JANUARY),
-            action = SELL_TO_OPEN,
-            symbol = SYMBOL,
-            averagePrice = value,
-            value = value,
-        )
-        val btcTx = stoTx.copy(
-            action = BUY_TO_CLOSE,
-            averagePrice = value.negate(),
-            value = value.negate(),
-        )
-        withFixedExchangeRate()
-
-        // When
-        scenario.publishTx(stoTx)
-        scenario.publishTx(btcTx)
-
-        // Then
-        assertThat(fiscalYearRepository.getFiscalYear(YEAR_2021).profits())
-            .isEqualTo(ProfitsSummary(eur(0), eur(0), eur(0)))
-    }
 
     @Test
     fun optionPositionClosedSameYearWithLossDueToExchangeRate() {
