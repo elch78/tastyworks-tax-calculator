@@ -49,8 +49,8 @@ class FiscalYear(
     fun onOptionPositionClosed(btcEvent: OptionBuyToCloseEvent) {
         val btcTx = btcEvent.btcTx
         val stoTx = btcEvent.stoTx
-        val premium = currencyExchange.usdToEur(stoTx.averagePrice.multiply(btcEvent.quantitySold), stoTx.date)
-        val buyValue = currencyExchange.usdToEur(btcTx.averagePrice.multiply(btcEvent.quantitySold), btcTx.date)
+        val premium = txValueInEur(stoTx)
+        val buyValue = txValueInEur(btcTx)
         if(positionWasOpenedInThisFiscalYear(stoTx)) {
             val netProfit = netProfit(btcTx, stoTx, btcEvent.quantitySold)
             /*

@@ -17,8 +17,8 @@ class CurrencyExchange(
     private val log = LoggerFactory.getLogger(CurrencyExchange::class.java)
 
     fun usdToEur(value: MonetaryAmount, date: Instant,): MonetaryAmount {
-        log.debug("usdToEur value='{}', date='{}'", value, date)
         val dateCet = ZonedDateTime.ofInstant(date, ZoneId.of("CET")).toLocalDate()
+        log.debug("usdToEur value='{}', date='{}', dateCet='{}'", value, date, dateCet)
         val rate = exchangeRateRepository.monthlyRateUsdToEur(dateCet)
         log.debug("usdToEur rate='{}'", rate)
         val eurValue = Money.of((value * rate).number, "EUR")

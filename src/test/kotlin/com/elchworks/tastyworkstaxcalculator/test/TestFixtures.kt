@@ -114,6 +114,7 @@ fun defaultOptionStoTx() = randomOptionTrade().copy(
 
 
 fun List<String>.symbol() = this[0]
+fun List<String>.averagePrice() = usd(this[5].toDouble())
 fun List<String>.value() = usd(this[5].toDouble() * 100)
 fun List<String>.callOrPut() = this[2].uppercase()
 fun List<String>.strikePrice() = usd(this[3].toDouble())
@@ -128,6 +129,22 @@ fun optionStoTx(optionDescription: String): OptionTrade {
         date = randomDate(YEAR_2021, FEBRUARY),
         action = SELL_TO_OPEN,
         symbol = attributes.symbol(),
+        averagePrice =  attributes.averagePrice(),
+        value = attributes.value(),
+        callOrPut = attributes.callOrPut(),
+        strikePrice = attributes.strikePrice(),
+        expirationDate = attributes.expirationDate(),
+        commissions = usd(COMMISSIONS)
+    )
+}
+
+fun optionBtcTx(optionDescription: String): OptionTrade {
+    val attributes = optionDescription.split(" ")
+    return randomOptionTrade().copy(
+        date = randomDate(YEAR_2021, FEBRUARY),
+        action = BUY_TO_CLOSE,
+        symbol = attributes.symbol(),
+        averagePrice =  attributes.averagePrice(),
         value = attributes.value(),
         callOrPut = attributes.callOrPut(),
         strikePrice = attributes.strikePrice(),

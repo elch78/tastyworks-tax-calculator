@@ -68,66 +68,6 @@ class End2EndTest @Autowired constructor(
             .isEqualTo(ProfitsSummary(eur(0), lossesFromOptions, eur(0)))
     }
 
-    @Test
-    fun optionPositionClosedSameYearWithProfitDueToExchangeRate() {
-        // Given
-        val sellDate = randomDate(YEAR_2021, JANUARY)
-        val buyDate = randomDate(YEAR_2021, FEBRUARY)
-        val stoTx = randomOptionTrade().copy(
-            date = sellDate,
-            action = SELL_TO_OPEN,
-            symbol = SYMBOL,
-            averagePrice = usd(SELL_VALUE_USD),
-            value = usd(SELL_VALUE_USD),
-        )
-        val btcTx = stoTx.copy(
-            date = buyDate,
-            action = BUY_TO_CLOSE,
-            averagePrice = usd(-SELL_VALUE_USD),
-            value = usd(-SELL_VALUE_USD),
-        )
-        withExchangeRate(sellDate, TWO)
-        withExchangeRate(buyDate, ONE)
-
-        // When
-        scenario.publishTx(stoTx)
-        scenario.publishTx(btcTx)
-
-        // Then loss due to different exchange rate
-        val profitsFromOptions = eur(SELL_VALUE_USD)
-        assertThat(fiscalYearRepository.getFiscalYear(YEAR_2021).profits())
-            .isEqualTo(ProfitsSummary(profitsFromOptions, eur(0), eur(0)))
-    }
-
-    @Test
-    fun optionPositionClosedDifferentYearWithoutProfitSameExchangeRate() {
-        // Given
-        val stoTx = randomOptionTrade().copy(
-            date = randomDate(YEAR_2021, DECEMBER),
-            action = SELL_TO_OPEN,
-            symbol = SYMBOL,
-            averagePrice = usd(SELL_VALUE_USD),
-            value = usd(SELL_VALUE_USD),
-        )
-        val btcTx = stoTx.copy(
-            date = randomDate(YEAR_2022, JANUARY),
-            action = BUY_TO_CLOSE,
-            averagePrice = usd(-BUY_VALUE_USD),
-            value = usd(-BUY_VALUE_USD),
-        )
-        withFixedExchangeRate()
-
-        // When
-        scenario.publishTx(stoTx)
-        scenario.publishTx(btcTx)
-
-        // Then sell value is profit for 2021 and buy value is a loss for 2022
-        assertThat(fiscalYearRepository.getFiscalYear(YEAR_2021).profits())
-            .isEqualTo(ProfitsSummary(eur(SELL_VALUE_EUR), eur(0), eur(0)))
-        assertThat(fiscalYearRepository.getFiscalYear(YEAR_2022).profits())
-            .isEqualTo(ProfitsSummary(eur(0), eur(BUY_VALUE_EUR), eur(0)))
-    }
-
     // TODO test partial close with loss and different year ...
     //  btc tx that consumes more than one sto tx. e.g. sell 1 + sell 2 + buy 2
 
@@ -177,27 +117,6 @@ class End2EndTest @Autowired constructor(
             .isEqualTo(ProfitsSummary(eur(0), eur(0), eur(0)))
     }
 
-    @ParameterizedTest
-    @MethodSource
-    fun simpleAssignmentPutAndCall(profitPerStock: BigDecimal) {
-        // Given
-        val premiumPut = randomUsdAmount()
-        val premiumCall = randomUsdAmount()
-        val stockBuyPrice = randomUsdAmount()
-        val stockSellPrice = stockBuyPrice + usd(profitPerStock)
-        withFixedExchangeRate()
-
-        // When
-        scenario.assignedPut(premium = premiumPut, strikePrice = stockBuyPrice)
-        scenario.assignedCall(premium = premiumCall, strikePrice = stockSellPrice)
-
-        // Then
-        val expectedStockProfit = profitPerStock * BigDecimal("100") * EXCHANGE_RATE
-        val expectedProfitFromOptions = ((premiumPut + premiumCall) * EXCHANGE_RATE).toEur()
-        assertThat(fiscalYearRepository.getFiscalYear(YEAR_2021).profits())
-            .isEqualTo(ProfitsSummary(expectedProfitFromOptions, eur(0), eur(expectedStockProfit)))
-    }
-
     @Test
     fun reverseSplit() {
         // Given
@@ -231,16 +150,5 @@ class End2EndTest @Autowired constructor(
         whenever(exchangeRateRepository.monthlyRateUsdToEur(eq(localDate)))
             .thenReturn(exchangeRate)
     }
-
-    companion object {
-
-
-        @JvmStatic
-        fun simpleAssignmentPutAndCall() = Stream.of(
-            Arguments.of(BigDecimal("10.0")),
-            Arguments.of(BigDecimal("-10.0"))
-        )
-    }
-
 }
 

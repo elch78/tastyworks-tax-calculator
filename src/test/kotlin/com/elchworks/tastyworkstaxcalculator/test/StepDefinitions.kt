@@ -55,15 +55,18 @@ class StepDefinitions @Autowired constructor(
 
     @Given("Fixed exchange rate of {string} USD to EUR")
     fun givenExchangeRate(rate: String) {
-
         whenever(exchangeRateRepository.monthlyRateUsdToEur(any()))
             .thenReturn(BigDecimal(rate))
     }
 
     @When("Sell option {string} on {string}")
     fun sellOption(optionDescription: String, date: String) {
-
         publishTx(optionStoTx(optionDescription).copy(date = date.toLocalDate().toInstant()))
+    }
+
+    @When("Buy option {string} on {string}")
+    fun buyOption(optionDescription: String, date: String) {
+        publishTx(optionBtcTx(optionDescription).copy(date = date.toLocalDate().toInstant()))
     }
 
     @When("Option expires {string} on {string}")
