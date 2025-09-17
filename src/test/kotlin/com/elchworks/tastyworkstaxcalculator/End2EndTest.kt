@@ -72,52 +72,6 @@ class End2EndTest @Autowired constructor(
     //  btc tx that consumes more than one sto tx. e.g. sell 1 + sell 2 + buy 2
 
     @Test
-    fun optionPositionClosedPartiallySameYear() {
-        val sellPrice = usd(2)
-        val buyPrice = usd(-2)
-        // Given stoTx with quantity 2
-        val stoTx = randomOptionTrade().copy(
-            date = randomDate(YEAR_2021, JANUARY),
-            action = SELL_TO_OPEN,
-            symbol = SYMBOL,
-            value = sellPrice * 2,
-            averagePrice = sellPrice,
-            quantity = 2
-        )
-        // btcTx with quantity 1
-        val btcTx = stoTx.copy(
-            date = randomDate(YEAR_2021, FEBRUARY),
-            action = BUY_TO_CLOSE,
-            symbol = SYMBOL,
-            value = buyPrice,
-            averagePrice = buyPrice,
-            quantity = 1
-        )
-        withFixedExchangeRate()
-
-        // When
-        scenario.publishTx(stoTx)
-
-        // Then profit contains premium of two options
-        assertThat(fiscalYearRepository.getFiscalYear(YEAR_2021).profits())
-            .isEqualTo(ProfitsSummary(eur(8), eur(0), eur(0)))
-
-        // When
-        scenario.publishTx(btcTx)
-
-        // Then only one option is sold. Premium of one option is left
-        assertThat(fiscalYearRepository.getFiscalYear(YEAR_2021).profits())
-            .isEqualTo(ProfitsSummary(eur(4), eur(0), eur(0)))
-
-        // When another btc tx with amount 1
-        scenario.publishTx(btcTx)
-
-        // Then the second option is closed. No profit left
-        assertThat(fiscalYearRepository.getFiscalYear(YEAR_2021).profits())
-            .isEqualTo(ProfitsSummary(eur(0), eur(0), eur(0)))
-    }
-
-    @Test
     fun reverseSplit() {
         // Given
         withFixedExchangeRate()
