@@ -25,6 +25,7 @@ import org.springframework.context.ApplicationEventPublisher
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import java.math.BigDecimal
 import java.time.LocalDate
+import java.time.Month
 import java.time.Year
 import java.time.ZoneId
 
@@ -116,6 +117,32 @@ class StepDefinitions @Autowired constructor(
         publishTx(defaultStockTrade().copy(
             action = BUY_TO_OPEN,
             averagePrice = strikePrice.toUsd().negate(),
+        ))
+    }
+
+    @When("Reverse split original quantity {int} new quantity {int}")
+    fun reverseSplit(originalQuantity: Int, newQuantity: Int) {
+        val splitDate = randomDate(Year.of(2022), Month.FEBRUARY)
+        publishTx(defaultReverseSplitTransaction().copy(
+            date = splitDate,
+            quantity = originalQuantity,
+            averagePrice = randomUsdAmount(),
+            action = SELL_TO_CLOSE
+        ))
+        publishTx(defaultReverseSplitTransaction().copy(
+            date = splitDate,
+            quantity = newQuantity,
+            averagePrice = randomUsdAmount(),
+            action = BUY_TO_OPEN
+        ))
+    }
+
+    @When("Sell stock quantity {int} price {string}")
+    fun sellStock(quantity: Int, price: String) {
+        publishTx(defaultStockTrade().copy(
+            action = SELL_TO_CLOSE,
+            quantity = quantity,
+            averagePrice = price.toUsd()
         ))
     }
 

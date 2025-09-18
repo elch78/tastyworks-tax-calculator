@@ -71,29 +71,6 @@ class End2EndTest @Autowired constructor(
     // TODO test partial close with loss and different year ...
     //  btc tx that consumes more than one sto tx. e.g. sell 1 + sell 2 + buy 2
 
-    @Test
-    fun reverseSplit() {
-        // Given
-        withFixedExchangeRate()
-
-        // When
-        // two assignments. Average price 15
-        scenario.assignedPut(premium = ZERO_USD, strikePrice = usd(10.0))
-        scenario.assignedPut(premium = ZERO_USD, strikePrice = usd(20.0))
-
-        // Reverse split 20:1
-        // new average price: 300
-        scenario.reverseSplit(originalQuantity = 200, newQuantity = 10)
-
-        // STC 5
-        scenario.sellStock(quantity = 5, price = usd(400.0))
-
-        // Then
-        // 5 stocks sold, 100 USD (200 EUR) profit per stock
-        val expectedProfitFromStocks = eur(1000.00)
-        assertThat(fiscalYearRepository.getFiscalYear(YEAR_2021).profits())
-            .isEqualTo(ProfitsSummary(eur(0.0), eur(0), expectedProfitFromStocks))
-    }
 
     private fun withFixedExchangeRate() {
         whenever(exchangeRateRepository.monthlyRateUsdToEur(any())).thenReturn(EXCHANGE_RATE)

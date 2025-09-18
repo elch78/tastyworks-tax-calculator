@@ -102,7 +102,7 @@ fun randomStockTrade() =
     )
 
 fun defaultOptionStoTx() = randomOptionTrade().copy(
-    date = randomDate(YEAR_2021, JANUARY),
+    date = randomDateIn2021(),
     action = SELL_TO_OPEN,
     symbol = SYMBOL,
     value = usd(SELL_VALUE_USD),
@@ -161,7 +161,7 @@ fun defaultReverseSplitTransaction() =
     )
 
 fun defaultAssignment() = randomOptionRemoval().copy(
-    date = randomDate(YEAR_2021, FEBRUARY),
+    date = randomDateIn2021(),
     symbol = SYMBOL,
     status = ASSIGNED,
     callOrPut = "PUT",
@@ -226,6 +226,7 @@ private fun randomDateIn2021(): Instant =
     ZonedDateTime.of(2021, 11, 1, 1, 1, 1, 0, ZoneId.of("CET"))
         .plusMinutes(RandomUtils.nextLong(1,  1000))
         .toInstant()
+
 fun randomDate(year: Year, month: Month): Instant =
     ZonedDateTime.of(year.value, month.value, 1, 1, 1, 1, 0, ZoneId.of("CET"))
         .plusMinutes(RandomUtils.nextLong(1,  1000))

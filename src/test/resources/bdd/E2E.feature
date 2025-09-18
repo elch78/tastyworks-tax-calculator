@@ -78,3 +78,11 @@ Feature: Calculation of profits and losses from options trading
     When Buy option "CLF 20/01/24 Put 13.50 @ 0.32" on "15/01/24" quantity 2
     And Portfolio should have an option position "CLF 20/01/24 Put 13.50 @ 0.32" with quantity 1 sold on "11/01/24"
 
+  Scenario: Reverse split
+    Given Fixed exchange rate of "2.00" USD to EUR
+    When Assigned put with premium "0.00" and strike price "10.0"
+    And Assigned put with premium "0.00" and strike price "20.0"
+    And Reverse split original quantity 100 new quantity 10
+    And Sell stock quantity 5 price "400.0"
+    Then Profits for fiscal year 2021 should be options profits 0.0 losses 0.0 stocks 1000.0
+
