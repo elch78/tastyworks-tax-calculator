@@ -8,6 +8,7 @@ import com.elchworks.tastyworkstaxcalculator.fiscalyear.ProfitsSummary
 import com.elchworks.tastyworkstaxcalculator.portfolio.NewTransactionEvent
 import com.elchworks.tastyworkstaxcalculator.portfolio.Portfolio
 import com.elchworks.tastyworkstaxcalculator.portfolio.option.OptionShortPosition
+import com.elchworks.tastyworkstaxcalculator.transactions.Action.BUY_TO_OPEN
 import com.elchworks.tastyworkstaxcalculator.transactions.Action.SELL_TO_CLOSE
 import com.elchworks.tastyworkstaxcalculator.transactions.Transaction
 import io.cucumber.java.Before
@@ -98,6 +99,24 @@ class StepDefinitions @Autowired constructor(
     fun assignOption(optionDescription: String) {
         publishTx(optionAssignment(optionDescription))
         publishTx(assignmentStockTrade(optionDescription))
+    }
+
+    @When("Assigned put with premium {string} and strike price {string}")
+    fun assignedPut(premium: String, strikePrice: String) {
+        publishTx(defaultOptionStoTx().copy(
+            callOrPut = "PUT",
+            value = premium.toUsd(),
+        ))
+
+        publishTx(defaultAssignment().copy(
+            callOrPut = "PUT",
+            averagePrice = strikePrice.toUsd(),
+        ))
+
+        publishTx(defaultStockTrade().copy(
+            action = BUY_TO_OPEN,
+            averagePrice = strikePrice.toUsd().negate(),
+        ))
     }
 
     @Then("Portfolio should have a stock position for symbol {string} with quantity {int}")
