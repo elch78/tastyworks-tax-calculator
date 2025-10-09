@@ -13,16 +13,16 @@ Feature: Calculation of profits and losses from options trading
     Then Profits for fiscal year 2024 should be options profits 128.0 losses 0.0 stocks 200.0
 
   Scenario: Simple roundtrip loss due to exchange rate
-    Given Exchange rate on "10/01/24" is "2.0" USD to EUR
-    And Exchange rate on "15/01/24" is "2.0" USD to EUR
+    Given Exchange rate on "10/01/24" is "3.0" USD to EUR
+    And Exchange rate on "15/01/24" is "3.0" USD to EUR
     And Exchange rate on "20/01/24" is "2.0" USD to EUR
-    And Exchange rate on "25/01/24" is "1.0" USD to EUR
-    When Sell option "CLF 15/01/24 Put 13.50 @ 0.32" on "10/01/24"
-    And Assignment "CLF 15/01/24 Put 13.50 @ 0.32"
-    And Sell option "CLF 25/01/24 Call 13.50 @ 0.32" on "20/01/24"
-    And Assignment "CLF 25/01/24 Call 13.50 @ 0.32"
-#    buy for $1350 at rate 2.0 = 2700€ sell at rate 1.0 = 1350 -> loss 1350
-    Then Profits for fiscal year 2024 should be options profits 128.0 losses 0.0 stocks -1350.0
+    And Exchange rate on "25/01/24" is "2.0" USD to EUR
+    When Sell option "CLF 15/01/24 Put 20.00 @ 0.10" on "10/01/24"
+    And Assignment "CLF 15/01/24 Put 20.00 @ 0.10"
+    And Sell option "CLF 25/01/24 Call 20.00 @ 0.10" on "20/01/24"
+    And Assignment "CLF 25/01/24 Call 20.00 @ 0.10"
+#    buy for $2000 at rate 3.0 = 6000€ sell at rate 2.0 = 4000 -> loss 2000
+    Then Profits for fiscal year 2024 should be options profits 50.0 losses 0.0 stocks -2000.0
 
   Scenario: Simple roundtrip profit due to exchange rate
     Given Exchange rate on "10/01/24" is "2.0" USD to EUR
