@@ -3,8 +3,6 @@ package com.elchworks.tastyworkstaxcalculator.fiscalyear
 import com.elchworks.tastyworkstaxcalculator.convert.CurrencyExchange
 import com.elchworks.tastyworkstaxcalculator.convert.ExchangeRateRepository
 import com.elchworks.tastyworkstaxcalculator.eur
-import com.elchworks.tastyworkstaxcalculator.fiscalyear.FiscalYear
-import com.elchworks.tastyworkstaxcalculator.fiscalyear.ProfitsSummary
 import com.elchworks.tastyworkstaxcalculator.plus
 import com.elchworks.tastyworkstaxcalculator.portfolio.option.OptionBuyToCloseEvent
 import com.elchworks.tastyworkstaxcalculator.portfolio.option.OptionSellToOpenEvent
@@ -121,7 +119,7 @@ class FiscalYearTest {
     }
 
     private fun withRateUsdToEur() {
-        whenever(exchangeRateRepository.monthlyRateUsdToEur(any()))
+        whenever(exchangeRateRepository.dailyRateUsdToEur(any()))
             .thenReturn(USD_EUR_EXCHANGE_RATE)
     }
 }

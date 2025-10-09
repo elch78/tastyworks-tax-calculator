@@ -33,7 +33,7 @@ class ExchangeRateRepository {
             }
     }
 
-    fun monthlyRateUsdToEur(date: LocalDate): BigDecimal {
+    fun dailyRateUsdToEur(date: LocalDate): BigDecimal {
         val rate = (rates[date] ?: error("No rate for date $date"))
         log.debug("usdToEur rate='{}'", rate)
         return rate

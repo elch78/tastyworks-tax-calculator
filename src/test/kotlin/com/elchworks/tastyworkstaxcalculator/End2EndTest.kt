@@ -9,9 +9,6 @@ import com.elchworks.tastyworkstaxcalculator.test.*
 import com.elchworks.tastyworkstaxcalculator.transactions.Action.*
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.params.ParameterizedTest
-import org.junit.jupiter.params.provider.Arguments
-import org.junit.jupiter.params.provider.MethodSource
 import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.whenever
@@ -24,7 +21,6 @@ import java.math.BigDecimal.ONE
 import java.time.Instant
 import java.time.Month.*
 import java.time.ZoneId
-import java.util.stream.Stream
 
 @SpringBootTest
 // Beans are stateful
@@ -73,12 +69,12 @@ class End2EndTest @Autowired constructor(
 
 
     private fun withFixedExchangeRate() {
-        whenever(exchangeRateRepository.monthlyRateUsdToEur(any())).thenReturn(EXCHANGE_RATE)
+        whenever(exchangeRateRepository.dailyRateUsdToEur(any())).thenReturn(EXCHANGE_RATE)
     }
 
     private fun withExchangeRate(date: Instant, exchangeRate: BigDecimal) {
         val localDate = date.atZone(ZoneId.of("CET")).toLocalDate()
-        whenever(exchangeRateRepository.monthlyRateUsdToEur(eq(localDate)))
+        whenever(exchangeRateRepository.dailyRateUsdToEur(eq(localDate)))
             .thenReturn(exchangeRate)
     }
 }

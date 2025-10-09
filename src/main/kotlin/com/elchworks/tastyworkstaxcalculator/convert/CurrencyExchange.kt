@@ -1,6 +1,5 @@
 package com.elchworks.tastyworkstaxcalculator.convert
 
-import com.elchworks.tastyworkstaxcalculator.portfolio.Profit
 import com.elchworks.tastyworkstaxcalculator.times
 import org.javamoney.moneta.Money
 import org.slf4j.LoggerFactory
@@ -16,13 +15,12 @@ class CurrencyExchange(
 ) {
     private val log = LoggerFactory.getLogger(CurrencyExchange::class.java)
 
-    fun usdToEur(value: MonetaryAmount, date: Instant,): MonetaryAmount {
+    fun usdToEur(valueUsd: MonetaryAmount, date: Instant,): MonetaryAmount {
+        log.debug("usdToEur value='{}', date='{}'", valueUsd, date)
         val dateCet = ZonedDateTime.ofInstant(date, ZoneId.of("CET")).toLocalDate()
-        log.debug("usdToEur value='{}', date='{}', dateCet='{}'", value, date, dateCet)
-        val rate = exchangeRateRepository.monthlyRateUsdToEur(dateCet)
-        log.debug("usdToEur rate='{}'", rate)
-        val eurValue = Money.of((value * rate).number, "EUR")
-        log.debug("usdToEur eurValue='{}'", eurValue)
-        return eurValue
+        val rate = exchangeRateRepository.dailyRateUsdToEur(dateCet)
+        val valueEur = Money.of((valueUsd * rate).number, "EUR")
+        log.info("valueUsd='{}', date='{}', rate='{}', valueEur='{}'", valueUsd, dateCet, rate, valueEur)
+        return valueEur
     }
 }

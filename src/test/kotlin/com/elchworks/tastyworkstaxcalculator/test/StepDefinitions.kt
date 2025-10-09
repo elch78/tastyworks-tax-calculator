@@ -24,7 +24,6 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import java.math.BigDecimal
-import java.time.LocalDate
 import java.time.Month
 import java.time.Year
 import java.time.ZoneId
@@ -48,13 +47,13 @@ class StepDefinitions @Autowired constructor(
     @Given("Exchange rate on {string} is {string} USD to EUR")
     fun givenExchangeRate(date: String, rate: String) {
 
-        whenever(exchangeRateRepository.monthlyRateUsdToEur(date.toLocalDate()))
+        whenever(exchangeRateRepository.dailyRateUsdToEur(date.toLocalDate()))
             .thenReturn(BigDecimal(rate))
     }
 
     @Given("Fixed exchange rate of {string} USD to EUR")
     fun givenExchangeRate(rate: String) {
-        whenever(exchangeRateRepository.monthlyRateUsdToEur(any()))
+        whenever(exchangeRateRepository.dailyRateUsdToEur(any()))
             .thenReturn(BigDecimal(rate))
     }
 
