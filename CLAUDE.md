@@ -8,9 +8,21 @@ This is a Kotlin/Spring Boot command-line application that calculates profits an
 
 ## Coding Guidelines
 
-### Clean Code
-- The code should be self explaining. I.e. it should be clear from the code itself WHAT the code is doing.
-- Comments should only be used to document the WHY not the WHAT (that should be clear from the code).
+## Coding Principles
+
+We prefer simple, clean, maintainable solutions over clever or complex ones.
+
+Readability and maintainability are primary concerns.
+
+Self-documenting names and code. The WHAT should be clear from the code, Comments should only be used to document the
+WHY.
+
+Small functions.
+
+Follow single responsibility principles in classes and functions.
+
+The project is developed by Continuous Delivery principles. I.e. trunk based development is practiced. All changes
+should be integrated at least once per day. Changes should be made in small iterative steps.
 
 ### Logging
 - all code should use log levels
