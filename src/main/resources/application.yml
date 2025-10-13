@@ -1,7 +1,11 @@
+
 logging.level:
-    com.elchworks: INFO
+    com.elchworks: info
     # suppress info logs of portfolio
-    com.elchworks.tastyworkstaxcalculator.portfolio: WARN
-#    com.elchworks.tastyworkstaxcalculator.convert: INFO
+#    com.elchworks.tastyworkstaxcalculator.portfolio: info
+    com.elchworks.tastyworkstaxcalculator.convert: warn
 #    com.elchworks.tastyworkstaxcalculator.CsvReader: INFO
-#    com.elchworks.tastyworkstaxcalculator.fiscalyear.FiscalYear: INFO
+#    com.elchworks.tastyworkstaxcalculator.fiscalyear.FiscalYear: info
+logging:
+  pattern:
+    console: "%5level %-40logger{39} : %m%n"

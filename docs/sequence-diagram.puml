@@ -1,0 +1,110 @@
+@startuml Transaction Processing Flow
+
+title Transaction Processing Flow - Option Trade Example
+
+actor User
+participant ApplicationRunner as runner
+participant TransactionCsvReader as reader
+participant ApplicationEventPublisher as publisher
+participant Portfolio as portfolio
+participant FiscalYearManager as fiscalMgr
+participant FiscalYearRepository as fiscalRepo
+participant FiscalYear as fiscalYear
+participant CurrencyExchange as exchange
+
+User -> runner : ./gradlew bootRun\n--args="--transactionsDir=..."
+
+activate runner
+
+runner -> reader : read(csvFile)
+activate reader
+reader --> runner : List<Transaction>
+deactivate reader
+
+loop for each transaction (sorted by date)
+    runner -> publisher : publishEvent(NewTransactionEvent)
+    activate publisher
+
+    publisher -> portfolio : @EventListener\nonNewTransaction()
+    activate portfolio
+
+    alt Option Trade (SELL_TO_OPEN)
+        portfolio -> portfolio : optionPositionSellToOpen()
+        portfolio -> portfolio : create OptionShortPosition
+        portfolio -> publisher : publishEvent(OptionSellToOpenEvent)
+
+        publisher -> fiscalMgr : @EventListener\nonOptionPositionOpened()
+        activate fiscalMgr
+        fiscalMgr -> fiscalRepo : getFiscalYear(year)
+        activate fiscalRepo
+        fiscalRepo --> fiscalMgr : FiscalYear
+        deactivate fiscalRepo
+
+        fiscalMgr -> fiscalYear : onOptionPositionOpened()
+        activate fiscalYear
+        fiscalYear -> exchange : usdToEur(premium, date)
+        activate exchange
+        exchange --> fiscalYear : premium in EUR
+        deactivate exchange
+        fiscalYear -> fiscalYear : update ProfitAndLoss
+        deactivate fiscalYear
+        deactivate fiscalMgr
+
+    else Option Trade (BUY_TO_CLOSE)
+        portfolio -> portfolio : optionPositionBuyToClose()
+        portfolio -> portfolio : close OptionShortPosition(s)\n(may be partial)
+        portfolio -> publisher : publishEvent(OptionBuyToCloseEvent)
+
+        publisher -> fiscalMgr : @EventListener\nonOptionPositionClosed()
+        activate fiscalMgr
+        fiscalMgr -> fiscalRepo : getFiscalYear(year)
+        activate fiscalRepo
+        fiscalRepo --> fiscalMgr : FiscalYear
+        deactivate fiscalRepo
+
+        fiscalMgr -> fiscalYear : onOptionPositionClosed()
+        activate fiscalYear
+        fiscalYear -> exchange : usdToEur(buyValue, date)
+        activate exchange
+        exchange --> fiscalYear : buyValue in EUR
+        deactivate exchange
+        fiscalYear -> fiscalYear : calculate net profit/loss\napply German tax rules
+        fiscalYear -> fiscalYear : update ProfitAndLoss
+        deactivate fiscalYear
+        deactivate fiscalMgr
+
+    else Stock Trade or Assignment
+        note right of portfolio
+            Similar flow for stock positions:
+            - Create StockPosition on BTO
+            - Close position(s) on STC
+            - Publish StockSellToCloseEvent
+        end note
+    end
+
+    deactivate portfolio
+    deactivate publisher
+end
+
+runner -> fiscalMgr : printReports()
+activate fiscalMgr
+fiscalMgr -> fiscalRepo : getAllSortedByYear()
+activate fiscalRepo
+fiscalRepo --> fiscalMgr : List<FiscalYear>
+deactivate fiscalRepo
+
+loop for each fiscal year
+    fiscalMgr -> fiscalYear : profits()
+    activate fiscalYear
+    fiscalYear --> fiscalMgr : ProfitsSummary
+    deactivate fiscalYear
+    fiscalMgr -> fiscalMgr : log profit/loss report
+end
+
+fiscalMgr --> runner
+deactivate fiscalMgr
+
+runner --> User : Tax reports printed
+deactivate runner
+
+@enduml

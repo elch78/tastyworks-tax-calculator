@@ -16,11 +16,11 @@ class FiscalYearManager(
     private val log = LoggerFactory.getLogger(FiscalYearManager::class.java)
 
     @EventListener(OptionSellToOpenEvent::class)
-    fun onPositionOpened(event: OptionSellToOpenEvent) =
+    fun onOptionPositionOpened(event: OptionSellToOpenEvent) =
         getFiscalYear(event.stoTx).onOptionPositionOpened(event)
 
     @EventListener(OptionBuyToCloseEvent::class)
-    fun onPositionClosed(event: OptionBuyToCloseEvent) =
+    fun onOptionPositionClosed(event: OptionBuyToCloseEvent) =
         getFiscalYear(event.btcTx).onOptionPositionClosed(event)
 
     @EventListener(StockSellToCloseEvent::class)
