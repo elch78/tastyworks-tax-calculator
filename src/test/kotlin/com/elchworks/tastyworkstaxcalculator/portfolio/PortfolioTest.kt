@@ -7,10 +7,7 @@ import com.elchworks.tastyworkstaxcalculator.test.randomAssignment
 import com.elchworks.tastyworkstaxcalculator.test.randomDate
 import com.elchworks.tastyworkstaxcalculator.test.randomOptionTrade
 import com.elchworks.tastyworkstaxcalculator.test.randomUsdAmount
-import com.elchworks.tastyworkstaxcalculator.transactions.Action.BUY_TO_CLOSE
-import com.elchworks.tastyworkstaxcalculator.transactions.Action.BUY_TO_OPEN
-import com.elchworks.tastyworkstaxcalculator.transactions.Action.SELL_TO_CLOSE
-import com.elchworks.tastyworkstaxcalculator.transactions.Action.SELL_TO_OPEN
+import com.elchworks.tastyworkstaxcalculator.transactions.Action.*
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired

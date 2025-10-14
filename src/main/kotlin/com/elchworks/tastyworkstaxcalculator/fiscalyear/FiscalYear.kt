@@ -4,13 +4,11 @@ import com.elchworks.tastyworkstaxcalculator.convert.CurrencyExchange
 import com.elchworks.tastyworkstaxcalculator.eur
 import com.elchworks.tastyworkstaxcalculator.format
 import com.elchworks.tastyworkstaxcalculator.plus
-import com.elchworks.tastyworkstaxcalculator.portfolio.Profit
 import com.elchworks.tastyworkstaxcalculator.portfolio.ProfitAndLoss
 import com.elchworks.tastyworkstaxcalculator.portfolio.option.OptionBuyToCloseEvent
 import com.elchworks.tastyworkstaxcalculator.portfolio.option.OptionSellToOpenEvent
 import com.elchworks.tastyworkstaxcalculator.portfolio.plus
 import com.elchworks.tastyworkstaxcalculator.portfolio.stock.StockSellToCloseEvent
-import com.elchworks.tastyworkstaxcalculator.times
 import com.elchworks.tastyworkstaxcalculator.transactions.OptionTrade
 import com.elchworks.tastyworkstaxcalculator.transactions.Transaction
 import com.elchworks.tastyworkstaxcalculator.transactions.optionDescription

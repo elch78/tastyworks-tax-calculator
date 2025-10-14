@@ -1,6 +1,5 @@
 package com.elchworks.tastyworkstaxcalculator.test
 
-import com.elchworks.tastyworkstaxcalculator.portfolio.option.OptionPositionStatus
 import com.elchworks.tastyworkstaxcalculator.portfolio.option.OptionPositionStatus.ASSIGNED
 import com.elchworks.tastyworkstaxcalculator.portfolio.option.OptionPositionStatus.EXPIRED
 import com.elchworks.tastyworkstaxcalculator.toMonetaryAmountUsd
@@ -18,7 +17,6 @@ import java.math.BigDecimal.ZERO
 import java.math.BigInteger
 import java.time.*
 import java.time.Month.FEBRUARY
-import java.time.Month.JANUARY
 import java.time.format.DateTimeFormatter
 
 val TWO = BigDecimal("2.0")

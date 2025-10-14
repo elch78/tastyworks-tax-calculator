@@ -1,18 +1,14 @@
 package com.elchworks.tastyworkstaxcalculator.fiscalyear
 
+import com.elchworks.tastyworkstaxcalculator.*
 import com.elchworks.tastyworkstaxcalculator.convert.CurrencyExchange
 import com.elchworks.tastyworkstaxcalculator.convert.ExchangeRateRepository
-import com.elchworks.tastyworkstaxcalculator.eur
-import com.elchworks.tastyworkstaxcalculator.plus
 import com.elchworks.tastyworkstaxcalculator.portfolio.option.OptionBuyToCloseEvent
 import com.elchworks.tastyworkstaxcalculator.portfolio.option.OptionSellToOpenEvent
 import com.elchworks.tastyworkstaxcalculator.portfolio.stock.StockSellToCloseEvent
 import com.elchworks.tastyworkstaxcalculator.test.randomOptionTrade
 import com.elchworks.tastyworkstaxcalculator.test.randomStockTrade
 import com.elchworks.tastyworkstaxcalculator.test.randomUsdAmount
-import com.elchworks.tastyworkstaxcalculator.times
-import com.elchworks.tastyworkstaxcalculator.toEur
-import com.elchworks.tastyworkstaxcalculator.usd
 import org.apache.commons.lang3.RandomUtils
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test

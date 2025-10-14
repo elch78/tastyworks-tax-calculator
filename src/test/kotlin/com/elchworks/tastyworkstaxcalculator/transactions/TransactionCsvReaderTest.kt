@@ -3,10 +3,7 @@ package com.elchworks.tastyworkstaxcalculator.transactions
 import com.elchworks.tastyworkstaxcalculator.TransactionCsvReader
 import com.elchworks.tastyworkstaxcalculator.portfolio.option.OptionPositionStatus.ASSIGNED
 import com.elchworks.tastyworkstaxcalculator.portfolio.option.OptionPositionStatus.EXPIRED
-import com.elchworks.tastyworkstaxcalculator.transactions.Action.BUY_TO_CLOSE
-import com.elchworks.tastyworkstaxcalculator.transactions.Action.BUY_TO_OPEN
-import com.elchworks.tastyworkstaxcalculator.transactions.Action.SELL_TO_CLOSE
-import com.elchworks.tastyworkstaxcalculator.transactions.Action.SELL_TO_OPEN
+import com.elchworks.tastyworkstaxcalculator.transactions.Action.*
 import com.elchworks.tastyworkstaxcalculator.usd
 import org.assertj.core.api.Assertions.assertThatList
 import org.junit.jupiter.api.Test
@@ -15,8 +12,6 @@ import java.math.BigDecimal
 import java.math.BigDecimal.ZERO
 import java.time.Instant
 import java.time.LocalDate
-import java.time.temporal.ChronoUnit
-import java.time.temporal.ChronoUnit.SECONDS
 
 class TransactionCsvReaderTest {
 

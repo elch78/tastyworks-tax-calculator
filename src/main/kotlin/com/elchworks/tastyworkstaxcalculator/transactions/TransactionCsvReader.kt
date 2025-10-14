@@ -3,7 +3,6 @@ package com.elchworks.tastyworkstaxcalculator
 import com.elchworks.tastyworkstaxcalculator.portfolio.option.OptionPositionStatus.ASSIGNED
 import com.elchworks.tastyworkstaxcalculator.portfolio.option.OptionPositionStatus.EXPIRED
 import com.elchworks.tastyworkstaxcalculator.transactions.*
-import com.elchworks.tastyworkstaxcalculator.transactions.Action.BUY_TO_OPEN
 import com.opencsv.CSVReaderBuilder
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
@@ -15,7 +14,6 @@ import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeFormatterBuilder
 import java.time.format.SignStyle
 import java.time.temporal.ChronoField
-import java.time.temporal.ChronoUnit.SECONDS
 
 @Component
 class TransactionCsvReader {
