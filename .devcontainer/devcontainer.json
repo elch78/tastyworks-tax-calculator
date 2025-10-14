@@ -1,0 +1,13 @@
+{
+	"name": "Tastyworks Tax Calculator",
+	"image": "eclipse-temurin:17-jdk",
+
+	"features": {
+		"ghcr.io/devcontainers/features/git:1": {},
+        "ghcr.io/devcontainers/features/node:1": {
+          "version": "lts"
+        }
+	},
+
+	"postCreateCommand": "git config --global --add safe.directory ${containerWorkspaceFolder} && chmod +x gradlew && ./gradlew --version && npm install -g @anthropic-ai/claude-code"
+}
