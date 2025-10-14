@@ -104,3 +104,11 @@ Feature: Calculation of profits and losses from options trading
     Then Profits for fiscal year 2024 should be options profits 0.0 losses 0.0 stocks 0.0
     And Portfolio should have no option position "CLF 20/02/24 Put 15.00 @ 0.10"
 
+  Scenario: Option position closed same year with loss due to exchange rate
+    Given Exchange rate on "10/01/21" is "1.0" USD to EUR
+    And Exchange rate on "15/02/21" is "2.0" USD to EUR
+    When Sell option "ABC 31/12/21 Put 10.00 @ 0.10" on "10/01/21"
+    And Buy option "ABC 31/12/21 Put 10.00 @ 0.10" on "15/02/21"
+#   Sell $10 at rate 1.0 = 10€, Buy $10 at rate 2.0 = 20€ -> loss 10€
+    Then Profits for fiscal year 2021 should be options profits 0.0 losses 10.0 stocks 0.0
+
