@@ -1,6 +1,6 @@
 {
 	"name": "Tastyworks Tax Calculator",
-	"image": "eclipse-temurin:17-jdk",
+	"image": "eclipse-temurin:24-jdk",
 
 	"features": {
 		"ghcr.io/devcontainers/features/git:1": {},
