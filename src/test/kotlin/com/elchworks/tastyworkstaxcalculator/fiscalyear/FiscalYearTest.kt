@@ -20,23 +20,29 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
 import org.mockito.kotlin.any
-import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.test.context.bean.override.mockito.MockitoBean
 import java.math.BigDecimal
 import java.time.Year
 import java.util.stream.Stream
 import javax.money.MonetaryAmount
 
-class FiscalYearTest {
-    private val exchangeRateRepository: ExchangeRateRepository = mock()
-    private val currencyExchange: CurrencyExchange = CurrencyExchange(exchangeRateRepository)
-    private val sut = FiscalYear(currencyExchange, Year.of(2021))
+@SpringBootTest(classes = [CurrencyExchange::class])
+class FiscalYearTest @Autowired constructor(
+    private val currencyExchange: CurrencyExchange
+) {
+    @MockitoBean
+    private lateinit var exchangeRateRepository: ExchangeRateRepository
+
+    private val sut by lazy { FiscalYear(currencyExchange, Year.of(2021)) }
 
     @Test
     fun optionExpired() {
         // Given
         val premium = randomUsdAmount(1f, 100f)
-        val stoTx = randomOptionTrade().copy(value = premium)
+        val stoTx = randomOptionTrade().copy(value = premium, averagePrice = premium.divide(100))
         withRateUsdToEur()
 
         // When
@@ -56,10 +62,10 @@ class FiscalYearTest {
     @MethodSource
     fun optionClosed(netProfit: MonetaryAmount) {
         // Given
-        val premium = randomUsdAmount()
+        val premium = usd(5)
         val buyPrice = premium.negate() + netProfit
-        val stoTx = randomOptionTrade().copy(value = premium, averagePrice = premium, quantity = 1)
-        val btcTx = randomOptionTrade().copy(value = buyPrice, averagePrice = buyPrice, quantity = 1)
+        val stoTx = randomOptionTrade().copy(value = premium, averagePrice = premium.divide(100), quantity = 1)
+        val btcTx = randomOptionTrade().copy(value = buyPrice, averagePrice = buyPrice.divide(100), quantity = 1)
         withRateUsdToEur()
 
         // When
@@ -115,6 +121,7 @@ class FiscalYearTest {
         fun optionClosed() = Stream.of(
             Arguments.of(usd(1)),
             Arguments.of(usd(-1)),
+            Arguments.of(usd(0)),
         )
     }
 

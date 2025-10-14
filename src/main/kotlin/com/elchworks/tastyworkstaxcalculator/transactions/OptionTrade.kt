@@ -26,7 +26,10 @@ data class OptionTrade(
     val underlyingSymbol: String,
     val orderNr: Int
     // FIXME: Transaction unnecessary
-): Transaction, OptionTransaction
+): Transaction, OptionTransaction {
+    override fun value(): MonetaryAmount = value(quantity)
+    override fun value(quantity: Int): MonetaryAmount = averagePrice.multiply(quantity).multiply(multiplier)
+}
 
 data class StockTrade(
     override val date: Instant,
@@ -39,7 +42,10 @@ data class StockTrade(
     override val description: String,
     val commissions: MonetaryAmount,
     val fees: MonetaryAmount
-): StockTransaction
+): StockTransaction {
+    override fun value(): MonetaryAmount = value(quantity)
+    override fun value(quantity: Int): MonetaryAmount = averagePrice.multiply(quantity)
+}
 
 data class OptionRemoval(
     override val date: Instant,
@@ -51,7 +57,10 @@ data class OptionRemoval(
     override val averagePrice: MonetaryAmount,
     override val description: String,
     val status: OptionPositionStatus,
-): OptionTransaction
+): OptionTransaction {
+    override fun value(): MonetaryAmount = value(quantity)
+    override fun value(quantity: Int): MonetaryAmount = averagePrice.multiply(quantity)
+}
 
 data class OptionAssignment(
     override val date: Instant,
@@ -63,7 +72,10 @@ data class OptionAssignment(
     override val averagePrice: MonetaryAmount,
     override val description: String,
     val fees: MonetaryAmount
-): StockTransaction
+): StockTransaction {
+    override fun value(): MonetaryAmount = value(quantity)
+    override fun value(quantity: Int): MonetaryAmount = averagePrice.multiply(quantity)
+}
 
 interface Transaction {
     val date: Instant
@@ -71,6 +83,8 @@ interface Transaction {
     val quantity: Int
     val averagePrice: MonetaryAmount
     val description: String
+    fun value(): MonetaryAmount
+    fun value(quantity: Int): MonetaryAmount
 }
 
 interface OptionTransaction: Transaction {

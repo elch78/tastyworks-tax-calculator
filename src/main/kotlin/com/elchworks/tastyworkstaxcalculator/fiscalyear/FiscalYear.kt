@@ -39,7 +39,7 @@ class FiscalYear(
 
     fun onOptionPositionOpened(stoEvent: OptionSellToOpenEvent) {
         val stoTx = stoEvent.stoTx
-        val premium = txValueInEur(stoTx)
+        val premium = currencyExchange.usdToEur(stoTx.value(), stoTx.date)
         profitAndLossFromOptions += ProfitAndLoss(premium, Money.of(0, "EUR"))
         log.info("{} Option STO: {} premium {}", fiscalYear, stoTx.symbol, format(premium))
     }
@@ -47,14 +47,20 @@ class FiscalYear(
     fun onOptionPositionClosed(btcEvent: OptionBuyToCloseEvent) {
         val btcTx = btcEvent.btcTx
         val stoTx = btcEvent.stoTx
-        val premium = txValueInEur(stoTx)
-        val buyValue = txValueInEur(btcTx)
+        val quantitySold = btcEvent.quantitySold
+        log.debug("onOptionPositionClosed stoTx.averagePrice='{}', stoTx.quantity='{}', btcTx.averagePrice='{}', btcTx.quantity='{}', quantitySold='{}'",
+            format(stoTx.averagePrice), stoTx.quantity, format(btcTx.averagePrice), btcTx.quantity, quantitySold)
+        // Calculate premium and buyValue for only the quantity being closed
+        val premium = currencyExchange.usdToEur(stoTx.value(quantitySold), stoTx.date)
+        // negate buyValue since averagePrice is positive but this is a cost
+        val buyValue = currencyExchange.usdToEur(btcTx.value(quantitySold), btcTx.date).negate()
+        log.debug("onOptionPositionClosed premium='{}', buyValue='{}'", format(premium), format(buyValue))
         val profitAndLoss = if(positionWasOpenedInThisFiscalYear(stoTx)) {
             val netProfit = netProfit(btcTx, stoTx, btcEvent.quantitySold)
             /*
              * This is due to german tax laws.
              * It is only allowed to deduct losses from option trades from profits from option trades
-             * (but from profits from stock trades).
+             * (but not from profits from stock trades).
              * So we need to track losses from option trades separately
              */
             if(isLoss(netProfit)) {
@@ -66,12 +72,12 @@ class FiscalYear(
                 // no loss. Only reduce profit by buyValue.
                 log.debug("Close with net profit. position='{}', netProfit='{}'",
                     stoTx.optionDescription(), format(netProfit))
-                ProfitAndLoss(buyValue, eur(0))
+                ProfitAndLoss(buyValue.negate(), eur(0))
             }
         } else {
             // the position was not opened in the same year. The whole value of the buy transaction is a loss for the current year
             log.debug("Option position closed that was opened in a different fiscal year.")
-            ProfitAndLoss(eur(0), buyValue.negate())
+            ProfitAndLoss(eur(0), buyValue)
         }
         profitAndLossFromOptions += profitAndLoss
         log.info(
@@ -97,13 +103,9 @@ class FiscalYear(
     }
 
     private fun netProfit(buyTx: Transaction, sellTx: Transaction, quantity: Int): MonetaryAmount {
-        val sellPrice = sellTx.averagePrice
-        val buyPrice = buyTx.averagePrice
-        log.debug("netProfit quantity='{}', buyPrice='{}', sellPrice='{}'", quantity, format(buyPrice), format(sellPrice))
-        val buyValue = buyPrice * quantity
-        val buyValueEur = currencyExchange.usdToEur(buyValue, buyTx.date)
-        val sellValue = sellPrice * quantity
-        val sellValueEur = currencyExchange.usdToEur(sellValue, sellTx.date)
+        val buyValueEur = currencyExchange.usdToEur(buyTx.value(quantity), buyTx.date)
+        val sellValueEur = currencyExchange.usdToEur(sellTx.value(quantity), sellTx.date)
+        log.debug("netProfit buyValueEur='{}', sellValueEur='{}'", format(buyValueEur), format(sellValueEur))
         // buy value is negative. Thus, we have to add the values
         val netProfit = sellValueEur + buyValueEur
         log.debug(
@@ -132,8 +134,6 @@ class FiscalYear(
         log.debug("positionWasOpenedInThisFiscalYear stoYear='{}', fiscalYear='{}', positionWasOpenedInThisFiscalYear='{}'", stoYear, fiscalYear, positionWasOpenedInThisFiscalYear)
         return positionWasOpenedInThisFiscalYear
     }
-
-    private fun txValueInEur(btcTx: OptionTrade) = currencyExchange.usdToEur(btcTx.value, btcTx.date)
 
     val dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
     // Use the same timezone as the currency exchange .. just in case
