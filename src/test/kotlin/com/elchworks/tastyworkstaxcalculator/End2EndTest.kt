@@ -64,10 +64,6 @@ class End2EndTest @Autowired constructor(
             .isEqualTo(ProfitsSummary(eur(0), lossesFromOptions, eur(0)))
     }
 
-    // TODO test partial close with loss and different year ...
-    //  btc tx that consumes more than one sto tx. e.g. sell 1 + sell 2 + buy 2
-
-
     private fun withFixedExchangeRate() {
         whenever(exchangeRateRepository.dailyRateUsdToEur(any())).thenReturn(EXCHANGE_RATE)
     }

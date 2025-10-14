@@ -86,3 +86,21 @@ Feature: Calculation of profits and losses from options trading
     And Sell stock quantity 5 price "400.0"
     Then Profits for fiscal year 2021 should be options profits 0.0 losses 0.0 stocks 1000.0
 
+  Scenario: Partial close with loss in different year
+    Given Exchange rate on "31/12/24" is "2.0" USD to EUR
+    And Exchange rate on "15/01/25" is "3.0" USD to EUR
+    When Sell option "CLF 20/02/25 Put 15.00 @ 0.10" on "31/12/24" quantity 2
+    Then Profits for fiscal year 2024 should be options profits 40.0 losses 0.0 stocks 0.0
+    When Buy option "CLF 20/02/25 Put 15.00 @ 0.10" on "15/01/25" quantity 1
+    Then Profits for fiscal year 2025 should be options profits 0.0 losses 30.0 stocks 0.0
+    And Portfolio should have an option position "CLF 20/02/25 Put 15.00 @ 0.10" with quantity 1
+
+  Scenario: BTC consuming multiple STO transactions
+    Given Fixed exchange rate of "2.00" USD to EUR
+    When Sell option "CLF 20/02/24 Put 15.00 @ 0.10" on "10/01/24" quantity 1
+    And Sell option "CLF 20/02/24 Put 15.00 @ 0.10" on "11/01/24" quantity 2
+    Then Profits for fiscal year 2024 should be options profits 60.0 losses 0.0 stocks 0.0
+    When Buy option "CLF 20/02/24 Put 15.00 @ 0.10" on "15/01/24" quantity 3
+    Then Profits for fiscal year 2024 should be options profits 0.0 losses 0.0 stocks 0.0
+    And Portfolio should have no option position "CLF 20/02/24 Put 15.00 @ 0.10"
+
