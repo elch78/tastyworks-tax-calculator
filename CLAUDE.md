@@ -91,6 +91,11 @@ The application uses Spring's event publishing mechanism:
 - **Profit and Loss Calculation**: Considers currency exchange rates for EUR tax reporting
 - **Fiscal Year Management**: Separates profits/losses by German tax years
 
+### Domain Rules
+
+- Losses from options can be deducted only from profits from options in the same year up to a certain limit (€10000)
+- Losses from options cannot be deducted from profits from stocks
+
 ## Configuration
 
 ### Exchange Rates
@@ -107,13 +112,5 @@ Key external libraries:
 - Mockito for unit testing
 
 ## Testing Strategy
-
-The project uses comprehensive BDD scenarios covering:
-- the existing e2e tests in End2EndTest.kt are to be migrated to BDD (E2E.feature)
-- Simple option roundtrips (sell-to-open → assignment/expiration)
-- Currency exchange rate impact on profits/losses
-- Cross-fiscal-year transactions
-- Partial position closes
-- Multiple position scenarios
 
 Run BDD tests with: `./gradlew test`
