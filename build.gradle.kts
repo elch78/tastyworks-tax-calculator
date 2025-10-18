@@ -28,6 +28,8 @@ dependencies {
     implementation("javax.money:money-api:1.1")
     implementation("org.javamoney:moneta:1.2.1")
     implementation("com.opencsv:opencsv:5.7.1")
+    implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
+    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
     implementation(platform("io.cucumber:cucumber-bom:7.22.1")  )
     developmentOnly("org.springframework.boot:spring-boot-devtools")
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")

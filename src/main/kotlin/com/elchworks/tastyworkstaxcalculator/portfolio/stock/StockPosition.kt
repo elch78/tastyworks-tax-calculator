@@ -6,9 +6,9 @@ import org.slf4j.LoggerFactory
 import kotlin.math.min
 
 class StockPosition(
-    val btoTx: StockTransaction
+    val btoTx: StockTransaction,
+    private var quantityLeft: Int
 ) {
-    private var quantityLeft: Int = btoTx.quantity
 
     fun sellToClose(quantity: Int): PositionCloseResult {
         val numSold = min(quantity, quantityLeft)

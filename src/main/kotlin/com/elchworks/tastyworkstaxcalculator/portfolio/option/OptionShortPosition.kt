@@ -6,8 +6,7 @@ import com.elchworks.tastyworkstaxcalculator.transactions.optionDescription
 import org.slf4j.LoggerFactory
 import kotlin.math.min
 
-data class OptionShortPosition(val stoTx: OptionTrade) {
-    private var quantityLeft = stoTx.quantity
+data class OptionShortPosition(val stoTx: OptionTrade, private var quantityLeft: Int) {
 
     fun buyToClose(quantity: Int): PositionCloseResult {
         LOG.debug("buyToClose quantity='{}', quantityLeft='{}'", quantity, quantityLeft)

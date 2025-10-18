@@ -65,6 +65,9 @@ class Portfolio(
         stockPositions.clear()
     }
 
+    internal fun getOptionPositionsMap(): MutableMap<String, Queue<OptionShortPosition>> = optionPositions
+    internal fun getStockPositionsMap(): MutableMap<String, Queue<StockPosition>> = stockPositions
+
     private fun optionTrade(tx: OptionTrade) {
         when(tx.action) {
             SELL_TO_OPEN -> optionPositionSellToOpen(tx)
@@ -91,7 +94,7 @@ class Portfolio(
 
     private fun openStockPosition(btoTx: StockTransaction) {
         stockPositions.computeIfAbsent(btoTx.symbol) {LinkedList()}
-            .offer(StockPosition(btoTx))
+            .offer(StockPosition(btoTx, btoTx.quantity))
         log.info("Stock BTO symbol='{}' stcTx date {} quantity {} price {} description {}",
             btoTx.symbol, btoTx.date, btoTx.quantity, btoTx.averagePrice, btoTx.description)
     }
@@ -146,7 +149,8 @@ class Portfolio(
                 description = btoTx.description,
                 commissions = usd(0.0),
                 fees = usd(0.0)
-            )
+            ),
+            newQuantity
         )
         log.debug("new postion='{}'", newPostion)
         stockPositions[splitTransaction.symbol] = LinkedList<StockPosition>().apply { offer(newPostion) }
@@ -193,7 +197,7 @@ class Portfolio(
     }
 
     private fun optionPositionSellToOpen(tx: OptionTrade) {
-        val position = OptionShortPosition(tx)
+        val position = OptionShortPosition(tx, tx.quantity)
         optionPositions.computeIfAbsent(tx.key()) { LinkedList() }
             .offer(position)
         log.info("Option STO position='{}'", position.description())

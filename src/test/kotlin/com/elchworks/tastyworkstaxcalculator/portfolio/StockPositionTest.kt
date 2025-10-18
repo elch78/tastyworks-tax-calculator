@@ -16,7 +16,7 @@ class StockPositionTest {
         // Given
         val quantity = 10
         val btoTx = randomStockTrade().copy(quantity = quantity)
-        val sut = StockPosition(btoTx)
+        val sut = StockPosition(btoTx, quantity)
 
         // When
         val quantityLeft = sut.sellToClose(soldQuantity)
@@ -32,7 +32,7 @@ class StockPositionTest {
     fun partialSellTx() {
         // Given
         val btoTx = randomStockTrade().copy(quantity = 10)
-        val sut = StockPosition(btoTx)
+        val sut = StockPosition(btoTx, 10)
 
         // When
         assertThat(sut.sellToClose(4)).isEqualTo(PositionCloseResult(4, 0, 6))

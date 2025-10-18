@@ -35,6 +35,19 @@ class FiscalYear(
         profitsFromStocks = profitAndLossFromStocks
     )
 
+    fun restoreState(
+        profitAndLossFromOptions: ProfitAndLoss,
+        profitAndLossFromStocks: MonetaryAmount
+    ) {
+        this.profitAndLossFromOptions = profitAndLossFromOptions
+        this.profitAndLossFromStocks = profitAndLossFromStocks
+        log.debug("Restored fiscal year {} state: optionProfit={}, optionLoss={}, stockProfit={}",
+            fiscalYear,
+            format(profitAndLossFromOptions.profit),
+            format(profitAndLossFromOptions.loss),
+            format(profitAndLossFromStocks))
+    }
+
     fun onOptionPositionOpened(stoEvent: OptionSellToOpenEvent) {
         val stoTx = stoEvent.stoTx
         val premium = currencyExchange.usdToEur(stoTx.value(), stoTx.date)

@@ -8,6 +8,10 @@ import com.elchworks.tastyworkstaxcalculator.fiscalyear.ProfitsSummary
 import com.elchworks.tastyworkstaxcalculator.portfolio.NewTransactionEvent
 import com.elchworks.tastyworkstaxcalculator.portfolio.Portfolio
 import com.elchworks.tastyworkstaxcalculator.portfolio.option.OptionShortPosition
+import com.elchworks.tastyworkstaxcalculator.snapshot.SnapshotDeserializer
+import com.elchworks.tastyworkstaxcalculator.snapshot.SnapshotFileService
+import com.elchworks.tastyworkstaxcalculator.snapshot.SnapshotSerializer
+import com.elchworks.tastyworkstaxcalculator.snapshot.StateSnapshot
 import com.elchworks.tastyworkstaxcalculator.transactions.Action.BUY_TO_OPEN
 import com.elchworks.tastyworkstaxcalculator.transactions.Action.SELL_TO_CLOSE
 import com.elchworks.tastyworkstaxcalculator.transactions.Transaction
@@ -23,7 +27,9 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.test.context.bean.override.mockito.MockitoBean
+import java.io.File
 import java.math.BigDecimal
+import java.time.Instant
 import java.time.Month
 import java.time.Year
 import java.time.ZoneId
@@ -37,7 +43,14 @@ class StepDefinitions @Autowired constructor(
     private val portfolio: Portfolio,
     private val fiscalYearRepository: FiscalYearRepository,
     @MockitoBean private val exchangeRateRepository: ExchangeRateRepository,
+    private val snapshotSerializer: SnapshotSerializer,
+    private val snapshotDeserializer: SnapshotDeserializer,
+    private val snapshotFileService: SnapshotFileService
 ){
+    private var currentSnapshot: StateSnapshot? = null
+    private var lastTransactionDate: Instant? = null
+    private val testTransactionsDir = File(System.getProperty("java.io.tmpdir"), "test-transactions")
+    private val testSnapshotDir = File(testTransactionsDir, "snapshots")
     @Before
     fun before() {
         portfolio.reset()
@@ -212,8 +225,126 @@ class StepDefinitions @Autowired constructor(
 
     fun publishTx(tx: Transaction) {
         eventPublisher.publishEvent(NewTransactionEvent(tx))
+        lastTransactionDate = tx.date
     }
 
+    @Given("a clean state with no snapshots")
+    fun aCleanStateWithNoSnapshots() {
+        if (testTransactionsDir.exists()) {
+            testTransactionsDir.deleteRecursively()
+        }
+        testTransactionsDir.mkdirs()
+    }
+
+    @Given("a clean snapshots directory")
+    fun aCleanSnapshotsDirectory() {
+        if (testTransactionsDir.exists()) {
+            testTransactionsDir.deleteRecursively()
+        }
+        testTransactionsDir.mkdirs()
+    }
+
+    @When("a snapshot is created")
+    fun aSnapshotIsCreated() {
+        require(lastTransactionDate != null) { "No transactions published yet" }
+
+        currentSnapshot = snapshotSerializer.createSnapshot(
+            portfolio = portfolio,
+            fiscalYearRepository = fiscalYearRepository,
+            lastTransactionDate = lastTransactionDate!!
+        )
+    }
+
+    @When("a snapshot is saved to file")
+    fun aSnapshotIsSavedToFile() {
+        require(lastTransactionDate != null) { "No transactions published yet" }
+
+        val snapshot = snapshotSerializer.createSnapshot(
+            portfolio = portfolio,
+            fiscalYearRepository = fiscalYearRepository,
+            lastTransactionDate = lastTransactionDate!!
+        )
+
+        snapshotFileService.saveSnapshot(snapshot, testTransactionsDir.absolutePath)
+        currentSnapshot = snapshot
+    }
+
+    @When("the snapshot is loaded from file")
+    fun theSnapshotIsLoadedFromFile() {
+        currentSnapshot = snapshotFileService.loadLatestSnapshot(testTransactionsDir.absolutePath)
+        require(currentSnapshot != null) { "No snapshot file found" }
+    }
+
+    @When("the portfolio is restored from the snapshot")
+    fun thePortfolioIsRestoredFromTheSnapshot() {
+        require(currentSnapshot != null) { "No snapshot created yet" }
+
+        portfolio.reset()
+        fiscalYearRepository.reset()
+
+        snapshotDeserializer.restoreState(
+            snapshot = currentSnapshot!!,
+            portfolio = portfolio,
+            fiscalYearRepository = fiscalYearRepository
+        )
+    }
+
+    @Then("a snapshot file should be created in {string} directory")
+    fun aSnapshotFileShouldBeCreatedInDirectory(directory: String) {
+        require(lastTransactionDate != null) { "No transactions published yet" }
+
+        val snapshot = snapshotSerializer.createSnapshot(
+            portfolio = portfolio,
+            fiscalYearRepository = fiscalYearRepository,
+            lastTransactionDate = lastTransactionDate!!
+        )
+        snapshotFileService.saveSnapshot(snapshot, testTransactionsDir.absolutePath)
+
+        assertThat(testSnapshotDir.exists()).isTrue()
+        assertThat(testSnapshotDir.isDirectory).isTrue()
+
+        val snapshotFiles = testSnapshotDir.listFiles { file ->
+            file.isFile && file.name.startsWith("snapshot-") && file.name.endsWith(".json")
+        } ?: emptyArray()
+
+        assertThat(snapshotFiles).isNotEmpty
+    }
+
+    @Then("a snapshot file should exist")
+    fun aSnapshotFileShouldExist() {
+        assertThat(testSnapshotDir.exists()).isTrue()
+        assertThat(testSnapshotDir.isDirectory).isTrue()
+
+        val snapshotFiles = testSnapshotDir.listFiles { file ->
+            file.isFile && file.name.startsWith("snapshot-") && file.name.endsWith(".json")
+        } ?: emptyArray()
+
+        assertThat(snapshotFiles).isNotEmpty
+    }
+
+    @Then("the snapshot filename should match format {string}")
+    fun theSnapshotFilenameShouldMatchFormat(format: String) {
+        val snapshotFiles = testSnapshotDir.listFiles { file ->
+            file.isFile && file.name.startsWith("snapshot-") && file.name.endsWith(".json")
+        }
+
+        assertThat(snapshotFiles).isNotEmpty
+        val snapshotFile = snapshotFiles!!.first()
+
+        val regexPattern = format
+            .replace(".", "\\.")
+            .replace("*", ".*")
+
+        assertThat(snapshotFile.name).matches(regexPattern)
+    }
+
+    @Then("the snapshot last transaction date should be {string}")
+    fun theSnapshotLastTransactionDateShouldBe(dateString: String) {
+        require(currentSnapshot != null) { "No snapshot loaded" }
+
+        val expectedDate = dateString.toLocalDate().toInstant()
+        assertThat(currentSnapshot!!.metadata.lastTransactionDate).isEqualTo(expectedDate)
+    }
 
     companion object {
     }
