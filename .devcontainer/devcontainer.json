@@ -1,13 +1,20 @@
 {
-	"name": "Tastyworks Tax Calculator",
-	"image": "eclipse-temurin:24-jdk",
+  "name": "Tastyworks Tax Calculator",
+  "image": "eclipse-temurin:24-jdk",
 
-	"features": {
-		"ghcr.io/devcontainers/features/git:1": {},
-        "ghcr.io/devcontainers/features/node:1": {
-          "version": "lts"
-        }
-	},
+  "remoteUser": "developer",
 
-	"postCreateCommand": "git config --global --add safe.directory ${containerWorkspaceFolder} && chmod +x gradlew && ./gradlew --version && npm install -g @anthropic-ai/claude-code"
+  "features": {
+    "ghcr.io/devcontainers/features/git:1": {},
+    "ghcr.io/devcontainers/features/node:1": {
+      "version": "lts"
+    },
+    "ghcr.io/devcontainers/features/common-utils:2": {
+      "username": "developer",
+      "uid": "1000",
+      "gid": "1000"
+    }
+  },
+
+  "postCreateCommand": "git config --global --add safe.directory ${containerWorkspaceFolder} && chmod +x gradlew && ./gradlew --version && npm install -g @anthropic-ai/claude-code"
 }
