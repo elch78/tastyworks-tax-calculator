@@ -2,6 +2,8 @@
 This is a command line program to calculate win and loss from option trades with the Tastyworks
 broker for the german tax.
 
+**Limitation:** This application is designed for options trading only. Transactions for buying stocks are not supported. The application handles option positions (buy/sell, assignments, expirations) but does not process stock purchase transactions.
+
 ## Haftungsausschluss / Disclaimer
 
 **Deutsch:**
