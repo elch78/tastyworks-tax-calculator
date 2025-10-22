@@ -1,29 +1,43 @@
 package com.elchworks.tastyworkstaxcalculator.snapshot
 
 import com.elchworks.tastyworkstaxcalculator.eur
+import com.elchworks.tastyworkstaxcalculator.fiscalyear.FiscalYearRepository
 import com.elchworks.tastyworkstaxcalculator.fiscalyear.OptionProfitLossUpdatedEvent
 import com.elchworks.tastyworkstaxcalculator.fiscalyear.StockProfitLossUpdatedEvent
+import com.elchworks.tastyworkstaxcalculator.portfolio.Portfolio
 import com.elchworks.tastyworkstaxcalculator.portfolio.ProfitAndLoss
 import com.elchworks.tastyworkstaxcalculator.portfolio.option.OptionBuyToCloseEvent
 import com.elchworks.tastyworkstaxcalculator.portfolio.option.OptionSellToOpenEvent
 import com.elchworks.tastyworkstaxcalculator.portfolio.stock.StockBuyToOpenEvent
 import com.elchworks.tastyworkstaxcalculator.portfolio.stock.StockSellToCloseEvent
 import com.elchworks.tastyworkstaxcalculator.transactions.OptionTrade
+import com.fasterxml.jackson.databind.ObjectMapper
 import org.javamoney.moneta.Money
 import org.slf4j.LoggerFactory
 import org.springframework.context.event.EventListener
 import org.springframework.stereotype.Component
+import java.io.File
 import java.time.Instant
+import java.time.Year
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 import javax.money.MonetaryAmount
 
 /**
- * Unified manager for state tracking and snapshot creation.
- * Listens to domain events and maintains snapshot-ready state for both
- * portfolio and fiscal years.
+ * Unified service for state tracking, snapshot persistence, and restoration.
+ * Listens to domain events, maintains snapshot-ready state, and handles
+ * saving/loading/restoring snapshots.
  */
 @Component
-class StateSnapshotManager {
-    private val log = LoggerFactory.getLogger(StateSnapshotManager::class.java)
+class SnapshotService(
+    private val objectMapper: ObjectMapper,
+    private val portfolio: Portfolio,
+    private val fiscalYearRepository: FiscalYearRepository
+) {
+    private val log = LoggerFactory.getLogger(SnapshotService::class.java)
+
+    private val filenameDateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd-HHmmss")
+        .withZone(ZoneId.of("CET")) // Use CET to match transaction dates
 
     // Portfolio state: maps of position key -> list of position snapshots (FIFO order)
     private val optionPositions = mutableMapOf<String, MutableList<OptionPositionSnapshot>>()
@@ -115,7 +129,6 @@ class StateSnapshotManager {
             symbol, quantityClosed, newQuantity)
     }
 
-    // Fiscal year event listeners
     @EventListener(OptionProfitLossUpdatedEvent::class)
     fun onOptionProfitLossUpdated(event: OptionProfitLossUpdatedEvent) {
         val year = event.year.value
@@ -136,7 +149,6 @@ class StateSnapshotManager {
             year, event.profitLossDelta, event.totalProfitAndLoss)
     }
 
-    // Restoration event listeners
     @EventListener(PortfolioStateRestoredEvent::class)
     fun onPortfolioRestored(event: PortfolioStateRestoredEvent) {
         log.info("Portfolio state restored event received, restoring tracker state")
@@ -167,11 +179,10 @@ class StateSnapshotManager {
         fiscalYears[snapshot.year] = state
     }
 
-    // Snapshot creation
-    fun createSnapshot(lastTransactionDate: Instant): StateSnapshot {
-        log.info("Creating snapshot with lastTransactionDate={}", lastTransactionDate)
+    fun saveSnapshot(lastTransactionDate: Instant, transactionsDir: String) {
+        log.info("Creating and saving snapshot with lastTransactionDate={}", lastTransactionDate)
 
-        return StateSnapshot(
+        val snapshot = StateSnapshot(
             metadata = SnapshotMetadata(
                 createdAt = Instant.now(),
                 lastTransactionDate = lastTransactionDate
@@ -191,6 +202,82 @@ class StateSnapshotManager {
                 )
             }
         )
+
+        val snapshotDir = getSnapshotDirectory(transactionsDir)
+        snapshotDir.mkdirs()
+
+        val filename = generateFilename(snapshot.metadata.lastTransactionDate)
+        val file = File(snapshotDir, filename)
+
+        log.info("Saving snapshot to {}", file.absolutePath)
+        objectMapper.writeValue(file, snapshot)
+        log.info("Snapshot saved successfully")
+    }
+
+    fun loadLatestSnapshot(transactionsDir: String): StateSnapshot? {
+        val snapshotDir = getSnapshotDirectory(transactionsDir)
+
+        if (!snapshotDir.exists() || !snapshotDir.isDirectory) {
+            log.info("No snapshot directory found at {}", snapshotDir.absolutePath)
+            return null
+        }
+
+        val latestFile = findLatestSnapshotFile(snapshotDir)
+            ?: return null.also { log.info("No snapshot files found in {}", snapshotDir.absolutePath) }
+
+        log.info("Loading snapshot from {}", latestFile.absolutePath)
+        val snapshot = objectMapper.readValue(latestFile, StateSnapshot::class.java)
+        log.info("Snapshot loaded successfully. lastTransactionDate={}", snapshot.metadata.lastTransactionDate)
+        return snapshot
+    }
+
+    fun loadAndRestoreState(transactionsDir: String): StateSnapshot? {
+        val snapshot = loadLatestSnapshot(transactionsDir)
+        if (snapshot != null) {
+            restoreState(snapshot)
+            log.info("Resumed from snapshot. Last transaction: {}", snapshot.metadata.lastTransactionDate)
+        } else {
+            log.info("No snapshot found. Processing all transactions from scratch.")
+        }
+        return snapshot
+    }
+
+    fun restoreState(snapshot: StateSnapshot) {
+        log.info("Restoring state from snapshot. lastTransactionDate={}", snapshot.metadata.lastTransactionDate)
+
+        // Restore portfolio - it will publish event for this service
+        portfolio.restoreFrom(snapshot.portfolio)
+
+        // Restore fiscal years - they will publish events for this service
+        restoreFiscalYears(snapshot.fiscalYears)
+
+        log.info("State restoration complete")
+    }
+
+    private fun restoreFiscalYears(fiscalYearsSnapshot: Map<Int, FiscalYearSnapshot>) {
+        fiscalYearRepository.reset() // Clear any existing state
+
+        fiscalYearsSnapshot.forEach { (yearValue, snapshot) ->
+            val fiscalYear = fiscalYearRepository.getFiscalYear(Year.of(yearValue))
+            fiscalYear.restoreState(
+                profitAndLossFromOptions = ProfitAndLoss(
+                    profit = Money.of(
+                        snapshot.profitAndLossFromOptions.profit.amount,
+                        snapshot.profitAndLossFromOptions.profit.currency
+                    ),
+                    loss = Money.of(
+                        snapshot.profitAndLossFromOptions.loss.amount,
+                        snapshot.profitAndLossFromOptions.loss.currency
+                    )
+                ),
+                profitAndLossFromStocks = Money.of(
+                    snapshot.profitAndLossFromStocks.amount,
+                    snapshot.profitAndLossFromStocks.currency
+                )
+            )
+        }
+
+        log.debug("Restored {} fiscal years", fiscalYearsSnapshot.size)
     }
 
     // State management
@@ -225,7 +312,24 @@ class StateSnapshotManager {
         }
     }
 
-    // Duplicate of Portfolio.optionKey() to avoid module dependency
+    private fun getSnapshotDirectory(transactionsDir: String): File {
+        return File(transactionsDir, "snapshots")
+    }
+
+    private fun generateFilename(lastTransactionDate: Instant): String {
+        val timestamp = filenameDateFormatter.format(lastTransactionDate)
+        return "snapshot-$timestamp.json"
+    }
+
+    private fun findLatestSnapshotFile(snapshotDir: File): File? {
+        val snapshotFiles = snapshotDir.listFiles { file ->
+            file.isFile && file.name.startsWith("snapshot-") && file.name.endsWith(".json")
+        } ?: return null
+
+        // Sort by filename (which includes timestamp) and return the latest
+        return snapshotFiles.sortedByDescending { it.name }.firstOrNull()
+    }
+
     private fun OptionTrade.key() = "${this.callOrPut}-${this.symbol}-${this.expirationDate}-${this.strikePrice}"
 
     private data class FiscalYearState(

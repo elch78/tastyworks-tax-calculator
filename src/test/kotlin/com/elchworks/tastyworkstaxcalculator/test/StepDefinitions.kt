@@ -8,10 +8,8 @@ import com.elchworks.tastyworkstaxcalculator.fiscalyear.ProfitsSummary
 import com.elchworks.tastyworkstaxcalculator.portfolio.NewTransactionEvent
 import com.elchworks.tastyworkstaxcalculator.portfolio.Portfolio
 import com.elchworks.tastyworkstaxcalculator.portfolio.option.OptionShortPosition
-import com.elchworks.tastyworkstaxcalculator.snapshot.SnapshotDeserializer
-import com.elchworks.tastyworkstaxcalculator.snapshot.SnapshotFileService
+import com.elchworks.tastyworkstaxcalculator.snapshot.SnapshotService
 import com.elchworks.tastyworkstaxcalculator.snapshot.StateSnapshot
-import com.elchworks.tastyworkstaxcalculator.snapshot.StateSnapshotManager
 import com.elchworks.tastyworkstaxcalculator.transactions.Action.BUY_TO_OPEN
 import com.elchworks.tastyworkstaxcalculator.transactions.Action.SELL_TO_CLOSE
 import com.elchworks.tastyworkstaxcalculator.transactions.Transaction
@@ -43,9 +41,7 @@ class StepDefinitions @Autowired constructor(
     private val portfolio: Portfolio,
     private val fiscalYearRepository: FiscalYearRepository,
     @MockitoBean private val exchangeRateRepository: ExchangeRateRepository,
-    private val snapshotDeserializer: SnapshotDeserializer,
-    private val snapshotFileService: SnapshotFileService,
-    private val stateSnapshotManager: StateSnapshotManager
+    private val snapshotService: SnapshotService
 ){
     private var currentSnapshot: StateSnapshot? = null
     private var lastTransactionDate: Instant? = null
@@ -55,7 +51,7 @@ class StepDefinitions @Autowired constructor(
     fun before() {
         portfolio.reset()
         fiscalYearRepository.reset()
-        stateSnapshotManager.reset()
+        snapshotService.reset()
 
         // Clean up test directory before each test
         if (testTransactionsDir.exists()) {
@@ -246,7 +242,7 @@ class StepDefinitions @Autowired constructor(
     fun theApplicationIsRunAgain() {
         portfolio.reset()
         fiscalYearRepository.reset()
-        stateSnapshotManager.reset()
+        snapshotService.reset()
         currentSnapshot = null
         lastTransactionDate = null
     }
@@ -255,14 +251,13 @@ class StepDefinitions @Autowired constructor(
     fun aSnapshotIsCreated() {
         require(lastTransactionDate != null) { "No transactions published yet" }
 
-        val snapshot = stateSnapshotManager.createSnapshot(lastTransactionDate!!)
-        snapshotFileService.saveSnapshot(snapshot, testTransactionsDir.absolutePath)
-        currentSnapshot = snapshot
+        snapshotService.saveSnapshot(lastTransactionDate!!, testTransactionsDir.absolutePath)
+        currentSnapshot = snapshotService.loadLatestSnapshot(testTransactionsDir.absolutePath)
     }
 
     @When("the snapshot is loaded from file")
     fun theSnapshotIsLoadedFromFile() {
-        currentSnapshot = snapshotFileService.loadLatestSnapshot(testTransactionsDir.absolutePath)
+        currentSnapshot = snapshotService.loadLatestSnapshot(testTransactionsDir.absolutePath)
         require(currentSnapshot != null) { "No snapshot file found" }
     }
 
@@ -272,20 +267,16 @@ class StepDefinitions @Autowired constructor(
 
         portfolio.reset()
         fiscalYearRepository.reset()
+        snapshotService.reset()
 
-        snapshotDeserializer.restoreState(
-            snapshot = currentSnapshot!!,
-            portfolio = portfolio,
-            fiscalYearRepository = fiscalYearRepository
-        )
+        snapshotService.restoreState(currentSnapshot!!)
     }
 
     @Then("a snapshot file should be created in {string} directory")
     fun aSnapshotFileShouldBeCreatedInDirectory(directory: String) {
         require(lastTransactionDate != null) { "No transactions published yet" }
 
-        val snapshot = stateSnapshotManager.createSnapshot(lastTransactionDate!!)
-        snapshotFileService.saveSnapshot(snapshot, testTransactionsDir.absolutePath)
+        snapshotService.saveSnapshot(lastTransactionDate!!, testTransactionsDir.absolutePath)
 
         assertThat(testSnapshotDir.exists()).isTrue()
         assertThat(testSnapshotDir.isDirectory).isTrue()

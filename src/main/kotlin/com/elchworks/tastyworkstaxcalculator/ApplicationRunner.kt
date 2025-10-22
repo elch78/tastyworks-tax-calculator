@@ -19,26 +19,15 @@ class ApplicationRunner(
     private val transactionsCsvReader: TransactionCsvReader,
     private val eventPublisher: ApplicationEventPublisher,
     private val fiscalYearManager: FiscalYearManager,
-    private val portfolio: Portfolio,
-    private val fiscalYearRepository: FiscalYearRepository,
-    private val snapshotFileService: SnapshotFileService,
-    private val snapshotDeserializer: SnapshotDeserializer,
-    private val stateSnapshotManager: StateSnapshotManager
+    private val snapshotService: SnapshotService
 ): ApplicationRunner {
     private val log = LoggerFactory.getLogger(TastyworksTaxCalculatorApplication::class.java)
 
     override fun run(args: ApplicationArguments) {
         val transactionsDir = args.getOptionValues("transactionsDir")[0]
 
-        // Load snapshot if available
-        val snapshot = snapshotFileService.loadLatestSnapshot(transactionsDir)
-        if (snapshot != null) {
-            snapshotDeserializer.restoreState(snapshot, portfolio, fiscalYearRepository)
-            // Trackers will restore automatically via events
-            log.info("Resumed from snapshot. Last transaction: {}", snapshot.metadata.lastTransactionDate)
-        } else {
-            log.info("No snapshot found. Processing all transactions from scratch.")
-        }
+        // Load and restore snapshot if available
+        val snapshot = snapshotService.loadAndRestoreState(transactionsDir)
 
         // Read and sort all transactions
         val transactions = File(transactionsDir)
@@ -75,9 +64,8 @@ class ApplicationRunner(
 
         // Save snapshot if we processed any transactions
         if (lastTransactionDate != null) {
-            log.debug("Creating new snapshot with lastTransactionDate: {}", lastTransactionDate)
-            val newSnapshot = stateSnapshotManager.createSnapshot(lastTransactionDate!!)
-            snapshotFileService.saveSnapshot(newSnapshot, transactionsDir)
+            log.debug("Saving snapshot with lastTransactionDate: {}", lastTransactionDate)
+            snapshotService.saveSnapshot(lastTransactionDate!!, transactionsDir)
         } else {
             log.debug("No transactions processed, snapshot not updated")
         }
