@@ -348,7 +348,7 @@ class SnapshotService(
         } ?: return null
 
         // Sort by filename (which includes timestamp) and return the latest
-        return snapshotFiles.sortedByDescending { it.name }.firstOrNull()
+        return snapshotFiles.maxByOrNull { it.name }
     }
 
     private fun OptionTrade.key() = "${this.callOrPut}-${this.symbol}-${this.expirationDate}-${this.strikePrice}"
