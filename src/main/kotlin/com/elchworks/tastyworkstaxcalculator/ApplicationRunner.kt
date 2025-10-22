@@ -26,10 +26,8 @@ class ApplicationRunner(
     override fun run(args: ApplicationArguments) {
         val transactionsDir = args.getOptionValues("transactionsDir")[0]
 
-        // Load and restore snapshot if available
         val snapshot = snapshotService.loadAndRestoreState(transactionsDir)
 
-        // Read and sort all transactions
         val transactions = File(transactionsDir)
             .walk()
             .filter { it.isFile && !it.absolutePath.contains("/snapshots/") }
@@ -45,10 +43,8 @@ class ApplicationRunner(
 
         log.debug("Total transactions loaded: {}", transactions.size)
 
-        // Validate chronological order
         validateChronologicalOrder(snapshot, transactions)
 
-        // Process transactions
         var lastTransactionDate: Instant? = snapshot?.metadata?.lastTransactionDate
         log.debug("Starting transaction processing. Initial lastTransactionDate: {}", lastTransactionDate)
 
@@ -59,10 +55,8 @@ class ApplicationRunner(
 
         log.debug("Transaction processing complete. Final lastTransactionDate: {}", lastTransactionDate)
 
-        // Generate reports
         fiscalYearManager.printReports()
 
-        // Save snapshot if we processed any transactions
         if (lastTransactionDate != null) {
             log.debug("Saving snapshot with lastTransactionDate: {}", lastTransactionDate)
             snapshotService.saveSnapshot(lastTransactionDate!!, transactionsDir)
@@ -75,7 +69,6 @@ class ApplicationRunner(
         log.debug("validateChronologicalOrder snapshot={}, transactions.size={}",
             snapshot?.metadata?.lastTransactionDate, transactions.size)
 
-        // Skip validation if no snapshot or no transactions
         if (snapshot == null || transactions.isEmpty()) {
             return
         }
