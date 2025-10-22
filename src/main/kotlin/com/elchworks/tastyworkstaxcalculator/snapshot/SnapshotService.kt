@@ -4,6 +4,7 @@ import com.elchworks.tastyworkstaxcalculator.eur
 import com.elchworks.tastyworkstaxcalculator.fiscalyear.FiscalYearRepository
 import com.elchworks.tastyworkstaxcalculator.fiscalyear.OptionProfitLossUpdatedEvent
 import com.elchworks.tastyworkstaxcalculator.fiscalyear.StockProfitLossUpdatedEvent
+import com.elchworks.tastyworkstaxcalculator.portfolio.NewTransactionEvent
 import com.elchworks.tastyworkstaxcalculator.portfolio.Portfolio
 import com.elchworks.tastyworkstaxcalculator.portfolio.ProfitAndLoss
 import com.elchworks.tastyworkstaxcalculator.portfolio.option.OptionBuyToCloseEvent
@@ -45,6 +46,41 @@ class SnapshotService(
 
     // Fiscal year state: map of year -> fiscal year state
     private val fiscalYears = mutableMapOf<Int, FiscalYearState>()
+
+    // Last transaction date
+    private var lastTransactionDate: Instant? = null
+    private var snapshot: StateSnapshot? = null
+
+    // Transaction event listener
+    @EventListener(NewTransactionEvent::class)
+    fun onNewTransaction(event: NewTransactionEvent) {
+        val transactionDate = event.tx.date
+
+        validateChronologicalOrder(transactionDate)
+
+        lastTransactionDate = transactionDate
+        log.debug("Tracked transaction date: {}", lastTransactionDate)
+    }
+
+    private fun validateChronologicalOrder(transactionDate: Instant) {
+        snapshot?.let {
+            require(transactionDate > it.metadata.lastTransactionDate) {
+                """
+                    |
+                    |ERROR: Chronological order violation detected
+                    |
+                    |  Snapshot last transaction: ${it.metadata.lastTransactionDate}
+                    |  Current transaction:       $transactionDate
+                    |
+                    |  Cannot process transactions that occur before the snapshot date.
+                    |
+                    |  Please provide complete transaction history from the beginning,
+                    |  or delete the snapshot files in the snapshots/ directory to start fresh.
+                    |
+                    """.trimMargin()
+            }
+        }
+    }
 
     // Portfolio event listeners
     @EventListener(OptionSellToOpenEvent::class)
@@ -149,13 +185,13 @@ class SnapshotService(
             year, event.profitLossDelta, event.totalProfitAndLoss)
     }
 
-    fun saveSnapshot(lastTransactionDate: Instant, transactionsDir: String) {
+    fun saveSnapshot(transactionsDir: String) {
         log.debug("saveSnapshot lastTransactionDate={}", lastTransactionDate)
 
         val snapshot = StateSnapshot(
             metadata = SnapshotMetadata(
                 createdAt = Instant.now(),
-                lastTransactionDate = lastTransactionDate
+                lastTransactionDate = lastTransactionDate!!
             ),
             portfolio = PortfolioSnapshot(
                 optionPositions = optionPositions.mapValues { it.value.toList() },
@@ -196,8 +232,8 @@ class SnapshotService(
             ?: return null.also { log.info("No snapshot files found in {}", snapshotDir.absolutePath) }
 
         log.info("Loading snapshot from {}", latestFile.absolutePath)
-        val snapshot = objectMapper.readValue(latestFile, StateSnapshot::class.java)
-        log.info("Snapshot loaded successfully. lastTransactionDate={}", snapshot.metadata.lastTransactionDate)
+        snapshot = objectMapper.readValue(latestFile, StateSnapshot::class.java)
+        log.info("Snapshot loaded successfully. lastTransactionDate={}", snapshot?.metadata?.lastTransactionDate)
         return snapshot
     }
 
@@ -215,6 +251,9 @@ class SnapshotService(
 
     fun restoreState(snapshot: StateSnapshot) {
         log.info("Restoring state from snapshot. lastTransactionDate={}", snapshot.metadata.lastTransactionDate)
+
+        this.snapshot = snapshot
+        lastTransactionDate = snapshot.metadata.lastTransactionDate
 
         restorePortfolioState(snapshot.portfolio)
 
@@ -286,6 +325,8 @@ class SnapshotService(
         optionPositions.clear()
         stockPositions.clear()
         fiscalYears.clear()
+        lastTransactionDate = null
+        snapshot = null
     }
 
     private fun getOrCreateFiscalYearState(year: Int): FiscalYearState {

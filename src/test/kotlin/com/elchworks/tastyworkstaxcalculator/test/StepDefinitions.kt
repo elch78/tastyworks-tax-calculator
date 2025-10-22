@@ -44,7 +44,6 @@ class StepDefinitions @Autowired constructor(
     private val snapshotService: SnapshotService
 ){
     private var currentSnapshot: StateSnapshot? = null
-    private var lastTransactionDate: Instant? = null
     private val testTransactionsDir = File(System.getProperty("java.io.tmpdir"), "test-transactions")
     private val testSnapshotDir = File(testTransactionsDir, "snapshots")
     @Before
@@ -228,7 +227,6 @@ class StepDefinitions @Autowired constructor(
 
     fun publishTx(tx: Transaction) {
         eventPublisher.publishEvent(NewTransactionEvent(tx))
-        lastTransactionDate = tx.date
     }
 
     @When("the snapshot files are deleted")
@@ -244,14 +242,11 @@ class StepDefinitions @Autowired constructor(
         fiscalYearRepository.reset()
         snapshotService.reset()
         currentSnapshot = null
-        lastTransactionDate = null
     }
 
     @When("a snapshot is created")
     fun aSnapshotIsCreated() {
-        require(lastTransactionDate != null) { "No transactions published yet" }
-
-        snapshotService.saveSnapshot(lastTransactionDate!!, testTransactionsDir.absolutePath)
+        snapshotService.saveSnapshot(testTransactionsDir.absolutePath)
         currentSnapshot = snapshotService.loadLatestSnapshot(testTransactionsDir.absolutePath)
     }
 
@@ -274,9 +269,7 @@ class StepDefinitions @Autowired constructor(
 
     @Then("a snapshot file should be created in {string} directory")
     fun aSnapshotFileShouldBeCreatedInDirectory(directory: String) {
-        require(lastTransactionDate != null) { "No transactions published yet" }
-
-        snapshotService.saveSnapshot(lastTransactionDate!!, testTransactionsDir.absolutePath)
+        snapshotService.saveSnapshot(testTransactionsDir.absolutePath)
 
         assertThat(testSnapshotDir.exists()).isTrue()
         assertThat(testSnapshotDir.isDirectory).isTrue()
