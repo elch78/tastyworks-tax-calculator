@@ -9,12 +9,17 @@ import com.elchworks.tastyworkstaxcalculator.portfolio.option.OptionBuyToCloseEv
 import com.elchworks.tastyworkstaxcalculator.portfolio.option.OptionSellToOpenEvent
 import com.elchworks.tastyworkstaxcalculator.portfolio.plus
 import com.elchworks.tastyworkstaxcalculator.portfolio.stock.StockSellToCloseEvent
+import com.elchworks.tastyworkstaxcalculator.snapshot.FiscalYearSnapshot
+import com.elchworks.tastyworkstaxcalculator.snapshot.FiscalYearStateRestoredEvent
+import com.elchworks.tastyworkstaxcalculator.snapshot.MonetaryAmountSnapshot
+import com.elchworks.tastyworkstaxcalculator.snapshot.ProfitAndLossSnapshot
 import com.elchworks.tastyworkstaxcalculator.transactions.OptionTrade
 import com.elchworks.tastyworkstaxcalculator.transactions.Transaction
 import com.elchworks.tastyworkstaxcalculator.transactions.optionDescription
 import com.elchworks.tastyworkstaxcalculator.transactions.year
 import org.javamoney.moneta.Money
 import org.slf4j.LoggerFactory
+import org.springframework.context.ApplicationEventPublisher
 import java.time.Instant
 import java.time.Year
 import java.time.ZoneId
@@ -24,6 +29,7 @@ import javax.money.MonetaryAmount
 class FiscalYear(
     private val currencyExchange: CurrencyExchange,
     val fiscalYear: Year,
+    private val eventPublisher: ApplicationEventPublisher
 ) {
     private var profitAndLossFromOptions = ProfitAndLoss()
     private var profitAndLossFromStocks = eur(0)
@@ -41,6 +47,21 @@ class FiscalYear(
     ) {
         this.profitAndLossFromOptions = profitAndLossFromOptions
         this.profitAndLossFromStocks = profitAndLossFromStocks
+
+        // Publish event so state trackers can restore
+        eventPublisher.publishEvent(
+            FiscalYearStateRestoredEvent(
+                fiscalYearSnapshot = FiscalYearSnapshot(
+                    year = fiscalYear.value,
+                    profitAndLossFromOptions = ProfitAndLossSnapshot(
+                        profit = MonetaryAmountSnapshot.from(profitAndLossFromOptions.profit),
+                        loss = MonetaryAmountSnapshot.from(profitAndLossFromOptions.loss)
+                    ),
+                    profitAndLossFromStocks = MonetaryAmountSnapshot.from(profitAndLossFromStocks)
+                )
+            )
+        )
+
         log.debug("Restored fiscal year {} state: optionProfit={}, optionLoss={}, stockProfit={}",
             fiscalYear,
             format(profitAndLossFromOptions.profit),
@@ -51,7 +72,17 @@ class FiscalYear(
     fun onOptionPositionOpened(stoEvent: OptionSellToOpenEvent) {
         val stoTx = stoEvent.stoTx
         val premium = currencyExchange.usdToEur(stoTx.value(), stoTx.date)
-        profitAndLossFromOptions += ProfitAndLoss(premium, Money.of(0, "EUR"))
+        val delta = ProfitAndLoss(premium, Money.of(0, "EUR"))
+        profitAndLossFromOptions += delta
+
+        eventPublisher.publishEvent(
+            OptionProfitLossUpdatedEvent(
+                year = fiscalYear,
+                profitLossDelta = delta,
+                totalProfitAndLoss = profitAndLossFromOptions
+            )
+        )
+
         log.info("{} Option STO: {} premium {}", fiscalYear, stoTx.symbol, format(premium))
     }
 
@@ -91,6 +122,15 @@ class FiscalYear(
             ProfitAndLoss(eur(0), buyValue)
         }
         profitAndLossFromOptions += profitAndLoss
+
+        eventPublisher.publishEvent(
+            OptionProfitLossUpdatedEvent(
+                year = fiscalYear,
+                profitLossDelta = profitAndLoss,
+                totalProfitAndLoss = profitAndLossFromOptions
+            )
+        )
+
         log.info(
             "{} Option BTC: {} profitAndLoss='{}', profitAndLossFromOptions='{}'",
             fiscalYear,
@@ -104,6 +144,15 @@ class FiscalYear(
         val quantity = event.quantitySold
         val netProfit = netProfit(btoTx, stcTx, quantity)
         profitAndLossFromStocks += netProfit
+
+        eventPublisher.publishEvent(
+            StockProfitLossUpdatedEvent(
+                year = fiscalYear,
+                profitLossDelta = netProfit,
+                totalProfitAndLoss = profitAndLossFromStocks
+            )
+        )
+
         log.info(
             "{} Stock STC: {} profitAndLoss='{}', profitFromStocks='{}'",
             fiscalYear,

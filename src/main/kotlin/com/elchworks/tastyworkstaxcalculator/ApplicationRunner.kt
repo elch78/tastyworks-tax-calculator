@@ -23,7 +23,9 @@ class ApplicationRunner(
     private val fiscalYearRepository: FiscalYearRepository,
     private val snapshotFileService: SnapshotFileService,
     private val snapshotSerializer: SnapshotSerializer,
-    private val snapshotDeserializer: SnapshotDeserializer
+    private val snapshotDeserializer: SnapshotDeserializer,
+    private val portfolioStateTracker: PortfolioStateTracker,
+    private val fiscalYearStateTracker: FiscalYearStateTracker
 ): ApplicationRunner {
     private val log = LoggerFactory.getLogger(TastyworksTaxCalculatorApplication::class.java)
 
@@ -34,6 +36,7 @@ class ApplicationRunner(
         val snapshot = snapshotFileService.loadLatestSnapshot(transactionsDir)
         if (snapshot != null) {
             snapshotDeserializer.restoreState(snapshot, portfolio, fiscalYearRepository)
+            // Trackers will restore automatically via events
             log.info("Resumed from snapshot. Last transaction: {}", snapshot.metadata.lastTransactionDate)
         } else {
             log.info("No snapshot found. Processing all transactions from scratch.")
@@ -78,7 +81,9 @@ class ApplicationRunner(
             val newSnapshot = snapshotSerializer.createSnapshot(
                 portfolio = portfolio,
                 fiscalYearRepository = fiscalYearRepository,
-                lastTransactionDate = lastTransactionDate!!
+                lastTransactionDate = lastTransactionDate!!,
+                portfolioStateTracker = portfolioStateTracker,
+                fiscalYearStateTracker = fiscalYearStateTracker
             )
             snapshotFileService.saveSnapshot(newSnapshot, transactionsDir)
         } else {

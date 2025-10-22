@@ -1,6 +1,7 @@
 package com.elchworks.tastyworkstaxcalculator.snapshot
 
 import java.time.Instant
+import javax.money.MonetaryAmount
 
 data class PortfolioSnapshot(
     val optionPositions: Map<String, List<OptionPositionSnapshot>>,
@@ -45,7 +46,16 @@ data class StockTransactionSnapshot(
 data class MonetaryAmountSnapshot(
     val amount: Double,
     val currency: String
-)
+) {
+    companion object {
+        fun from(monetaryAmount: MonetaryAmount): MonetaryAmountSnapshot {
+            return MonetaryAmountSnapshot(
+                amount = monetaryAmount.number.doubleValueExact(),
+                currency = monetaryAmount.currency.currencyCode
+            )
+        }
+    }
+}
 
 data class FiscalYearSnapshot(
     val year: Int,

@@ -5,11 +5,14 @@ import com.elchworks.tastyworkstaxcalculator.portfolio.option.OptionPositionStat
 import com.elchworks.tastyworkstaxcalculator.portfolio.option.OptionPositionStatus.EXPIRED
 import com.elchworks.tastyworkstaxcalculator.portfolio.option.OptionSellToOpenEvent
 import com.elchworks.tastyworkstaxcalculator.portfolio.option.OptionShortPosition
+import com.elchworks.tastyworkstaxcalculator.portfolio.stock.StockBuyToOpenEvent
 import com.elchworks.tastyworkstaxcalculator.portfolio.stock.StockPosition
 import com.elchworks.tastyworkstaxcalculator.portfolio.stock.StockSellToCloseEvent
+import com.elchworks.tastyworkstaxcalculator.snapshot.*
 import com.elchworks.tastyworkstaxcalculator.transactions.*
 import com.elchworks.tastyworkstaxcalculator.transactions.Action.*
 import com.elchworks.tastyworkstaxcalculator.usd
+import org.javamoney.moneta.Money
 import org.slf4j.LoggerFactory
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.context.event.EventListener
@@ -65,8 +68,93 @@ class Portfolio(
         stockPositions.clear()
     }
 
-    internal fun getOptionPositionsMap(): MutableMap<String, Queue<OptionShortPosition>> = optionPositions
-    internal fun getStockPositionsMap(): MutableMap<String, Queue<StockPosition>> = stockPositions
+    fun restoreFrom(snapshot: PortfolioSnapshot) {
+        // Sanity check: restoration should only happen at startup
+        if (optionPositions.isNotEmpty() || stockPositions.isNotEmpty()) {
+            throw IllegalStateException(
+                "Portfolio restoration attempted with non-empty positions! " +
+                "Restoration should only happen at application startup before processing transactions. " +
+                "Current state: ${optionPositions.size} option position keys, ${stockPositions.size} stock position keys"
+            )
+        }
+
+        log.info("Restoring portfolio from snapshot: {} option position keys, {} stock position keys",
+            snapshot.optionPositions.size, snapshot.stockPositions.size)
+
+        // Restore option positions
+        snapshot.optionPositions.forEach { (key, positions) ->
+            val queue: Queue<OptionShortPosition> = LinkedList()
+            positions.forEach { posSnapshot ->
+                queue.offer(deserializeOptionPosition(posSnapshot))
+            }
+            optionPositions[key] = queue
+        }
+
+        // Restore stock positions
+        snapshot.stockPositions.forEach { (symbol, positions) ->
+            val queue: Queue<StockPosition> = LinkedList()
+            positions.forEach { posSnapshot ->
+                queue.offer(deserializeStockPosition(posSnapshot))
+            }
+            stockPositions[symbol] = queue
+        }
+
+        // Publish event so state trackers can restore
+        eventPublisher.publishEvent(PortfolioStateRestoredEvent(snapshot))
+
+        log.debug("Portfolio restoration complete")
+    }
+
+    private fun deserializeOptionPosition(snapshot: OptionPositionSnapshot): OptionShortPosition {
+        return OptionShortPosition(
+            stoTx = deserializeOptionTrade(snapshot.stoTx),
+            quantityLeft = snapshot.quantityLeft
+        )
+    }
+
+    private fun deserializeStockPosition(snapshot: StockPositionSnapshot): StockPosition {
+        return StockPosition(
+            btoTx = deserializeStockTransaction(snapshot.btoTx),
+            quantityLeft = snapshot.quantityLeft
+        )
+    }
+
+    private fun deserializeOptionTrade(snapshot: OptionTradeSnapshot): OptionTrade {
+        return OptionTrade(
+            date = snapshot.date,
+            action = Action.SELL_TO_OPEN,
+            symbol = snapshot.symbol,
+            callOrPut = snapshot.callOrPut,
+            expirationDate = LocalDate.parse(snapshot.expirationDate),
+            strikePrice = Money.of(snapshot.strikePrice.amount, snapshot.strikePrice.currency),
+            quantity = snapshot.quantity,
+            averagePrice = Money.of(snapshot.averagePrice.amount, snapshot.averagePrice.currency),
+            description = snapshot.description,
+            commissions = Money.of(snapshot.commissions.amount, snapshot.commissions.currency),
+            fees = Money.of(snapshot.fees.amount, snapshot.fees.currency),
+            instrumentType = "Equity Option",
+            value = Money.of(snapshot.averagePrice.amount, snapshot.averagePrice.currency)
+                .multiply(snapshot.quantity).multiply(100),
+            multiplier = 100,
+            underlyingSymbol = snapshot.symbol,
+            orderNr = 0
+        )
+    }
+
+    private fun deserializeStockTransaction(snapshot: StockTransactionSnapshot): StockTrade {
+        return StockTrade(
+            date = snapshot.date,
+            action = Action.BUY_TO_OPEN,
+            symbol = snapshot.symbol,
+            type = snapshot.type,
+            value = Money.of(snapshot.value.amount, snapshot.value.currency),
+            quantity = snapshot.quantity,
+            averagePrice = Money.of(snapshot.averagePrice.amount, snapshot.averagePrice.currency),
+            description = snapshot.description,
+            commissions = Money.of(snapshot.commissions.amount, snapshot.commissions.currency),
+            fees = Money.of(snapshot.fees.amount, snapshot.fees.currency)
+        )
+    }
 
     private fun optionTrade(tx: OptionTrade) {
         when(tx.action) {
@@ -101,6 +189,7 @@ class Portfolio(
     private fun openStockPosition(btoTx: StockTransaction) {
         stockPositions.computeIfAbsent(btoTx.symbol) {LinkedList()}
             .offer(StockPosition(btoTx, btoTx.quantity))
+        eventPublisher.publishEvent(StockBuyToOpenEvent(btoTx))
         log.info("Stock BTO symbol='{}' stcTx date {} quantity {} price {} description {}",
             btoTx.symbol, btoTx.date, btoTx.quantity, btoTx.averagePrice, btoTx.description)
     }

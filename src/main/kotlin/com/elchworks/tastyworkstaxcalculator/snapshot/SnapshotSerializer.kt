@@ -1,7 +1,6 @@
 package com.elchworks.tastyworkstaxcalculator.snapshot
 
 import com.elchworks.tastyworkstaxcalculator.fiscalyear.FiscalYearRepository
-import com.elchworks.tastyworkstaxcalculator.fiscalyear.FiscalYear
 import com.elchworks.tastyworkstaxcalculator.portfolio.Portfolio
 import com.elchworks.tastyworkstaxcalculator.portfolio.option.OptionShortPosition
 import com.elchworks.tastyworkstaxcalculator.portfolio.stock.StockPosition
@@ -19,52 +18,41 @@ class SnapshotSerializer {
     fun createSnapshot(
         portfolio: Portfolio,
         fiscalYearRepository: FiscalYearRepository,
-        lastTransactionDate: Instant
+        lastTransactionDate: Instant,
+        portfolioStateTracker: PortfolioStateTracker,
+        fiscalYearStateTracker: FiscalYearStateTracker
     ): StateSnapshot {
         log.info("Creating snapshot with lastTransactionDate={}", lastTransactionDate)
+
+        // Use trackers as source of truth
+        val portfolioSnapshot = portfolioStateTracker.getPortfolioSnapshot()
+        val fiscalYearsSnapshot = fiscalYearStateTracker.getFiscalYearsSnapshot()
 
         return StateSnapshot(
             metadata = SnapshotMetadata(
                 createdAt = Instant.now(),
                 lastTransactionDate = lastTransactionDate
             ),
-            portfolio = serializePortfolio(portfolio),
-            fiscalYears = serializeFiscalYears(fiscalYearRepository)
+            portfolio = portfolioSnapshot,
+            fiscalYears = fiscalYearsSnapshot
         )
     }
 
-    private fun serializePortfolio(portfolio: Portfolio): PortfolioSnapshot {
-        log.debug("serializePortfolio")
-        val optionPositions = portfolio.getOptionPositionsMap()
-            .mapValues { (_, queue) ->
-                queue.map { serializeOptionPosition(it) }
-            }
-
-        val stockPositions = portfolio.getStockPositionsMap()
-            .mapValues { (_, queue) ->
-                queue.map { serializeStockPosition(it) }
-            }
-
-        log.debug("serializePortfolio optionPositions.size={}, stockPositions.size={}",
-            optionPositions.size, stockPositions.size)
-        return PortfolioSnapshot(optionPositions, stockPositions)
-    }
-
-    private fun serializeOptionPosition(position: OptionShortPosition): OptionPositionSnapshot {
+    internal fun serializeOptionPosition(position: OptionShortPosition): OptionPositionSnapshot {
         return OptionPositionSnapshot(
             stoTx = serializeOptionTrade(position.stoTx),
             quantityLeft = position.quantity()
         )
     }
 
-    private fun serializeStockPosition(position: StockPosition): StockPositionSnapshot {
+    internal fun serializeStockPosition(position: StockPosition): StockPositionSnapshot {
         return StockPositionSnapshot(
             btoTx = serializeStockTransaction(position.btoTx),
             quantityLeft = position.quantity()
         )
     }
 
-    private fun serializeOptionTrade(trade: OptionTrade): OptionTradeSnapshot {
+    internal fun serializeOptionTrade(trade: OptionTrade): OptionTradeSnapshot {
         return OptionTradeSnapshot(
             date = trade.date,
             symbol = trade.symbol,
@@ -79,7 +67,7 @@ class SnapshotSerializer {
         )
     }
 
-    private fun serializeStockTransaction(tx: StockTransaction): StockTransactionSnapshot {
+    internal fun serializeStockTransaction(tx: StockTransaction): StockTransactionSnapshot {
         return StockTransactionSnapshot(
             date = tx.date,
             symbol = tx.symbol,
@@ -105,31 +93,7 @@ class SnapshotSerializer {
         )
     }
 
-    private fun serializeMonetaryAmount(amount: MonetaryAmount): MonetaryAmountSnapshot {
-        return MonetaryAmountSnapshot(
-            amount = amount.number.doubleValueExact(),
-            currency = amount.currency.currencyCode
-        )
-    }
-
-    private fun serializeFiscalYears(repository: FiscalYearRepository): Map<Int, FiscalYearSnapshot> {
-        val fiscalYears = repository.getAllSortedByYear()
-            .associate { fiscalYear ->
-                fiscalYear.fiscalYear.value to serializeFiscalYear(fiscalYear)
-            }
-        log.debug("serializeFiscalYears fiscalYears.size={}", fiscalYears.size)
-        return fiscalYears
-    }
-
-    private fun serializeFiscalYear(fiscalYear: FiscalYear): FiscalYearSnapshot {
-        val profits = fiscalYear.profits()
-        return FiscalYearSnapshot(
-            year = fiscalYear.fiscalYear.value,
-            profitAndLossFromOptions = ProfitAndLossSnapshot(
-                profit = serializeMonetaryAmount(profits.profitsFromOptions),
-                loss = serializeMonetaryAmount(profits.lossesFromOptions)
-            ),
-            profitAndLossFromStocks = serializeMonetaryAmount(profits.profitsFromStocks)
-        )
+    internal fun serializeMonetaryAmount(amount: MonetaryAmount): MonetaryAmountSnapshot {
+        return MonetaryAmountSnapshot.from(amount)
     }
 }

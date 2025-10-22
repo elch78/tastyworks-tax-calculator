@@ -17,8 +17,10 @@ import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
 import org.mockito.kotlin.any
 import org.mockito.kotlin.whenever
+import org.mockito.kotlin.mock
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.context.ApplicationEventPublisher
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import java.math.BigDecimal
 import java.time.Year
@@ -32,7 +34,8 @@ class FiscalYearTest @Autowired constructor(
     @MockitoBean
     private lateinit var exchangeRateRepository: ExchangeRateRepository
 
-    private val sut by lazy { FiscalYear(currencyExchange, Year.of(2021)) }
+    private val mockEventPublisher = mock<ApplicationEventPublisher>()
+    private val sut by lazy { FiscalYear(currencyExchange, Year.of(2021), mockEventPublisher) }
 
     @Test
     fun optionExpired() {

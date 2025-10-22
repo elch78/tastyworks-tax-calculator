@@ -2,6 +2,7 @@ package com.elchworks.tastyworkstaxcalculator.portfolio
 
 import com.elchworks.tastyworkstaxcalculator.portfolio.option.OptionBuyToCloseEvent
 import com.elchworks.tastyworkstaxcalculator.portfolio.option.OptionSellToOpenEvent
+import com.elchworks.tastyworkstaxcalculator.portfolio.stock.StockBuyToOpenEvent
 import com.elchworks.tastyworkstaxcalculator.portfolio.stock.StockSellToCloseEvent
 import com.elchworks.tastyworkstaxcalculator.test.randomAssignment
 import com.elchworks.tastyworkstaxcalculator.test.randomDate
@@ -94,6 +95,8 @@ class PortfolioTest @Autowired constructor(
         // Then
         assertThat(publishedEvents(eventPublisher)).isEqualTo(
             listOf(
+                StockBuyToOpenEvent(btoTx1),
+                StockBuyToOpenEvent(btoTx2),
                 StockSellToCloseEvent(btoTx1, stcTx1, 3),
                 StockSellToCloseEvent(btoTx1, stcTx1, 2),
                 StockSellToCloseEvent(btoTx2, stcTx1, 1),

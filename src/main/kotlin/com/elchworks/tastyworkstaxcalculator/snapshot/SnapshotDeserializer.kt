@@ -27,90 +27,13 @@ class SnapshotDeserializer {
     ) {
         log.info("Restoring state from snapshot. lastTransactionDate={}", snapshot.metadata.lastTransactionDate)
 
-        restorePortfolio(snapshot.portfolio, portfolio)
+        // Restore portfolio - it will publish event for trackers
+        portfolio.restoreFrom(snapshot.portfolio)
+
+        // Restore fiscal years - they will publish events for trackers
         restoreFiscalYears(snapshot.fiscalYears, fiscalYearRepository)
 
         log.info("State restoration complete")
-    }
-
-    private fun restorePortfolio(portfolioSnapshot: PortfolioSnapshot, portfolio: Portfolio) {
-        portfolio.reset() // Clear any existing state
-
-        // Restore option positions
-        portfolioSnapshot.optionPositions.forEach { (key, positions) ->
-            val queue: Queue<OptionShortPosition> = LinkedList()
-            positions.forEach { posSnapshot ->
-                queue.offer(deserializeOptionPosition(posSnapshot))
-            }
-            portfolio.getOptionPositionsMap()[key] = queue
-        }
-
-        // Restore stock positions
-        portfolioSnapshot.stockPositions.forEach { (symbol, positions) ->
-            val queue: Queue<StockPosition> = LinkedList()
-            positions.forEach { posSnapshot ->
-                queue.offer(deserializeStockPosition(posSnapshot))
-            }
-            portfolio.getStockPositionsMap()[symbol] = queue
-        }
-
-        log.debug("Restored {} option position keys and {} stock position keys",
-            portfolioSnapshot.optionPositions.size, portfolioSnapshot.stockPositions.size)
-    }
-
-    private fun deserializeOptionPosition(snapshot: OptionPositionSnapshot): OptionShortPosition {
-        return OptionShortPosition(
-            stoTx = deserializeOptionTrade(snapshot.stoTx),
-            quantityLeft = snapshot.quantityLeft
-        )
-    }
-
-    private fun deserializeStockPosition(snapshot: StockPositionSnapshot): StockPosition {
-        return StockPosition(
-            btoTx = deserializeStockTransaction(snapshot.btoTx),
-            quantityLeft = snapshot.quantityLeft
-        )
-    }
-
-    private fun deserializeOptionTrade(snapshot: OptionTradeSnapshot): OptionTrade {
-        return OptionTrade(
-            date = snapshot.date,
-            action = Action.SELL_TO_OPEN, // Always SELL_TO_OPEN for open positions
-            symbol = snapshot.symbol,
-            callOrPut = snapshot.callOrPut,
-            expirationDate = LocalDate.parse(snapshot.expirationDate),
-            strikePrice = deserializeMonetaryAmount(snapshot.strikePrice),
-            quantity = snapshot.quantity,
-            averagePrice = deserializeMonetaryAmount(snapshot.averagePrice),
-            description = snapshot.description,
-            commissions = deserializeMonetaryAmount(snapshot.commissions),
-            fees = deserializeMonetaryAmount(snapshot.fees),
-            // These fields are not critical for position restoration but needed for OptionTrade
-            instrumentType = "Equity Option",
-            value = deserializeMonetaryAmount(snapshot.averagePrice).multiply(snapshot.quantity).multiply(100),
-            multiplier = 100,
-            underlyingSymbol = snapshot.symbol,
-            orderNr = 0
-        )
-    }
-
-    private fun deserializeStockTransaction(snapshot: StockTransactionSnapshot): StockTrade {
-        return StockTrade(
-            date = snapshot.date,
-            action = Action.BUY_TO_OPEN, // Always BUY_TO_OPEN for open positions
-            symbol = snapshot.symbol,
-            type = snapshot.type,
-            value = deserializeMonetaryAmount(snapshot.value),
-            quantity = snapshot.quantity,
-            averagePrice = deserializeMonetaryAmount(snapshot.averagePrice),
-            description = snapshot.description,
-            commissions = deserializeMonetaryAmount(snapshot.commissions),
-            fees = deserializeMonetaryAmount(snapshot.fees)
-        )
-    }
-
-    private fun deserializeMonetaryAmount(snapshot: MonetaryAmountSnapshot): Money {
-        return Money.of(snapshot.amount, snapshot.currency)
     }
 
     private fun restoreFiscalYears(
@@ -121,19 +44,24 @@ class SnapshotDeserializer {
 
         fiscalYearsSnapshot.forEach { (yearValue, snapshot) ->
             val fiscalYear = repository.getFiscalYear(Year.of(yearValue))
-            restoreFiscalYear(snapshot, fiscalYear)
+            fiscalYear.restoreState(
+                profitAndLossFromOptions = ProfitAndLoss(
+                    profit = Money.of(
+                        snapshot.profitAndLossFromOptions.profit.amount,
+                        snapshot.profitAndLossFromOptions.profit.currency
+                    ),
+                    loss = Money.of(
+                        snapshot.profitAndLossFromOptions.loss.amount,
+                        snapshot.profitAndLossFromOptions.loss.currency
+                    )
+                ),
+                profitAndLossFromStocks = Money.of(
+                    snapshot.profitAndLossFromStocks.amount,
+                    snapshot.profitAndLossFromStocks.currency
+                )
+            )
         }
 
         log.debug("Restored {} fiscal years", fiscalYearsSnapshot.size)
-    }
-
-    private fun restoreFiscalYear(snapshot: FiscalYearSnapshot, fiscalYear: FiscalYear) {
-        fiscalYear.restoreState(
-            profitAndLossFromOptions = ProfitAndLoss(
-                profit = deserializeMonetaryAmount(snapshot.profitAndLossFromOptions.profit),
-                loss = deserializeMonetaryAmount(snapshot.profitAndLossFromOptions.loss)
-            ),
-            profitAndLossFromStocks = deserializeMonetaryAmount(snapshot.profitAndLossFromStocks)
-        )
     }
 }
