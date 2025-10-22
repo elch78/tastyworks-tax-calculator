@@ -32,9 +32,9 @@ class ApplicationRunner(
             .walk()
             .filter { it.isFile && !it.absolutePath.contains("/snapshots/") }
             .map {
-                log.debug("reading $it")
+                log.debug("reading {}", it)
                 val tx = transactionsCsvReader.read(it)
-                log.info("read $it")
+                log.info("read {}", it)
                 tx
             }
             .flatten()
@@ -42,6 +42,11 @@ class ApplicationRunner(
             .toList()
 
         log.debug("Total transactions loaded: {}", transactions.size)
+
+        if (transactions.isEmpty()) {
+            log.debug("No transactions to process")
+            return
+        }
 
         validateChronologicalOrder(snapshot, transactions)
 
@@ -57,12 +62,7 @@ class ApplicationRunner(
 
         fiscalYearManager.printReports()
 
-        if (lastTransactionDate != null) {
-            log.debug("Saving snapshot with lastTransactionDate: {}", lastTransactionDate)
-            snapshotService.saveSnapshot(lastTransactionDate!!, transactionsDir)
-        } else {
-            log.debug("No transactions processed, snapshot not updated")
-        }
+        snapshotService.saveSnapshot(lastTransactionDate!!, transactionsDir)
     }
 
     private fun validateChronologicalOrder(snapshot: StateSnapshot?, transactions: List<Transaction>) {
