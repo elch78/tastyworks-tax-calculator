@@ -56,6 +56,12 @@ class StepDefinitions @Autowired constructor(
         portfolio.reset()
         fiscalYearRepository.reset()
         stateSnapshotManager.reset()
+
+        // Clean up test directory before each test
+        if (testTransactionsDir.exists()) {
+            testTransactionsDir.deleteRecursively()
+        }
+        testTransactionsDir.mkdirs()
     }
 
     @Given("Exchange rate on {string} is {string} USD to EUR")
@@ -229,31 +235,24 @@ class StepDefinitions @Autowired constructor(
         lastTransactionDate = tx.date
     }
 
-    @Given("a clean state with no snapshots")
-    fun aCleanStateWithNoSnapshots() {
-        if (testTransactionsDir.exists()) {
-            testTransactionsDir.deleteRecursively()
+    @When("the snapshot files are deleted")
+    fun theSnapshotFilesAreDeleted() {
+        if (testSnapshotDir.exists()) {
+            testSnapshotDir.deleteRecursively()
         }
-        testTransactionsDir.mkdirs()
     }
 
-    @Given("a clean snapshots directory")
-    fun aCleanSnapshotsDirectory() {
-        if (testTransactionsDir.exists()) {
-            testTransactionsDir.deleteRecursively()
-        }
-        testTransactionsDir.mkdirs()
+    @When("the application is run again")
+    fun theApplicationIsRunAgain() {
+        portfolio.reset()
+        fiscalYearRepository.reset()
+        stateSnapshotManager.reset()
+        currentSnapshot = null
+        lastTransactionDate = null
     }
 
     @When("a snapshot is created")
     fun aSnapshotIsCreated() {
-        require(lastTransactionDate != null) { "No transactions published yet" }
-
-        currentSnapshot = stateSnapshotManager.createSnapshot(lastTransactionDate!!)
-    }
-
-    @When("a snapshot is saved to file")
-    fun aSnapshotIsSavedToFile() {
         require(lastTransactionDate != null) { "No transactions published yet" }
 
         val snapshot = stateSnapshotManager.createSnapshot(lastTransactionDate!!)

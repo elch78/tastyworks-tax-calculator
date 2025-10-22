@@ -2,7 +2,6 @@ Feature: Persistent State Snapshots
 
   Scenario: Create snapshot after processing transactions
     Given Fixed exchange rate of "2.00" USD to EUR
-    And a clean state with no snapshots
     When Sell option "CLF 15/01/24 Put 13.50 @ 0.32" on "10/01/24"
     And Buy option "CLF 15/01/24 Put 13.50 @ 0.32" on "15/01/24"
     Then a snapshot file should be created in "snapshots/" directory
@@ -50,10 +49,19 @@ Feature: Persistent State Snapshots
 
   Scenario: Snapshot file operations
     Given Fixed exchange rate of "2.00" USD to EUR
-    And a clean snapshots directory
     When Sell option "CLF 15/01/24 Put 13.50 @ 0.32" on "10/01/24"
-    And a snapshot is saved to file
+    And a snapshot is created
     Then a snapshot file should exist
     And the snapshot filename should match format "snapshot-2024-01-10-*.json"
     When the snapshot is loaded from file
     Then the snapshot last transaction date should be "10/01/24"
+
+  Scenario: Reprocess transactions after snapshot deletion
+    Given Fixed exchange rate of "2.00" USD to EUR
+    When Sell option "CLF 15/01/24 Put 13.50 @ 0.32" on "10/01/24"
+    And a snapshot is created
+    Then Profits for fiscal year 2024 should be options profits 64.0 losses 0.0 stocks 0.0
+    When the snapshot files are deleted
+    And the application is run again
+    And Sell option "CLF 15/01/24 Put 13.50 @ 0.32" on "10/01/24"
+    Then Profits for fiscal year 2024 should be options profits 64.0 losses 0.0 stocks 0.0
