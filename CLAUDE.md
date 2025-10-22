@@ -40,7 +40,7 @@ should be integrated at least once per day. Changes should be made in small iter
       ...
     }
     ```
-  - methods should log their inputs on debug leve and the result on info or debug
+  - methods should log their inputs on debug level and the result on info or debug
     
     
 ## Development Commands
