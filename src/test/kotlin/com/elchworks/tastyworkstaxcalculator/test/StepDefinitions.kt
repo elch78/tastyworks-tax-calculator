@@ -8,12 +8,10 @@ import com.elchworks.tastyworkstaxcalculator.fiscalyear.ProfitsSummary
 import com.elchworks.tastyworkstaxcalculator.portfolio.NewTransactionEvent
 import com.elchworks.tastyworkstaxcalculator.portfolio.Portfolio
 import com.elchworks.tastyworkstaxcalculator.portfolio.option.OptionShortPosition
-import com.elchworks.tastyworkstaxcalculator.snapshot.FiscalYearStateTracker
-import com.elchworks.tastyworkstaxcalculator.snapshot.PortfolioStateTracker
 import com.elchworks.tastyworkstaxcalculator.snapshot.SnapshotDeserializer
 import com.elchworks.tastyworkstaxcalculator.snapshot.SnapshotFileService
-import com.elchworks.tastyworkstaxcalculator.snapshot.SnapshotSerializer
 import com.elchworks.tastyworkstaxcalculator.snapshot.StateSnapshot
+import com.elchworks.tastyworkstaxcalculator.snapshot.StateSnapshotManager
 import com.elchworks.tastyworkstaxcalculator.transactions.Action.BUY_TO_OPEN
 import com.elchworks.tastyworkstaxcalculator.transactions.Action.SELL_TO_CLOSE
 import com.elchworks.tastyworkstaxcalculator.transactions.Transaction
@@ -45,11 +43,9 @@ class StepDefinitions @Autowired constructor(
     private val portfolio: Portfolio,
     private val fiscalYearRepository: FiscalYearRepository,
     @MockitoBean private val exchangeRateRepository: ExchangeRateRepository,
-    private val snapshotSerializer: SnapshotSerializer,
     private val snapshotDeserializer: SnapshotDeserializer,
     private val snapshotFileService: SnapshotFileService,
-    private val portfolioStateTracker: PortfolioStateTracker,
-    private val fiscalYearStateTracker: FiscalYearStateTracker
+    private val stateSnapshotManager: StateSnapshotManager
 ){
     private var currentSnapshot: StateSnapshot? = null
     private var lastTransactionDate: Instant? = null
@@ -59,8 +55,7 @@ class StepDefinitions @Autowired constructor(
     fun before() {
         portfolio.reset()
         fiscalYearRepository.reset()
-        portfolioStateTracker.reset()
-        fiscalYearStateTracker.reset()
+        stateSnapshotManager.reset()
     }
 
     @Given("Exchange rate on {string} is {string} USD to EUR")
@@ -254,23 +249,14 @@ class StepDefinitions @Autowired constructor(
     fun aSnapshotIsCreated() {
         require(lastTransactionDate != null) { "No transactions published yet" }
 
-        currentSnapshot = snapshotSerializer.createSnapshot(
-            lastTransactionDate = lastTransactionDate!!,
-            portfolioStateTracker = portfolioStateTracker,
-            fiscalYearStateTracker = fiscalYearStateTracker
-        )
+        currentSnapshot = stateSnapshotManager.createSnapshot(lastTransactionDate!!)
     }
 
     @When("a snapshot is saved to file")
     fun aSnapshotIsSavedToFile() {
         require(lastTransactionDate != null) { "No transactions published yet" }
 
-        val snapshot = snapshotSerializer.createSnapshot(
-            lastTransactionDate = lastTransactionDate!!,
-            portfolioStateTracker = portfolioStateTracker,
-            fiscalYearStateTracker = fiscalYearStateTracker
-        )
-
+        val snapshot = stateSnapshotManager.createSnapshot(lastTransactionDate!!)
         snapshotFileService.saveSnapshot(snapshot, testTransactionsDir.absolutePath)
         currentSnapshot = snapshot
     }
@@ -299,11 +285,7 @@ class StepDefinitions @Autowired constructor(
     fun aSnapshotFileShouldBeCreatedInDirectory(directory: String) {
         require(lastTransactionDate != null) { "No transactions published yet" }
 
-        val snapshot = snapshotSerializer.createSnapshot(
-            lastTransactionDate = lastTransactionDate!!,
-            portfolioStateTracker = portfolioStateTracker,
-            fiscalYearStateTracker = fiscalYearStateTracker
-        )
+        val snapshot = stateSnapshotManager.createSnapshot(lastTransactionDate!!)
         snapshotFileService.saveSnapshot(snapshot, testTransactionsDir.absolutePath)
 
         assertThat(testSnapshotDir.exists()).isTrue()

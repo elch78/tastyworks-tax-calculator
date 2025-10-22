@@ -22,10 +22,8 @@ class ApplicationRunner(
     private val portfolio: Portfolio,
     private val fiscalYearRepository: FiscalYearRepository,
     private val snapshotFileService: SnapshotFileService,
-    private val snapshotSerializer: SnapshotSerializer,
     private val snapshotDeserializer: SnapshotDeserializer,
-    private val portfolioStateTracker: PortfolioStateTracker,
-    private val fiscalYearStateTracker: FiscalYearStateTracker
+    private val stateSnapshotManager: StateSnapshotManager
 ): ApplicationRunner {
     private val log = LoggerFactory.getLogger(TastyworksTaxCalculatorApplication::class.java)
 
@@ -78,11 +76,7 @@ class ApplicationRunner(
         // Save snapshot if we processed any transactions
         if (lastTransactionDate != null) {
             log.debug("Creating new snapshot with lastTransactionDate: {}", lastTransactionDate)
-            val newSnapshot = snapshotSerializer.createSnapshot(
-                lastTransactionDate = lastTransactionDate!!,
-                portfolioStateTracker = portfolioStateTracker,
-                fiscalYearStateTracker = fiscalYearStateTracker
-            )
+            val newSnapshot = stateSnapshotManager.createSnapshot(lastTransactionDate!!)
             snapshotFileService.saveSnapshot(newSnapshot, transactionsDir)
         } else {
             log.debug("No transactions processed, snapshot not updated")
