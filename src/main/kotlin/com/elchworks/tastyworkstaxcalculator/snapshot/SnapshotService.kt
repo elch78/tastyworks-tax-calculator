@@ -237,16 +237,11 @@ class SnapshotService(
         return snapshot
     }
 
-    fun loadAndRestoreState(transactionsDir: String): StateSnapshot? {
-        val snapshot = loadLatestSnapshot(transactionsDir)
-        if (snapshot == null) {
-            log.info("No snapshot found. Processing all transactions from scratch.")
-            return null
-        }
+    fun loadAndRestoreState(transactionsDir: String) {
+        val snapshot = loadLatestSnapshot(transactionsDir) ?: return
 
         restoreState(snapshot)
         log.info("Resumed from snapshot. Last transaction: {}", snapshot.metadata.lastTransactionDate)
-        return snapshot
     }
 
     fun restoreState(snapshot: StateSnapshot) {
