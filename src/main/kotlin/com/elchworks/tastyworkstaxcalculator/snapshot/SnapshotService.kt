@@ -149,38 +149,8 @@ class SnapshotService(
             year, event.profitLossDelta, event.totalProfitAndLoss)
     }
 
-    @EventListener(PortfolioStateRestoredEvent::class)
-    fun onPortfolioRestored(event: PortfolioStateRestoredEvent) {
-        log.info("Portfolio state restored event received, restoring tracker state")
-        restorePortfolioState(event.portfolioSnapshot)
-    }
-
-    @EventListener(FiscalYearStateRestoredEvent::class)
-    fun onFiscalYearRestored(event: FiscalYearStateRestoredEvent) {
-        val snapshot = event.fiscalYearSnapshot
-        log.debug("Fiscal year state restored event received for year {}", snapshot.year)
-
-        val state = FiscalYearState(
-            profitAndLossFromOptions = ProfitAndLoss(
-                profit = Money.of(
-                    snapshot.profitAndLossFromOptions.profit.amount,
-                    snapshot.profitAndLossFromOptions.profit.currency
-                ),
-                loss = Money.of(
-                    snapshot.profitAndLossFromOptions.loss.amount,
-                    snapshot.profitAndLossFromOptions.loss.currency
-                )
-            ),
-            profitAndLossFromStocks = Money.of(
-                snapshot.profitAndLossFromStocks.amount,
-                snapshot.profitAndLossFromStocks.currency
-            )
-        )
-        fiscalYears[snapshot.year] = state
-    }
-
     fun saveSnapshot(lastTransactionDate: Instant, transactionsDir: String) {
-        log.info("Creating and saving snapshot with lastTransactionDate={}", lastTransactionDate)
+        log.debug("saveSnapshot lastTransactionDate={}", lastTransactionDate)
 
         val snapshot = StateSnapshot(
             metadata = SnapshotMetadata(
@@ -209,7 +179,7 @@ class SnapshotService(
         val filename = generateFilename(snapshot.metadata.lastTransactionDate)
         val file = File(snapshotDir, filename)
 
-        log.info("Saving snapshot to {}", file.absolutePath)
+        log.debug("Saving snapshot to {}", file.absolutePath)
         objectMapper.writeValue(file, snapshot)
         log.info("Snapshot saved successfully")
     }
@@ -233,29 +203,41 @@ class SnapshotService(
 
     fun loadAndRestoreState(transactionsDir: String): StateSnapshot? {
         val snapshot = loadLatestSnapshot(transactionsDir)
-        if (snapshot != null) {
-            restoreState(snapshot)
-            log.info("Resumed from snapshot. Last transaction: {}", snapshot.metadata.lastTransactionDate)
-        } else {
+        if (snapshot == null) {
             log.info("No snapshot found. Processing all transactions from scratch.")
+            return null
         }
+
+        restoreState(snapshot)
+        log.info("Resumed from snapshot. Last transaction: {}", snapshot.metadata.lastTransactionDate)
         return snapshot
     }
 
     fun restoreState(snapshot: StateSnapshot) {
         log.info("Restoring state from snapshot. lastTransactionDate={}", snapshot.metadata.lastTransactionDate)
 
-        // Restore portfolio - it will publish event for this service
-        portfolio.restoreFrom(snapshot.portfolio)
+        restorePortfolioState(snapshot.portfolio)
 
-        // Restore fiscal years - they will publish events for this service
         restoreFiscalYears(snapshot.fiscalYears)
 
         log.info("State restoration complete")
     }
 
+    private fun restorePortfolioState(portfolioSnapshot: PortfolioSnapshot) {
+        portfolio.restoreFrom(portfolioSnapshot)
+
+        portfolioSnapshot.optionPositions.forEach { (key, list) ->
+            optionPositions[key] = list.toMutableList()
+        }
+        portfolioSnapshot.stockPositions.forEach { (symbol, list) ->
+            stockPositions[symbol] = list.toMutableList()
+        }
+
+        log.debug("Restored portfolio state: optionKeys={}, stockSymbols={}",
+            optionPositions.size, stockPositions.size)
+    }
+
     private fun restoreFiscalYears(fiscalYearsSnapshot: Map<Int, FiscalYearSnapshot>) {
-        fiscalYearRepository.reset() // Clear any existing state
 
         fiscalYearsSnapshot.forEach { (yearValue, snapshot) ->
             val fiscalYear = fiscalYearRepository.getFiscalYear(Year.of(yearValue))
@@ -275,6 +257,24 @@ class SnapshotService(
                     snapshot.profitAndLossFromStocks.currency
                 )
             )
+
+            val state = FiscalYearState(
+                profitAndLossFromOptions = ProfitAndLoss(
+                    profit = Money.of(
+                        snapshot.profitAndLossFromOptions.profit.amount,
+                        snapshot.profitAndLossFromOptions.profit.currency
+                    ),
+                    loss = Money.of(
+                        snapshot.profitAndLossFromOptions.loss.amount,
+                        snapshot.profitAndLossFromOptions.loss.currency
+                    )
+                ),
+                profitAndLossFromStocks = Money.of(
+                    snapshot.profitAndLossFromStocks.amount,
+                    snapshot.profitAndLossFromStocks.currency
+                )
+            )
+            fiscalYears[yearValue] = state
         }
 
         log.debug("Restored {} fiscal years", fiscalYearsSnapshot.size)
@@ -286,21 +286,6 @@ class SnapshotService(
         optionPositions.clear()
         stockPositions.clear()
         fiscalYears.clear()
-    }
-
-    private fun restorePortfolioState(snapshot: PortfolioSnapshot) {
-        optionPositions.clear()
-        stockPositions.clear()
-
-        snapshot.optionPositions.forEach { (key, list) ->
-            optionPositions[key] = list.toMutableList()
-        }
-        snapshot.stockPositions.forEach { (symbol, list) ->
-            stockPositions[symbol] = list.toMutableList()
-        }
-
-        log.debug("Restored portfolio state: optionKeys={}, stockSymbols={}",
-            optionPositions.size, stockPositions.size)
     }
 
     private fun getOrCreateFiscalYearState(year: Int): FiscalYearState {

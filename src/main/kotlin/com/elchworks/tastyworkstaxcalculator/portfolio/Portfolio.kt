@@ -9,7 +9,6 @@ import com.elchworks.tastyworkstaxcalculator.portfolio.stock.StockBuyToOpenEvent
 import com.elchworks.tastyworkstaxcalculator.portfolio.stock.StockPosition
 import com.elchworks.tastyworkstaxcalculator.portfolio.stock.StockSellToCloseEvent
 import com.elchworks.tastyworkstaxcalculator.snapshot.PortfolioSnapshot
-import com.elchworks.tastyworkstaxcalculator.snapshot.PortfolioStateRestoredEvent
 import com.elchworks.tastyworkstaxcalculator.transactions.*
 import com.elchworks.tastyworkstaxcalculator.transactions.Action.*
 import com.elchworks.tastyworkstaxcalculator.usd
@@ -92,9 +91,6 @@ class Portfolio(
                 LinkedList(positions.map { it.toStockPosition() })
             }
         )
-
-        // Publish event so state trackers can restore
-        eventPublisher.publishEvent(PortfolioStateRestoredEvent(snapshot))
 
         log.info("Portfolio restored from snapshot")
     }

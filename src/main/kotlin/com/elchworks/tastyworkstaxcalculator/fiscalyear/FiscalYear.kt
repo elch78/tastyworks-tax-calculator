@@ -9,10 +9,6 @@ import com.elchworks.tastyworkstaxcalculator.portfolio.option.OptionBuyToCloseEv
 import com.elchworks.tastyworkstaxcalculator.portfolio.option.OptionSellToOpenEvent
 import com.elchworks.tastyworkstaxcalculator.portfolio.plus
 import com.elchworks.tastyworkstaxcalculator.portfolio.stock.StockSellToCloseEvent
-import com.elchworks.tastyworkstaxcalculator.snapshot.FiscalYearSnapshot
-import com.elchworks.tastyworkstaxcalculator.snapshot.FiscalYearStateRestoredEvent
-import com.elchworks.tastyworkstaxcalculator.snapshot.MonetaryAmountSnapshot
-import com.elchworks.tastyworkstaxcalculator.snapshot.ProfitAndLossSnapshot
 import com.elchworks.tastyworkstaxcalculator.transactions.OptionTrade
 import com.elchworks.tastyworkstaxcalculator.transactions.Transaction
 import com.elchworks.tastyworkstaxcalculator.transactions.optionDescription
@@ -47,20 +43,6 @@ class FiscalYear(
     ) {
         this.profitAndLossFromOptions = profitAndLossFromOptions
         this.profitAndLossFromStocks = profitAndLossFromStocks
-
-        // Publish event so state trackers can restore
-        eventPublisher.publishEvent(
-            FiscalYearStateRestoredEvent(
-                fiscalYearSnapshot = FiscalYearSnapshot(
-                    year = fiscalYear.value,
-                    profitAndLossFromOptions = ProfitAndLossSnapshot(
-                        profit = MonetaryAmountSnapshot.from(profitAndLossFromOptions.profit),
-                        loss = MonetaryAmountSnapshot.from(profitAndLossFromOptions.loss)
-                    ),
-                    profitAndLossFromStocks = MonetaryAmountSnapshot.from(profitAndLossFromStocks)
-                )
-            )
-        )
 
         log.debug("Restored fiscal year {} state: optionProfit={}, optionLoss={}, stockProfit={}",
             fiscalYear,
