@@ -255,8 +255,6 @@ class StepDefinitions @Autowired constructor(
         require(lastTransactionDate != null) { "No transactions published yet" }
 
         currentSnapshot = snapshotSerializer.createSnapshot(
-            portfolio = portfolio,
-            fiscalYearRepository = fiscalYearRepository,
             lastTransactionDate = lastTransactionDate!!,
             portfolioStateTracker = portfolioStateTracker,
             fiscalYearStateTracker = fiscalYearStateTracker
@@ -268,8 +266,6 @@ class StepDefinitions @Autowired constructor(
         require(lastTransactionDate != null) { "No transactions published yet" }
 
         val snapshot = snapshotSerializer.createSnapshot(
-            portfolio = portfolio,
-            fiscalYearRepository = fiscalYearRepository,
             lastTransactionDate = lastTransactionDate!!,
             portfolioStateTracker = portfolioStateTracker,
             fiscalYearStateTracker = fiscalYearStateTracker
@@ -304,8 +300,6 @@ class StepDefinitions @Autowired constructor(
         require(lastTransactionDate != null) { "No transactions published yet" }
 
         val snapshot = snapshotSerializer.createSnapshot(
-            portfolio = portfolio,
-            fiscalYearRepository = fiscalYearRepository,
             lastTransactionDate = lastTransactionDate!!,
             portfolioStateTracker = portfolioStateTracker,
             fiscalYearStateTracker = fiscalYearStateTracker

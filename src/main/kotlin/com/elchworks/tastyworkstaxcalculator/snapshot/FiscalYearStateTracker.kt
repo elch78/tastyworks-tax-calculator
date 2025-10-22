@@ -49,10 +49,10 @@ class FiscalYearStateTracker(
             FiscalYearSnapshot(
                 year = year,
                 profitAndLossFromOptions = ProfitAndLossSnapshot(
-                    profit = snapshotSerializer.serializeMonetaryAmount(state.profitAndLossFromOptions.profit),
-                    loss = snapshotSerializer.serializeMonetaryAmount(state.profitAndLossFromOptions.loss)
+                    profit = MonetaryAmountSnapshot.from(state.profitAndLossFromOptions.profit),
+                    loss = MonetaryAmountSnapshot.from(state.profitAndLossFromOptions.loss)
                 ),
-                profitAndLossFromStocks = snapshotSerializer.serializeMonetaryAmount(state.profitAndLossFromStocks)
+                profitAndLossFromStocks = MonetaryAmountSnapshot.from(state.profitAndLossFromStocks)
             )
         }
     }

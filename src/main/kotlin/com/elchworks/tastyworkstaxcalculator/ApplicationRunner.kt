@@ -79,8 +79,6 @@ class ApplicationRunner(
         if (lastTransactionDate != null) {
             log.debug("Creating new snapshot with lastTransactionDate: {}", lastTransactionDate)
             val newSnapshot = snapshotSerializer.createSnapshot(
-                portfolio = portfolio,
-                fiscalYearRepository = fiscalYearRepository,
                 lastTransactionDate = lastTransactionDate!!,
                 portfolioStateTracker = portfolioStateTracker,
                 fiscalYearStateTracker = fiscalYearStateTracker

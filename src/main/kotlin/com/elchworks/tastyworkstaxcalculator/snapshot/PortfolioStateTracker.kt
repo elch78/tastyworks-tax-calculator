@@ -25,7 +25,7 @@ class PortfolioStateTracker(
         val key = stoTx.key()
 
         val snapshot = OptionPositionSnapshot(
-            stoTx = snapshotSerializer.serializeOptionTrade(stoTx),
+            stoTx = OptionTradeSnapshot.from(stoTx),
             quantityLeft = stoTx.quantity
         )
 
@@ -68,7 +68,7 @@ class PortfolioStateTracker(
         val symbol = btoTx.symbol
 
         val snapshot = StockPositionSnapshot(
-            btoTx = snapshotSerializer.serializeStockTransaction(btoTx),
+            btoTx = StockTransactionSnapshot.from(btoTx),
             quantityLeft = btoTx.quantity
         )
 
