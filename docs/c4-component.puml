@@ -1,0 +1,42 @@
+ @startuml
+  !include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+  ' Optional: Define custom styling
+  !define DEVICONS https://raw.githubusercontent.com/tupadr3/plantuml-icon-font-sprites/master/devicons
+  !define FONTAWESOME https://raw.githubusercontent.com/tupadr3/plantuml-icon-font-sprites/master/font-awesome-5
+
+  ' LAYOUT_WITH_LEGEND()
+  LAYOUT_TOP_DOWN()
+  ' LAYOUT_LEFT_RIGHT()
+
+  title Component Diagram for [System Name]
+
+  Person(user, "User", "A user of the system")
+
+  System_Boundary(c1, "System Name") {
+      Container_Boundary(app, "Application") {
+          Component(controller, "API Controller", "Spring MVC", "Handles HTTP requests")
+          Component(service, "Service Layer", "Spring Service", "Business logic")
+          Component(repository, "Repository", "Spring Data", "Data access")
+          Component(eventPublisher, "Event Publisher", "Spring Events", "Publishes domain events")
+      }
+
+      ContainerDb(db, "Database", "PostgreSQL", "Stores application data")
+  }
+
+  System_Ext(external, "External System", "External service or API")
+
+  ' Relationships
+  Rel(user, controller, "Uses", "HTTPS")
+  Rel(controller, service, "Calls")
+  Rel(service, repository, "Uses")
+  Rel(service, eventPublisher, "Publishes events")
+  Rel(repository, db, "Reads/Writes", "JDBC")
+  Rel(service, external, "Calls", "HTTPS/JSON")
+
+  ' Optional: Add notes
+  ' Rel_Back(repository, service, "Returns data")
+  ' Rel_Neighbor(controller, eventPublisher, "Observes")
+
+  SHOW_LEGEND()
+  @enduml
