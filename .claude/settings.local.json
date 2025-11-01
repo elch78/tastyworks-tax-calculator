@@ -1,7 +1,9 @@
 {
   "permissions": {
     "allow": [
-      "Bash(./gradlew compileTestKotlin:*)"
+      "Bash(./gradlew compileTestKotlin:*)",
+      "Bash(./gradlew test:*)",
+      "Bash(git rev-parse:*)"
     ],
     "deny": [],
     "ask": []
