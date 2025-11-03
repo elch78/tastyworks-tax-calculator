@@ -1,0 +1,356 @@
+{
+  "configuration" : { },
+  "description" : "Component architecture for a Kotlin/Spring Boot CLI application that calculates German tax reports from option trades",
+  "documentation" : { },
+  "id" : 1,
+  "lastModifiedDate" : "2025-11-03T14:42:09Z",
+  "model" : {
+    "softwareSystems" : [ {
+      "containers" : [ {
+        "components" : [ {
+          "description" : "Main entry point, coordinates the flow",
+          "documentation" : { },
+          "id" : "3",
+          "name" : "ApplicationRunner",
+          "properties" : {
+            "structurizr.dsl.identifier" : "applicationRunner"
+          },
+          "relationships" : [ {
+            "description" : "Load/Save state",
+            "destinationId" : "8",
+            "id" : "12",
+            "sourceId" : "3",
+            "tags" : "Relationship"
+          }, {
+            "description" : "Reads transactions via",
+            "destinationId" : "4",
+            "id" : "15",
+            "sourceId" : "3",
+            "tags" : "Relationship"
+          }, {
+            "description" : "Publishes",
+            "destinationId" : "9",
+            "id" : "16",
+            "sourceId" : "3",
+            "tags" : "Relationship"
+          }, {
+            "description" : "Prints reports via",
+            "destinationId" : "6",
+            "id" : "24",
+            "sourceId" : "3",
+            "tags" : "Relationship"
+          } ],
+          "tags" : "Element,Component,Entry Point",
+          "technology" : "Kotlin/Spring Boot"
+        }, {
+          "description" : "Parses Tastyworks CSV files",
+          "documentation" : { },
+          "id" : "4",
+          "name" : "TransactionCsvReader",
+          "properties" : {
+            "structurizr.dsl.identifier" : "transactionCsvReader"
+          },
+          "tags" : "Element,Component,Support",
+          "technology" : "Kotlin"
+        }, {
+          "description" : "Tracks and manages all trading positions",
+          "documentation" : { },
+          "id" : "5",
+          "name" : "Portfolio",
+          "properties" : {
+            "structurizr.dsl.identifier" : "portfolio"
+          },
+          "relationships" : [ {
+            "description" : "Listens to",
+            "destinationId" : "9",
+            "id" : "17",
+            "sourceId" : "5",
+            "tags" : "Relationship"
+          }, {
+            "description" : "Publishes",
+            "destinationId" : "10",
+            "id" : "18",
+            "sourceId" : "5",
+            "tags" : "Relationship"
+          } ],
+          "tags" : "Element,Component,Core Domain",
+          "technology" : "Kotlin"
+        }, {
+          "description" : "Manages tax calculations across fiscal years",
+          "documentation" : { },
+          "id" : "6",
+          "name" : "FiscalYear",
+          "properties" : {
+            "structurizr.dsl.identifier" : "fiscalYear"
+          },
+          "relationships" : [ {
+            "description" : "listens to",
+            "destinationId" : "10",
+            "id" : "19",
+            "sourceId" : "6",
+            "tags" : "Relationship"
+          }, {
+            "description" : "publishes",
+            "destinationId" : "11",
+            "id" : "20",
+            "sourceId" : "6",
+            "tags" : "Relationship"
+          }, {
+            "description" : "convert monetary amounts",
+            "destinationId" : "7",
+            "id" : "21",
+            "sourceId" : "6",
+            "tags" : "Relationship"
+          } ],
+          "tags" : "Element,Component,Core Domain",
+          "technology" : "Kotlin"
+        }, {
+          "description" : "Converts USD to EUR for tax reporting",
+          "documentation" : { },
+          "id" : "7",
+          "name" : "CurrencyExchange",
+          "properties" : {
+            "structurizr.dsl.identifier" : "currencyExchange"
+          },
+          "tags" : "Element,Component,Support",
+          "technology" : "Kotlin"
+        }, {
+          "description" : "Saves and restores application state as JSON",
+          "documentation" : { },
+          "id" : "8",
+          "name" : "SnapshotService",
+          "properties" : {
+            "structurizr.dsl.identifier" : "snapshotService"
+          },
+          "relationships" : [ {
+            "description" : "Restores",
+            "destinationId" : "5",
+            "id" : "13",
+            "sourceId" : "8",
+            "tags" : "Relationship"
+          }, {
+            "description" : "Restores",
+            "destinationId" : "6",
+            "id" : "14",
+            "sourceId" : "8",
+            "tags" : "Relationship"
+          }, {
+            "description" : "Listens to",
+            "destinationId" : "10",
+            "id" : "22",
+            "sourceId" : "8",
+            "tags" : "Relationship"
+          }, {
+            "description" : "Listens to",
+            "destinationId" : "11",
+            "id" : "23",
+            "sourceId" : "8",
+            "tags" : "Relationship"
+          } ],
+          "tags" : "Element,Component,Support",
+          "technology" : "Kotlin"
+        }, {
+          "description" : "Published when transaction is processed",
+          "documentation" : { },
+          "id" : "9",
+          "name" : "NewTransactionEvent",
+          "properties" : {
+            "structurizr.dsl.identifier" : "newTransactionEvent"
+          },
+          "tags" : "Element,Component,Event",
+          "technology" : "Event"
+        }, {
+          "description" : "PositionOpenedEvent, PositionClosedEvent, etc.",
+          "documentation" : { },
+          "id" : "10",
+          "name" : "Position Events",
+          "properties" : {
+            "structurizr.dsl.identifier" : "positionEvents"
+          },
+          "tags" : "Element,Component,Event",
+          "technology" : "Events"
+        }, {
+          "description" : "OptionProfitEvent, OptionLossEvent, StockProfitEvent",
+          "documentation" : { },
+          "id" : "11",
+          "name" : "ProfitLoss Events",
+          "properties" : {
+            "structurizr.dsl.identifier" : "profitLossEvents"
+          },
+          "tags" : "Element,Component,Event",
+          "technology" : "Events"
+        } ],
+        "description" : "Command-line application that processes transactions and generates tax reports",
+        "documentation" : { },
+        "id" : "2",
+        "name" : "CLI Application",
+        "properties" : {
+          "structurizr.dsl.identifier" : "cliContainer"
+        },
+        "tags" : "Element,Container",
+        "technology" : "Kotlin/Spring Boot"
+      } ],
+      "documentation" : { },
+      "id" : "1",
+      "name" : "Tastyworks Tax Calculator",
+      "properties" : {
+        "structurizr.dsl.identifier" : "cliApp"
+      },
+      "tags" : "Element,Software System"
+    } ]
+  },
+  "name" : "Tastyworks Tax Calculator",
+  "properties" : {
+    "structurizr.inspection.error" : "21",
+    "structurizr.dsl" : "d29ya3NwYWNlICJUYXN0eXdvcmtzIFRheCBDYWxjdWxhdG9yIiAiQ29tcG9uZW50IGFyY2hpdGVjdHVyZSBmb3IgYSBLb3RsaW4vU3ByaW5nIEJvb3QgQ0xJIGFwcGxpY2F0aW9uIHRoYXQgY2FsY3VsYXRlcyBHZXJtYW4gdGF4IHJlcG9ydHMgZnJvbSBvcHRpb24gdHJhZGVzIiB7CgogICAgbW9kZWwgewogICAgICAgIGNsaUFwcCA9IHNvZnR3YXJlU3lzdGVtICJUYXN0eXdvcmtzIFRheCBDYWxjdWxhdG9yIiB7CgogICAgICAgICAgICBjbGlDb250YWluZXIgPSBjb250YWluZXIgIkNMSSBBcHBsaWNhdGlvbiIgIkNvbW1hbmQtbGluZSBhcHBsaWNhdGlvbiB0aGF0IHByb2Nlc3NlcyB0cmFuc2FjdGlvbnMgYW5kIGdlbmVyYXRlcyB0YXggcmVwb3J0cyIgIktvdGxpbi9TcHJpbmcgQm9vdCIgewogICAgICAgICAgICAgICAgYXBwbGljYXRpb25SdW5uZXIgPSBjb21wb25lbnQgIkFwcGxpY2F0aW9uUnVubmVyIiAiTWFpbiBlbnRyeSBwb2ludCwgY29vcmRpbmF0ZXMgdGhlIGZsb3ciICJLb3RsaW4vU3ByaW5nIEJvb3QiIHsKICAgICAgICAgICAgICAgICAgICB0YWdzICJFbnRyeSBQb2ludCIKICAgICAgICAgICAgICAgIH0KCiAgICAgICAgICAgICAgICB0cmFuc2FjdGlvbkNzdlJlYWRlciA9IGNvbXBvbmVudCAiVHJhbnNhY3Rpb25Dc3ZSZWFkZXIiICJQYXJzZXMgVGFzdHl3b3JrcyBDU1YgZmlsZXMiICJLb3RsaW4iIHsKICAgICAgICAgICAgICAgICAgICB0YWdzICJTdXBwb3J0IgogICAgICAgICAgICAgICAgfQoKICAgICAgICAgICAgICAgIHBvcnRmb2xpbyA9IGNvbXBvbmVudCAiUG9ydGZvbGlvIiAiVHJhY2tzIGFuZCBtYW5hZ2VzIGFsbCB0cmFkaW5nIHBvc2l0aW9ucyIgIktvdGxpbiIgewogICAgICAgICAgICAgICAgICAgIHRhZ3MgIkNvcmUgRG9tYWluIgogICAgICAgICAgICAgICAgfQoKICAgICAgICAgICAgICAgIGZpc2NhbFllYXIgPSBjb21wb25lbnQgIkZpc2NhbFllYXIiICJNYW5hZ2VzIHRheCBjYWxjdWxhdGlvbnMgYWNyb3NzIGZpc2NhbCB5ZWFycyIgIktvdGxpbiIgewogICAgICAgICAgICAgICAgICAgIHRhZ3MgIkNvcmUgRG9tYWluIgogICAgICAgICAgICAgICAgfQoKICAgICAgICAgICAgICAgIGN1cnJlbmN5RXhjaGFuZ2UgPSBjb21wb25lbnQgIkN1cnJlbmN5RXhjaGFuZ2UiICJDb252ZXJ0cyBVU0QgdG8gRVVSIGZvciB0YXggcmVwb3J0aW5nIiAiS290bGluIiB7CiAgICAgICAgICAgICAgICAgICAgdGFncyAiU3VwcG9ydCIKICAgICAgICAgICAgICAgIH0KCiAgICAgICAgICAgICAgICBzbmFwc2hvdFNlcnZpY2UgPSBjb21wb25lbnQgIlNuYXBzaG90U2VydmljZSIgIlNhdmVzIGFuZCByZXN0b3JlcyBhcHBsaWNhdGlvbiBzdGF0ZSBhcyBKU09OIiAiS290bGluIiB7CiAgICAgICAgICAgICAgICAgICAgdGFncyAiU3VwcG9ydCIKICAgICAgICAgICAgICAgIH0KCiAgICAgICAgICAgICAgICAjIEV2ZW50cyAoU3ByaW5nIGV2ZW50cykKICAgICAgICAgICAgICAgIG5ld1RyYW5zYWN0aW9uRXZlbnQgPSBjb21wb25lbnQgIk5ld1RyYW5zYWN0aW9uRXZlbnQiICJQdWJsaXNoZWQgd2hlbiB0cmFuc2FjdGlvbiBpcyBwcm9jZXNzZWQiICJFdmVudCIgewogICAgICAgICAgICAgICAgICAgIHRhZ3MgIkV2ZW50IgogICAgICAgICAgICAgICAgfQogICAgICAgICAgICAgICAgcG9zaXRpb25FdmVudHMgPSBjb21wb25lbnQgIlBvc2l0aW9uIEV2ZW50cyIgIlBvc2l0aW9uT3BlbmVkRXZlbnQsIFBvc2l0aW9uQ2xvc2VkRXZlbnQsIGV0Yy4iICJFdmVudHMiIHsKICAgICAgICAgICAgICAgICAgICB0YWdzICJFdmVudCIKICAgICAgICAgICAgICAgIH0KICAgICAgICAgICAgICAgIHByb2ZpdExvc3NFdmVudHMgPSBjb21wb25lbnQgIlByb2ZpdExvc3MgRXZlbnRzIiAiT3B0aW9uUHJvZml0RXZlbnQsIE9wdGlvbkxvc3NFdmVudCwgU3RvY2tQcm9maXRFdmVudCIgIkV2ZW50cyIgewogICAgICAgICAgICAgICAgICAgIHRhZ3MgIkV2ZW50IgogICAgICAgICAgICAgICAgfQogICAgICAgICAgICB9CgoKICAgICAgICAgICAgIyBSZWxhdGlvbnNoaXBzIC0gTWFpbiBmbG93CiAgICAgICAgICAgIGFwcGxpY2F0aW9uUnVubmVyIC0+IHNuYXBzaG90U2VydmljZSAiTG9hZC9TYXZlIHN0YXRlIgoKICAgICAgICAgICAgc25hcHNob3RTZXJ2aWNlIC0+IHBvcnRmb2xpbyAiUmVzdG9yZXMiCiAgICAgICAgICAgIHNuYXBzaG90U2VydmljZSAtPiBmaXNjYWxZZWFyICJSZXN0b3JlcyIKICAgICAgICAgICAgYXBwbGljYXRpb25SdW5uZXIgLT4gdHJhbnNhY3Rpb25Dc3ZSZWFkZXIgIlJlYWRzIHRyYW5zYWN0aW9ucyB2aWEiCgogICAgICAgICAgICBhcHBsaWNhdGlvblJ1bm5lciAtPiBuZXdUcmFuc2FjdGlvbkV2ZW50ICJQdWJsaXNoZXMiCgogICAgICAgICAgICAjIEV2ZW50LWRyaXZlbiBmbG93cwogICAgICAgICAgICBwb3J0Zm9saW8gLT4gbmV3VHJhbnNhY3Rpb25FdmVudCAiTGlzdGVucyB0byIKICAgICAgICAgICAgcG9ydGZvbGlvIC0+IHBvc2l0aW9uRXZlbnRzICJQdWJsaXNoZXMiCgogICAgICAgICAgICBmaXNjYWxZZWFyIC0+IHBvc2l0aW9uRXZlbnRzICJsaXN0ZW5zIHRvIgogICAgICAgICAgICBmaXNjYWxZZWFyIC0+IHByb2ZpdExvc3NFdmVudHMgInB1Ymxpc2hlcyIKICAgICAgICAgICAgZmlzY2FsWWVhciAtPiBjdXJyZW5jeUV4Y2hhbmdlICJjb252ZXJ0IG1vbmV0YXJ5IGFtb3VudHMiCiAgICAgICAgICAgIHNuYXBzaG90U2VydmljZSAtPiBwb3NpdGlvbkV2ZW50cyAiTGlzdGVucyB0byIKICAgICAgICAgICAgc25hcHNob3RTZXJ2aWNlIC0+IHByb2ZpdExvc3NFdmVudHMgIkxpc3RlbnMgdG8iCgogICAgICAgICAgICAjIFJlcG9ydCBnZW5lcmF0aW9uCiAgICAgICAgICAgIGFwcGxpY2F0aW9uUnVubmVyIC0+IGZpc2NhbFllYXIgIlByaW50cyByZXBvcnRzIHZpYSIKICAgICAgICB9CiAgICB9CgogICAgdmlld3MgewogICAgICAgIGNvbXBvbmVudCBjbGlDb250YWluZXIgIkNvcmVEb21haW4iIHsKICAgICAgICAgICAgaW5jbHVkZSAqCiAgICAgICAgICAgIGV4Y2x1ZGUgc25hcHNob3RTZXJ2aWNlIHByb2ZpdExvc3NFdmVudHMKICAgICAgICB9CgogICAgICAgIGNvbXBvbmVudCBjbGlDb250YWluZXIgInNuYXBzaG90U2VydmljZSIgewogICAgICAgICAgICBpbmNsdWRlIC0+c25hcHNob3RTZXJ2aWNlLT4KICAgICAgICB9CgogICAgICAgIHN0eWxlcyB7CiAgICAgICAgICAgIGVsZW1lbnQgIkNvbXBvbmVudCIgewogICAgICAgICAgICAgICAgYmFja2dyb3VuZCAjNDM4ZGQ1CiAgICAgICAgICAgICAgICBjb2xvciAjZmZmZmZmCiAgICAgICAgICAgIH0KICAgICAgICAgICAgZWxlbWVudCAiRW50cnkgUG9pbnQiIHsKICAgICAgICAgICAgICAgIGJhY2tncm91bmQgIzExNjhiZAogICAgICAgICAgICAgICAgY29sb3IgI2ZmZmZmZgogICAgICAgICAgICAgICAgc2hhcGUgUm91bmRlZEJveAogICAgICAgICAgICB9CiAgICAgICAgICAgIGVsZW1lbnQgIkNvcmUgRG9tYWluIiB7CiAgICAgICAgICAgICAgICBiYWNrZ3JvdW5kICM4NWJiZjAKICAgICAgICAgICAgICAgIGNvbG9yICMwMDAwMDAKICAgICAgICAgICAgfQogICAgICAgICAgICBlbGVtZW50ICJTdXBwb3J0IiB7CiAgICAgICAgICAgICAgICBiYWNrZ3JvdW5kICNhOGM1ZTAKICAgICAgICAgICAgICAgIGNvbG9yICMwMDAwMDAKICAgICAgICAgICAgfQogICAgICAgICAgICBlbGVtZW50ICJSZXBvc2l0b3J5IiB7CiAgICAgICAgICAgICAgICBiYWNrZ3JvdW5kICNjMGQ5ZWQKICAgICAgICAgICAgICAgIGNvbG9yICMwMDAwMDAKICAgICAgICAgICAgfQogICAgICAgICAgICBlbGVtZW50ICJFdmVudCIgewogICAgICAgICAgICAgICAgYmFja2dyb3VuZCAjOTBlZTkwCiAgICAgICAgICAgICAgICBjb2xvciAjMDAwMDAwCiAgICAgICAgICAgICAgICBzaGFwZSBFbGxpcHNlCiAgICAgICAgICAgIH0KICAgICAgICB9CiAgICB9Cgp9",
+    "structurizr.inspection.info" : "0",
+    "structurizr.inspection.ignore" : "0",
+    "structurizr.inspection.warning" : "0"
+  },
+  "views" : {
+    "componentViews" : [ {
+      "containerId" : "2",
+      "dimensions" : {
+        "height" : 2148,
+        "width" : 2880
+      },
+      "elements" : [ {
+        "id" : "3",
+        "x" : 437,
+        "y" : 67
+      }, {
+        "id" : "4",
+        "x" : 1210,
+        "y" : 60
+      }, {
+        "id" : "5",
+        "x" : 467,
+        "y" : 1017
+      }, {
+        "id" : "6",
+        "x" : 1207,
+        "y" : 1522
+      }, {
+        "id" : "7",
+        "x" : 1992,
+        "y" : 1497
+      }, {
+        "id" : "9",
+        "x" : 437,
+        "y" : 557
+      }, {
+        "id" : "10",
+        "x" : 502,
+        "y" : 1542
+      } ],
+      "externalContainerBoundariesVisible" : false,
+      "key" : "CoreDomain",
+      "name" : "Component View: Tastyworks Tax Calculator - CLI Application",
+      "order" : 1,
+      "relationships" : [ {
+        "id" : "15"
+      }, {
+        "id" : "16"
+      }, {
+        "id" : "17"
+      }, {
+        "id" : "18"
+      }, {
+        "id" : "19"
+      }, {
+        "id" : "21"
+      }, {
+        "id" : "24"
+      } ]
+    }, {
+      "containerId" : "2",
+      "dimensions" : {
+        "height" : 2480,
+        "width" : 3508
+      },
+      "elements" : [ {
+        "id" : "3",
+        "x" : 1795,
+        "y" : 45
+      }, {
+        "id" : "5",
+        "x" : 2265,
+        "y" : 1030
+      }, {
+        "id" : "6",
+        "x" : 455,
+        "y" : 520
+      }, {
+        "id" : "8",
+        "x" : 1780,
+        "y" : 500
+      }, {
+        "id" : "10",
+        "x" : 1215,
+        "y" : 1200
+      }, {
+        "id" : "11",
+        "x" : 1130,
+        "y" : 760
+      } ],
+      "externalContainerBoundariesVisible" : false,
+      "key" : "snapshotService",
+      "name" : "Component View: Tastyworks Tax Calculator - CLI Application",
+      "order" : 2,
+      "paperSize" : "A4_Landscape",
+      "relationships" : [ {
+        "id" : "12"
+      }, {
+        "id" : "13"
+      }, {
+        "id" : "14"
+      }, {
+        "id" : "18"
+      }, {
+        "id" : "19"
+      }, {
+        "id" : "20"
+      }, {
+        "id" : "22"
+      }, {
+        "id" : "23"
+      }, {
+        "id" : "24"
+      } ]
+    } ],
+    "configuration" : {
+      "branding" : { },
+      "lastSavedView" : "snapshotService",
+      "styles" : {
+        "elements" : [ {
+          "background" : "#438dd5",
+          "color" : "#ffffff",
+          "tag" : "Component"
+        }, {
+          "background" : "#85bbf0",
+          "color" : "#000000",
+          "tag" : "Core Domain"
+        }, {
+          "background" : "#1168bd",
+          "color" : "#ffffff",
+          "shape" : "RoundedBox",
+          "tag" : "Entry Point"
+        }, {
+          "background" : "#90ee90",
+          "color" : "#000000",
+          "shape" : "Ellipse",
+          "tag" : "Event"
+        }, {
+          "background" : "#c0d9ed",
+          "color" : "#000000",
+          "tag" : "Repository"
+        }, {
+          "background" : "#a8c5e0",
+          "color" : "#000000",
+          "tag" : "Support"
+        } ]
+      },
+      "terminology" : { }
+    }
+  }
+}
