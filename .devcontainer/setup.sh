@@ -1,12 +1,14 @@
 #!/bin/bash
 set -e
 
+WORKSPACE_DIR="${1:-$(pwd)}"
+
 echo "Installing system packages..."
 sudo apt-get update
 sudo apt-get install -y graphviz
 
 echo "Configuring git..."
-git config --global --add safe.directory ${containerWorkspaceFolder}
+git config --global --add safe.directory "$WORKSPACE_DIR"
 
 echo "Setting up Gradle..."
 chmod +x gradlew
