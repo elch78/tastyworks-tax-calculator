@@ -16,5 +16,9 @@
     }
   },
 
-  "postCreateCommand": "sudo apt-get update && sudo apt-get install -y graphviz && git config --global --add safe.directory ${containerWorkspaceFolder} && chmod +x gradlew && ./gradlew --version && npm install -g @anthropic-ai/claude-code && mkdir -p /home/developer/.local/bin && wget -q -O /home/developer/.local/bin/plantuml.jar https://github.com/plantuml/plantuml/releases/download/v1.2024.7/plantuml.jar && echo 'alias plantuml=\"java -jar /home/developer/.local/bin/plantuml.jar\"' >> /home/developer/.bashrc"
+  "forwardPorts": [8080],
+
+  "postCreateCommand": "bash .devcontainer/setup.sh",
+
+  "postStartCommand": "bash .devcontainer/start-structurizr.sh"
 }
