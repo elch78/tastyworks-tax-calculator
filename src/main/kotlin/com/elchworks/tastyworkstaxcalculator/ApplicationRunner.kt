@@ -20,7 +20,8 @@ class ApplicationRunner(
     private val log = LoggerFactory.getLogger(TastyworksTaxCalculatorApplication::class.java)
 
     override fun run(args: ApplicationArguments) {
-        val transactionsDir = args.getOptionValues("transactionsDir")[0]
+        val transactionsDir = args.getOptionValues("transactionsDir")?.firstOrNull()
+            ?: error("Missing required argument: --transactionsDir")
 
         snapshotService.loadAndRestoreState(transactionsDir)
 
