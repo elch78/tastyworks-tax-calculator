@@ -30,8 +30,5 @@ jobs:
         with:
           distribution: temurin
           java-version: 17
-      - name: Setup Gradle
-        uses: gradle/gradle-build-action@v2
-      # Runs a single command using the runners shell
-      - name: Build
-        run: ./gradlew test
+      - name: Build with Maven
+        run: ./mvnw verify
