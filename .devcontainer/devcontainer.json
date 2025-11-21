@@ -18,7 +18,7 @@
 
   "forwardPorts": [8080],
 
-  "postCreateCommand": "bash .devcontainer/setup.sh ${containerWorkspaceFolder}",
+  "postCreateCommand": "bash .devcontainer/setup.sh",
 
   "postStartCommand": "bash .devcontainer/start-structurizr.sh"
 }

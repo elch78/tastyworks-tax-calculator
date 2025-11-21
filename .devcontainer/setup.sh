@@ -1,10 +1,8 @@
 #!/bin/bash
 set -e
 
-WORKSPACE_DIR="${1:-$(pwd)}"
-
 echo "Configuring git..."
-git config --global --add safe.directory "$WORKSPACE_DIR"
+git config --global --add safe.directory "$(pwd)"
 
 echo "Setting up Gradle..."
 chmod +x gradlew
