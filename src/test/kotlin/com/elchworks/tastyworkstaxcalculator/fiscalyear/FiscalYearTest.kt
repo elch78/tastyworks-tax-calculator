@@ -41,7 +41,7 @@ class FiscalYearTest @Autowired constructor(
     fun optionExpired() {
         // Given
         val premium = randomUsdAmount(1f, 100f)
-        val stoTx = randomOptionTrade().copy(value = premium, averagePrice = premium.divide(100))
+        val stoTx = randomOptionTrade().copy(value = premium, averagePrice = premium)
         withRateUsdToEur()
 
         // When
@@ -63,8 +63,8 @@ class FiscalYearTest @Autowired constructor(
         // Given
         val premium = usd(5)
         val buyPrice = premium.negate() + netProfit
-        val stoTx = randomOptionTrade().copy(value = premium, averagePrice = premium.divide(100), quantity = 1)
-        val btcTx = randomOptionTrade().copy(value = buyPrice, averagePrice = buyPrice.divide(100), quantity = 1)
+        val stoTx = randomOptionTrade().copy(value = premium, averagePrice = premium, quantity = 1)
+        val btcTx = randomOptionTrade().copy(value = buyPrice, averagePrice = buyPrice, quantity = 1)
         withRateUsdToEur()
 
         // When
