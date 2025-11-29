@@ -30,7 +30,7 @@ data class OptionTrade(
     // FIXME: Transaction unnecessary
 ): Transaction, OptionTransaction {
     override fun value(): MonetaryAmount = value(quantity)
-    override fun value(quantity: Int): MonetaryAmount = averagePrice.multiply(quantity).multiply(multiplier)
+    override fun value(quantity: Int): MonetaryAmount = averagePrice.multiply(quantity)
 }
 
 data class StockTrade(
