@@ -39,6 +39,8 @@ fun randomOptionTrade() =
         date = randomDateIn2021(),
         action = SELL_TO_OPEN,
         symbol = "",
+        type = "",
+        subType = null,
         instrumentType = "",
         description = "",
         value = randomUsdAmount(),
@@ -51,7 +53,7 @@ fun randomOptionTrade() =
         expirationDate = randomLocalDate(),
         strikePrice = usd(randomBigDecimal()),
         callOrPut = "PUT",
-        orderNr = 0
+        orderNr = 0,
     )
 
 fun randomUsdAmount() = RandomUtils.nextFloat().toMonetaryAmountUsd()
@@ -61,6 +63,8 @@ fun randomOptionRemoval() =
     OptionRemoval(
         date = randomDateIn2021(),
         symbol = "symbol",
+        type = "",
+        subType = null,
         expirationDate = randomLocalDate(),
         strikePrice = usd(randomBigDecimal()),
         callOrPut = "PUT",
@@ -81,6 +85,7 @@ fun randomAssignment() =
         averagePrice = randomUsdAmount(),
         fees = randomUsdAmount(),
         description = "description",
+        subType = null
     )
 
 private fun randomLocalDate(): LocalDate = LocalDate.now()
@@ -96,7 +101,8 @@ fun randomStockTrade() =
         fees = randomUsdAmount(),
         commissions = randomUsdAmount(),
         averagePrice = randomUsdAmount(),
-        description = "randomDescription"
+        description = "randomDescription",
+        subType = null
     )
 
 fun defaultOptionStoTx() = randomOptionTrade().copy(
@@ -155,7 +161,7 @@ fun optionBtcTx(optionDescription: String, quantity: Int = 1): OptionTrade {
 
 fun defaultReverseSplitTransaction() =
     defaultStockTrade().copy(
-        type = "Reverse Split"
+        subType = "Reverse Split"
     )
 
 fun defaultAssignment() = randomOptionRemoval().copy(

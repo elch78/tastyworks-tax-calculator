@@ -4,7 +4,7 @@ logging.level:
     # suppress info logs of portfolio
 #    com.elchworks.tastyworkstaxcalculator.portfolio: info
     com.elchworks.tastyworkstaxcalculator.convert: warn
-#    com.elchworks.tastyworkstaxcalculator.CsvReader: INFO
+    # com.elchworks.tastyworkstaxcalculator.TransactionCsvReader: debug
 #    com.elchworks.tastyworkstaxcalculator.fiscalyear.FiscalYear: info
 logging:
   pattern:

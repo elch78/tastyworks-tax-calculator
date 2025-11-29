@@ -11,6 +11,8 @@ import javax.money.MonetaryAmount
 data class OptionTrade(
     override val date: Instant,
     override val symbol: String,
+    override val type: String,
+    override val subType: String?,
     override val expirationDate: LocalDate,
     override val strikePrice: MonetaryAmount,
     override val callOrPut: String,
@@ -24,7 +26,7 @@ data class OptionTrade(
     val fees: MonetaryAmount,
     val multiplier: Int,
     val underlyingSymbol: String,
-    val orderNr: Int
+    val orderNr: Int,
     // FIXME: Transaction unnecessary
 ): Transaction, OptionTransaction {
     override fun value(): MonetaryAmount = value(quantity)
@@ -36,6 +38,7 @@ data class StockTrade(
     override val symbol: String,
     override val action: Action,
     override val type: String,
+    override val subType: String?,
     override val value: MonetaryAmount,
     override val quantity: Int,
     override val averagePrice: MonetaryAmount,
@@ -50,6 +53,8 @@ data class StockTrade(
 data class OptionRemoval(
     override val date: Instant,
     override val symbol: String,
+    override val type: String,
+    override val subType: String?,
     override val expirationDate: LocalDate,
     override val strikePrice: MonetaryAmount,
     override val callOrPut: String,
@@ -66,6 +71,7 @@ data class OptionAssignment(
     override val date: Instant,
     override val action: Action,
     override val type: String,
+    override val subType: String?,
     override val symbol: String,
     override val value: MonetaryAmount,
     override val quantity: Int,
@@ -83,6 +89,8 @@ interface Transaction {
     val quantity: Int
     val averagePrice: MonetaryAmount
     val description: String
+    val type: String
+    val subType: String?
     fun value(): MonetaryAmount
     fun value(quantity: Int): MonetaryAmount
 }
@@ -96,7 +104,6 @@ interface OptionTransaction: Transaction {
 interface StockTransaction : Transaction{
     val action: Action
     val value: MonetaryAmount
-    val type: String
 }
 
 fun Transaction.year(): Year = Year.of(this.date.atZone(ZoneId.of("CET")).get(ChronoField.YEAR))

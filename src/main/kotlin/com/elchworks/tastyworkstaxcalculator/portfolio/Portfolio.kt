@@ -134,7 +134,7 @@ class Portfolio(
     }
 
     private fun stockTrade(stockTransaction: StockTransaction) {
-        if(stockTransaction.type == "Reverse Split") {
+        if(stockTransaction.subType == "Reverse Split") {
             reverseSplit(stockTransaction)
         } else {
             when(stockTransaction.action) {
@@ -182,7 +182,8 @@ class Portfolio(
                 averagePrice = averagePrice,
                 description = btoTx.description,
                 commissions = usd(0.0),
-                fees = usd(0.0)
+                fees = usd(0.0),
+                subType = btoTx.subType
             ),
             newQuantity
         )

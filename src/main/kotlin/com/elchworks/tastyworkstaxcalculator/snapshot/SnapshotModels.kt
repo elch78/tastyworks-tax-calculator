@@ -62,6 +62,8 @@ data class StockPositionSnapshot(
 data class OptionTradeSnapshot(
     val date: Instant,
     val symbol: String,
+    val type: String,
+    val subtype: String?,
     val callOrPut: String,
     val expirationDate: String, // LocalDate as ISO string
     val strikePrice: MonetaryAmountSnapshot,
@@ -69,11 +71,13 @@ data class OptionTradeSnapshot(
     val averagePrice: MonetaryAmountSnapshot,
     val description: String,
     val commissions: MonetaryAmountSnapshot,
-    val fees: MonetaryAmountSnapshot
+    val fees: MonetaryAmountSnapshot,
 ) {
     fun toOptionTrade(): OptionTrade {
         return OptionTrade(
             date = date,
+            type = type,
+            subType = subtype,
             action = Action.SELL_TO_OPEN,
             symbol = symbol,
             callOrPut = callOrPut,
@@ -89,7 +93,7 @@ data class OptionTradeSnapshot(
                 .multiply(quantity).multiply(100),
             multiplier = 100,
             underlyingSymbol = symbol,
-            orderNr = 0
+            orderNr = 0,
         )
     }
 
@@ -97,6 +101,8 @@ data class OptionTradeSnapshot(
         fun from(trade: OptionTrade): OptionTradeSnapshot {
             return OptionTradeSnapshot(
                 date = trade.date,
+                type = trade.type,
+                subtype = trade.subType,
                 symbol = trade.symbol,
                 callOrPut = trade.callOrPut,
                 expirationDate = trade.expirationDate.toString(),
@@ -115,6 +121,7 @@ data class StockTransactionSnapshot(
     val date: Instant,
     val symbol: String,
     val type: String,
+    val subtype: String?,
     val value: MonetaryAmountSnapshot,
     val quantity: Int,
     val averagePrice: MonetaryAmountSnapshot,
@@ -128,6 +135,7 @@ data class StockTransactionSnapshot(
             action = Action.BUY_TO_OPEN,
             symbol = symbol,
             type = type,
+            subType = subtype,
             value = Money.of(value.amount, value.currency),
             quantity = quantity,
             averagePrice = Money.of(averagePrice.amount, averagePrice.currency),
@@ -158,7 +166,8 @@ data class StockTransactionSnapshot(
                     is com.elchworks.tastyworkstaxcalculator.transactions.OptionAssignment ->
                         MonetaryAmountSnapshot.from(tx.fees)
                     else -> MonetaryAmountSnapshot.from(usd(0.0))
-                }
+                },
+                subtype = tx.subType
             )
         }
     }

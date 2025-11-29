@@ -61,13 +61,14 @@ class TransactionCsvReader {
         OptionAssignment(
             date = parseDate(columns.date()),
             action = Action.valueOf(columns.action()),
-            type = columns.subType(),
+            type = columns.type(),
             symbol = columns.symbol(),
             value = columns.value(),
             quantity = columns.quantity(),
             averagePrice = columns.averagePrice(),
             fees = columns.fees(),
             description = columns.description(),
+            subType = columns.subType()
         )
 
     private fun isAssignment(columns: Array<String>): Boolean {
@@ -131,19 +132,22 @@ class TransactionCsvReader {
             date = date,
             symbol = columns.symbol(),
             action = action,
-            type = columns.subType(),
+            type = columns.type(),
             value = columns.value(),
             description = columns.description(),
             quantity = columns.quantity(),
             averagePrice = columns.averagePrice(),
             commissions = commissions,
             fees = columns.fees(),
+            subType = columns.subType()
         )
     }
 
     private fun optionRemoval(columns: Array<String>) =
         OptionRemoval(
             date = parseDate(columns.date()),
+            type = columns.type(),
+            subType = columns.subType(),
             status = if (columns.description().contains("assignment")) ASSIGNED else EXPIRED,
             symbol = columns.rootSymbol(),
             expirationDate = parsLocalDate(columns.expirationDate()),
@@ -151,13 +155,15 @@ class TransactionCsvReader {
             callOrPut = columns.callOrPut(),
             quantity = columns.quantity(),
             averagePrice = columns.averagePrice(),
-            description = columns.description(),
+            description = columns.description()
         )
 
     private fun optionTrade(columns: Array<String>) = OptionTrade(
         date = parseDate(columns.date()),
         action = Action.valueOf(columns.action()),
         symbol = columns.rootSymbol(),
+        type = columns.type(),
+        subType = columns.subType(),
         instrumentType = columns.instrumentType(),
         description = columns.description(),
         value = columns.value(),
@@ -201,25 +207,79 @@ class TransactionCsvReader {
     }
 }
 
+/**
+ * Determines if this CSV row is in the pre-2024 format (18 columns).
+ *
+ * The 2023 format has 18 columns, while the 2024 format has 21 columns.
+ * The 2024 format introduced:
+ * - "Sub Type" column at index 2 (shifting all subsequent columns by +1)
+ * - "Total" column at index 19
+ * - "Currency" column at index 20
+ *
+ * @return true if this row has 18 columns (2023 format), false if 21 columns (2024 format)
+ */
+private fun Array<String>.isPre2024Format() = this.size == 18
+
+/**
+ * Retrieves the value at the specified column index, accounting for format differences.
+ *
+ * This function handles the column index offset between 2023 and 2024 CSV formats:
+ * - Columns 0-1 (Date, Type): Same index in both formats
+ * - Columns 2+ (Action onwards): Index in 2024 format, adjusted by -1 for 2023 format
+ *
+ * All extension functions (action(), symbol(), etc.) should delegate to this function
+ * to ensure correct column access regardless of CSV format.
+ *
+ * @param index The column index in 2024 format (0-based)
+ * @return The string value at the appropriate column for the detected format
+ *
+ * Example:
+ * - getColumn(3) returns this[3] for 2024 format (Action)
+ * - getColumn(3) returns this[2] for 2023 format (Action, adjusted for missing Sub Type)
+ */
+private fun Array<String>.getColumn(index: Int): String {
+    return if (isPre2024Format()) {
+        // 2023 format: columns 0-1 are the same, columns 2+ are shifted by -1
+        if (index <= 1) this[index] else this[index - 1]
+    } else {
+        // 2024 format: use index as-is
+        this[index]
+    }
+}
+
 fun Array<String>.date() = this[0]
 fun Array<String>.type() = this[1]
-fun Array<String>.subType() = this[2]
-fun Array<String>.action() = this[3]
-fun Array<String>.symbol() = this[4]
-fun Array<String>.instrumentType() = this[5]
-fun Array<String>.description() = this[6]
-fun Array<String>.value() = this[7].replace(",", "").toFloat().toMonetaryAmountUsd()
-fun Array<String>.quantity() = this[8].toInt()
-fun Array<String>.averagePrice() = this[9].toFloat().toMonetaryAmountUsd()
-fun Array<String>.commissions() = this[10].toFloat().toMonetaryAmountUsd()
-fun Array<String>.fees() = this[11].toFloat().toMonetaryAmountUsd()
-fun Array<String>.multiplier() = this[12]
-fun Array<String>.rootSymbol() = this[13]
-fun Array<String>.underlyingSymbol() = this[14]
-fun Array<String>.expirationDate() = this[15]
-fun Array<String>.strikePrice() = this[16].toFloat().toMonetaryAmountUsd()
-fun Array<String>.callOrPut() = this[17]
-fun Array<String>.orderNr() = this[18]
+
+/**
+ * Returns the Sub Type column value (2024 format only).
+ *
+ * The Sub Type column was introduced in 2024 format at index 2. It contains values like:
+ * - "Sell to Open", "Buy to Close" for trades
+ * - "Assignment", "Expiration" for option removals
+ * - "Reverse Split" for reverse split events
+ *
+ * For 2023 format files, this column does not exist and returns null.
+ *
+ * @return Sub Type value for 2024 format, null for 2023 format
+ */
+fun Array<String>.subType(): String? = if (isPre2024Format()) null else this[2]
+
+fun Array<String>.action() = this.getColumn(3)
+fun Array<String>.symbol() = this.getColumn(4)
+fun Array<String>.instrumentType() = this.getColumn(5)
+fun Array<String>.description() = this.getColumn(6)
+fun Array<String>.value() = this.getColumn(7).replace(",", "").toFloat().toMonetaryAmountUsd()
+fun Array<String>.quantity() = this.getColumn(8).toInt()
+fun Array<String>.averagePrice() = this.getColumn(9).toFloat().toMonetaryAmountUsd()
+fun Array<String>.commissions() = this.getColumn(10).toFloat().toMonetaryAmountUsd()
+fun Array<String>.fees() = this.getColumn(11).toFloat().toMonetaryAmountUsd()
+fun Array<String>.multiplier() = this.getColumn(12)
+fun Array<String>.rootSymbol() = this.getColumn(13)
+fun Array<String>.underlyingSymbol() = this.getColumn(14)
+fun Array<String>.expirationDate() = this.getColumn(15)
+fun Array<String>.strikePrice() = this.getColumn(16).toFloat().toMonetaryAmountUsd()
+fun Array<String>.callOrPut() = this.getColumn(17)
+fun Array<String>.orderNr() = this.getColumn(18)
 
 
 operator fun <T> List<T>.component6() = this[5]
