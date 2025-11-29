@@ -108,7 +108,8 @@ class Portfolio(
             stcTx.symbol, stcTx.date, stcTx.quantity, stcTx.averagePrice, stcTx.description)
         var quantityToClose = stcTx.quantity
         do {
-            val positionsForSymbol = stockPositions[stcTx.symbol]!!
+            val positionsForSymbol = stockPositions[stcTx.symbol]
+                ?: throw RuntimeException("Stock positions not found: ${stcTx.symbol}")
             val position = positionsForSymbol.peek()
             log.debug("optionAssignmentSellToClose position='{}'", position)
             val positionCloseResult = position.sellToClose(quantityToClose)
@@ -206,7 +207,7 @@ class Portfolio(
     }
 
     private fun optionRemoval(tx: OptionRemoval) {
-        val position = removePositionFifo(tx)
+        val position = removeOptionPositionFifo(tx)
         when(tx.status) {
             ASSIGNED -> log.info("Position assigned. position='{}'", position.description())
             EXPIRED -> log.info("Position expired. position='{}'", position.description())
@@ -245,10 +246,10 @@ class Portfolio(
         eventPublisher.publishEvent(OptionSellToOpenEvent(tx))
     }
 
-    private fun removePositionFifo(tx: OptionTransaction): OptionShortPosition {
-        val positionsForOption = optionPositions[tx.key()]!!
-        val position = positionsForOption.remove()
-        if (positionsForOption.isEmpty()) {
+    private fun removeOptionPositionFifo(tx: OptionTransaction): OptionShortPosition {
+        val positions = optionPositions[tx.key()]?: throw RuntimeException("No positions for ${tx.key()}")
+        val position = positions.remove()
+        if (positions.isEmpty()) {
             optionPositions.remove(tx.key())
         }
         return position
