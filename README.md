@@ -31,6 +31,10 @@ that may arise from the use of this tool.
 
 For tax-related questions, please consult a qualified tax advisor or the relevant tax authority.
 
+# Similar project
+
+https://github.com/avion23/tastyworksTaxes
+
 # Run
 
 - Download your transactions from the Tastyworks application and store them in a directory.
