@@ -4,10 +4,6 @@ set -e
 echo "Configuring git..."
 git config --global --add safe.directory "$(pwd)"
 
-echo "Setting up Gradle..."
-chmod +x gradlew
-./gradlew --version
-
 echo "Installing Claude Code..."
 npm install -g @anthropic-ai/claude-code
 
@@ -17,5 +13,14 @@ mkdir -p /home/developer/.local/bin
 echo "Downloading Structurizr Lite..."
 wget -q -O /home/developer/.local/bin/structurizr-lite.war \
   https://github.com/structurizr/lite/releases/latest/download/structurizr-lite.war
+
+echo "Installing Opencode..."
+
+curl -fsSL https://opencode.ai/install | bash
+
+# Intellij changes the config home directory to /.jbdevcontainer/config. User $XDG_CONFIG_HOME to put the files in the right place
+cp .devcontainer/opencode/* $XDG_CONFIG_HOME/opencode/
+
+echo "Opencode installed"
 
 echo "Setup complete!"
