@@ -19,7 +19,9 @@ echo "Installing Opencode..."
 curl -fsSL https://opencode.ai/install | bash
 
 # Intellij changes the config home directory to /.jbdevcontainer/config. User $XDG_CONFIG_HOME to put the files in the right place
-cp .devcontainer/opencode/* $XDG_CONFIG_HOME/opencode/
+# https://www.jetbrains.com/help/idea/dev-container-limitations.html
+mkdir -p /.jbdevcontainer/config/opencode
+cp .devcontainer/opencode/* /.jbdevcontainer/config/opencode/
 
 echo "Opencode installed"
 
