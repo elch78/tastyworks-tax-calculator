@@ -8,7 +8,6 @@ import com.elchworks.tastyworkstaxcalculator.portfolio.option.OptionShortPositio
 import com.elchworks.tastyworkstaxcalculator.portfolio.stock.StockBuyToOpenEvent
 import com.elchworks.tastyworkstaxcalculator.portfolio.stock.StockPosition
 import com.elchworks.tastyworkstaxcalculator.portfolio.stock.StockSellToCloseEvent
-import com.elchworks.tastyworkstaxcalculator.snapshot.PortfolioSnapshot
 import com.elchworks.tastyworkstaxcalculator.transactions.*
 import com.elchworks.tastyworkstaxcalculator.transactions.Action.*
 import com.elchworks.tastyworkstaxcalculator.usd
@@ -65,34 +64,6 @@ class Portfolio(
     fun reset() {
         optionPositions.clear()
         stockPositions.clear()
-    }
-
-    fun restoreFrom(snapshot: PortfolioSnapshot) {
-        // Sanity check: restoration should only happen at startup
-        if (optionPositions.isNotEmpty() || stockPositions.isNotEmpty()) {
-            throw IllegalStateException(
-                "Portfolio restoration attempted with non-empty positions! " +
-                "Restoration should only happen at application startup before processing transactions. " +
-                "Current state: ${optionPositions.size} option position keys, ${stockPositions.size} stock position keys"
-            )
-        }
-
-        log.debug("Restoring portfolio from snapshot: {} option position keys, {} stock position keys",
-            snapshot.optionPositions.size, snapshot.stockPositions.size)
-
-        optionPositions.putAll(
-            snapshot.optionPositions.mapValues { (_, positions) ->
-                LinkedList(positions.map { it.toOptionShortPosition() })
-            }
-        )
-
-        stockPositions.putAll(
-            snapshot.stockPositions.mapValues { (_, positions) ->
-                LinkedList(positions.map { it.toStockPosition() })
-            }
-        )
-
-        log.info("Portfolio restored from snapshot")
     }
 
     private fun optionTrade(tx: OptionTrade) {

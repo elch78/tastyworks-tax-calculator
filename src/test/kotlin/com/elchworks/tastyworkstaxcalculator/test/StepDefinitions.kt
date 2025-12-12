@@ -8,8 +8,6 @@ import com.elchworks.tastyworkstaxcalculator.fiscalyear.ProfitsSummary
 import com.elchworks.tastyworkstaxcalculator.portfolio.NewTransactionEvent
 import com.elchworks.tastyworkstaxcalculator.portfolio.Portfolio
 import com.elchworks.tastyworkstaxcalculator.portfolio.option.OptionShortPosition
-import com.elchworks.tastyworkstaxcalculator.snapshot.SnapshotService
-import com.elchworks.tastyworkstaxcalculator.snapshot.StateSnapshot
 import com.elchworks.tastyworkstaxcalculator.transactions.Action.BUY_TO_OPEN
 import com.elchworks.tastyworkstaxcalculator.transactions.Action.SELL_TO_CLOSE
 import com.elchworks.tastyworkstaxcalculator.transactions.Transaction
@@ -41,16 +39,13 @@ class StepDefinitions @Autowired constructor(
     private val portfolio: Portfolio,
     private val fiscalYearRepository: FiscalYearRepository,
     @MockitoBean private val exchangeRateRepository: ExchangeRateRepository,
-    private val snapshotService: SnapshotService
 ){
-    private var currentSnapshot: StateSnapshot? = null
     private val testTransactionsDir = File(System.getProperty("java.io.tmpdir"), "test-transactions")
-    private val testSnapshotDir = File(testTransactionsDir, "snapshots")
+
     @Before
     fun before() {
         portfolio.reset()
         fiscalYearRepository.reset()
-        snapshotService.reset()
 
         // Clean up test directory before each test
         if (testTransactionsDir.exists()) {
@@ -227,96 +222,5 @@ class StepDefinitions @Autowired constructor(
 
     fun publishTx(tx: Transaction) {
         eventPublisher.publishEvent(NewTransactionEvent(tx))
-    }
-
-    @When("the snapshot files are deleted")
-    fun theSnapshotFilesAreDeleted() {
-        if (testSnapshotDir.exists()) {
-            testSnapshotDir.deleteRecursively()
-        }
-    }
-
-    @When("the application is run again")
-    fun theApplicationIsRunAgain() {
-        portfolio.reset()
-        fiscalYearRepository.reset()
-        snapshotService.reset()
-        currentSnapshot = null
-    }
-
-    @When("a snapshot is created")
-    fun aSnapshotIsCreated() {
-        snapshotService.saveSnapshot(testTransactionsDir.absolutePath)
-        currentSnapshot = snapshotService.loadLatestSnapshot(testTransactionsDir.absolutePath)
-    }
-
-    @When("the snapshot is loaded from file")
-    fun theSnapshotIsLoadedFromFile() {
-        currentSnapshot = snapshotService.loadLatestSnapshot(testTransactionsDir.absolutePath)
-        require(currentSnapshot != null) { "No snapshot file found" }
-    }
-
-    @When("the portfolio is restored from the snapshot")
-    fun thePortfolioIsRestoredFromTheSnapshot() {
-        require(currentSnapshot != null) { "No snapshot created yet" }
-
-        portfolio.reset()
-        fiscalYearRepository.reset()
-        snapshotService.reset()
-
-        snapshotService.restoreState(currentSnapshot!!)
-    }
-
-    @Then("a snapshot file should be created in {string} directory")
-    fun aSnapshotFileShouldBeCreatedInDirectory(directory: String) {
-        snapshotService.saveSnapshot(testTransactionsDir.absolutePath)
-
-        assertThat(testSnapshotDir.exists()).isTrue()
-        assertThat(testSnapshotDir.isDirectory).isTrue()
-
-        val snapshotFiles = testSnapshotDir.listFiles { file ->
-            file.isFile && file.name.startsWith("snapshot-") && file.name.endsWith(".json")
-        } ?: emptyArray()
-
-        assertThat(snapshotFiles).isNotEmpty
-    }
-
-    @Then("a snapshot file should exist")
-    fun aSnapshotFileShouldExist() {
-        assertThat(testSnapshotDir.exists()).isTrue()
-        assertThat(testSnapshotDir.isDirectory).isTrue()
-
-        val snapshotFiles = testSnapshotDir.listFiles { file ->
-            file.isFile && file.name.startsWith("snapshot-") && file.name.endsWith(".json")
-        } ?: emptyArray()
-
-        assertThat(snapshotFiles).isNotEmpty
-    }
-
-    @Then("the snapshot filename should match format {string}")
-    fun theSnapshotFilenameShouldMatchFormat(format: String) {
-        val snapshotFiles = testSnapshotDir.listFiles { file ->
-            file.isFile && file.name.startsWith("snapshot-") && file.name.endsWith(".json")
-        }
-
-        assertThat(snapshotFiles).isNotEmpty
-        val snapshotFile = snapshotFiles!!.first()
-
-        val regexPattern = format
-            .replace(".", "\\.")
-            .replace("*", ".*")
-
-        assertThat(snapshotFile.name).matches(regexPattern)
-    }
-
-    @Then("the snapshot last transaction date should be {string}")
-    fun theSnapshotLastTransactionDateShouldBe(dateString: String) {
-        require(currentSnapshot != null) { "No snapshot loaded" }
-
-        val expectedDate = dateString.toLocalDate().toInstant()
-        assertThat(currentSnapshot!!.metadata.lastTransactionDate).isEqualTo(expectedDate)
-    }
-
-    companion object {
     }
 }

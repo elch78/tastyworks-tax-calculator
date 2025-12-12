@@ -2,7 +2,6 @@ package com.elchworks.tastyworkstaxcalculator
 
 import com.elchworks.tastyworkstaxcalculator.fiscalyear.FiscalYearManager
 import com.elchworks.tastyworkstaxcalculator.portfolio.NewTransactionEvent
-import com.elchworks.tastyworkstaxcalculator.snapshot.SnapshotService
 import org.slf4j.LoggerFactory
 import org.springframework.boot.ApplicationArguments
 import org.springframework.boot.ApplicationRunner
@@ -15,7 +14,6 @@ class ApplicationRunner(
     private val transactionsCsvReader: TransactionCsvReader,
     private val eventPublisher: ApplicationEventPublisher,
     private val fiscalYearManager: FiscalYearManager,
-    private val snapshotService: SnapshotService
 ): ApplicationRunner {
     private val log = LoggerFactory.getLogger(TastyworksTaxCalculatorApplication::class.java)
 
@@ -23,11 +21,9 @@ class ApplicationRunner(
         val transactionsDir = args.getOptionValues("transactionsDir")?.firstOrNull()
             ?: error("Missing required argument: --transactionsDir")
 
-        snapshotService.loadAndRestoreState(transactionsDir)
-
         val transactions = File(transactionsDir)
             .walk()
-            .filter { it.isFile && !it.absolutePath.contains("/snapshots/") }
+            .filter { it.isFile }
             .map {
                 log.debug("reading {}", it)
                 val tx = transactionsCsvReader.read(it)
@@ -50,6 +46,5 @@ class ApplicationRunner(
         }
 
         fiscalYearManager.printReports()
-        snapshotService.saveSnapshot(transactionsDir)
     }
 }
