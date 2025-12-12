@@ -46,23 +46,23 @@ should be integrated at least once per day. Changes should be made in small iter
 ## Development Commands
 
 ### Building and Testing
-- `./gradlew build` - Assembles and tests the project
-- `./gradlew test` - Runs the test suite (includes unit tests and BDD tests)
-- `./gradlew clean` - Deletes the build directory
-- `./gradlew compileKotlin` - Compiles Kotlin source code
-- `./gradlew bootRun --args="--transactionsDir=/path/to/transactions"` - Run the application
+- `./mvnw clean package` - Assembles and tests the project
+- `./mvnw test` - Runs the test suite (includes unit tests and BDD tests)
+- `./mvnw clean` - Deletes the build directory
+- `./mvnw compiler:compile` - Compiles Kotlin source code
+- `./mvnw spring-boot:run --transactionsDir=/path/to/transactions` - Run the application
 
 ### Running the Application
 The application requires a command-line argument:
 ```bash
-./gradlew bootRun --args="--transactionsDir=/path/to/transactions"
+./mvnw spring-boot:run --transactionsDir=/path/to/transactions
 ```
 
 ### Testing Framework
 - Uses JUnit 5 as the primary testing framework
 - Cucumber BDD tests are located in `src/test/resources/bdd/E2E.feature`
 - Test files follow the pattern `*Test.kt`
-- Run individual test: `./gradlew test --tests "ClassName"`
+- Run individual test: `./mvnw test -Dtest="ClassName"`
 
 ## Architecture Overview
 
