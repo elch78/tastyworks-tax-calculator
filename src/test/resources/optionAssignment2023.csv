@@ -1,3 +1,0 @@
-Date,Type,Action,Symbol,Instrument Type,Description,Value,Quantity,Average Price,Commissions,Fees,Multiplier,Root Symbol,Underlying Symbol,Expiration Date,Strike Price,Call or Put,Order #
-2022-12-16T23:00:00+0100,Receive Deliver,BUY_TO_OPEN,TLRY,Equity,Buy to Open 200 TLRY @ 3.50,-700.00,200,-3.50,--,-5.00,,,,,,,
-2022-01-07T22:00:00+0100,Receive Deliver,SELL_TO_CLOSE,CLF,Equity,Sell to Close 100 CLF @ 21.00,"2,100.00",100,21.00,--,-5.032,,,,,,,

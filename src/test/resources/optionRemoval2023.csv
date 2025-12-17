@@ -1,3 +1,0 @@
-Date,Type,Action,Symbol,Instrument Type,Description,Value,Quantity,Average Price,Commissions,Fees,Multiplier,Root Symbol,Underlying Symbol,Expiration Date,Strike Price,Call or Put,Order #
-2022-12-30T22:00:00+0100,Receive Deliver,,PACB  221230C00010500,Equity Option,Removal of 2.0 PACB 12/30/22 Call 10.50 due to expiration.,0.00,2,0.00,--,0.00,100,PACB,PACB,12/30/22,10.5,CALL,
-2022-12-16T23:00:00+0100,Receive Deliver,,TLRY  221216P00003500,Equity Option,Removal of option due to assignment,0.00,2,0.00,--,0.00,100,TLRY,TLRY,12/16/22,3.5,PUT,

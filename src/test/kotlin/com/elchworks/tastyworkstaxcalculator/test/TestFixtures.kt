@@ -40,7 +40,7 @@ fun randomOptionTrade() =
         action = SELL_TO_OPEN,
         symbol = "",
         type = "",
-        subType = null,
+        subType = "Sell to Open",
         instrumentType = "",
         description = "",
         value = randomUsdAmount(),
@@ -64,7 +64,7 @@ fun randomOptionRemoval() =
         date = randomDateIn2021(),
         symbol = "symbol",
         type = "",
-        subType = null,
+        subType = "Expiration",
         expirationDate = randomLocalDate(),
         strikePrice = usd(randomBigDecimal()),
         callOrPut = "PUT",
@@ -85,7 +85,7 @@ fun randomAssignment() =
         averagePrice = randomUsdAmount(),
         fees = randomUsdAmount(),
         description = "description",
-        subType = null
+        subType = "Assignment"
     )
 
 private fun randomLocalDate(): LocalDate = LocalDate.now()
@@ -102,7 +102,7 @@ fun randomStockTrade() =
         commissions = randomUsdAmount(),
         averagePrice = randomUsdAmount(),
         description = "randomDescription",
-        subType = null
+        subType = "Sell to Close"
     )
 
 fun defaultOptionStoTx() = randomOptionTrade().copy(

@@ -12,7 +12,7 @@ data class OptionTrade(
     override val date: Instant,
     override val symbol: String,
     override val type: String,
-    override val subType: String?,
+    override val subType: String,
     override val expirationDate: LocalDate,
     override val strikePrice: MonetaryAmount,
     override val callOrPut: String,
@@ -38,7 +38,7 @@ data class StockTrade(
     override val symbol: String,
     override val action: Action,
     override val type: String,
-    override val subType: String?,
+    override val subType: String,
     override val value: MonetaryAmount,
     override val quantity: Int,
     override val averagePrice: MonetaryAmount,
@@ -54,7 +54,7 @@ data class OptionRemoval(
     override val date: Instant,
     override val symbol: String,
     override val type: String,
-    override val subType: String?,
+    override val subType: String,
     override val expirationDate: LocalDate,
     override val strikePrice: MonetaryAmount,
     override val callOrPut: String,
@@ -71,7 +71,7 @@ data class OptionAssignment(
     override val date: Instant,
     override val action: Action,
     override val type: String,
-    override val subType: String?,
+    override val subType: String,
     override val symbol: String,
     override val value: MonetaryAmount,
     override val quantity: Int,
@@ -90,7 +90,7 @@ interface Transaction {
     val averagePrice: MonetaryAmount
     val description: String
     val type: String
-    val subType: String?
+    val subType: String
     fun value(): MonetaryAmount
     fun value(quantity: Int): MonetaryAmount
 }
