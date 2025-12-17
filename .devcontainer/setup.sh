@@ -25,4 +25,8 @@ cp .devcontainer/opencode/* /.jbdevcontainer/config/opencode/
 
 echo "Opencode installed"
 
+echo "Installing kilocode..."
+npm install -g @kilocode/cli
+echo "kilocode installed"
+
 echo "Setup complete!"
