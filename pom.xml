@@ -21,6 +21,7 @@
         <java.version>24</java.version>
         <kotlin.version>2.2.20</kotlin.version>
         <cucumber.version>7.22.1</cucumber.version>
+        <mockito.version>5.14.2</mockito.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
@@ -96,6 +97,12 @@
             <groupId>org.mockito.kotlin</groupId>
             <artifactId>mockito-kotlin</artifactId>
             <version>4.1.0</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <version>${mockito.version}</version>
             <scope>test</scope>
         </dependency>
 
@@ -204,6 +211,8 @@
                         <include>**/*Tests.java</include>
                         <include>**/*Tests.kt</include>
                     </includes>
+                    <!-- Since ~JDK 21 mockito agents needs to be added explicitly -->
+                    <argLine>-javaagent:${settings.localRepository}/org/mockito/mockito-core/${mockito.version}/mockito-core-${mockito.version}.jar</argLine>
                 </configuration>
             </plugin>
         </plugins>
